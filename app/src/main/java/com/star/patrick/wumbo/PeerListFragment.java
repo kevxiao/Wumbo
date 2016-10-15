@@ -31,7 +31,7 @@ public class PeerListFragment implements WifiP2pManager.PeerListListener{
         peers.addAll(peerList.getDeviceList());
         //((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
         if (peers.size() == 0) {
-            Log.d(MainActivity.TAG, "No devices found");
+            Log.d(MainActivity.TAG, peers.toString());
             return;
         }
     }
