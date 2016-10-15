@@ -3,10 +3,12 @@ package com.star.patrick.wumbo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     private WifiP2pManager.Channel mChannel;
     private BroadcastReceiver mReceiver;
     private IntentFilter mIntentFilter;
+    public static final String TAG = "SE464";
 
     private ImageButton sendBtn;
     private EditText editMsg;
@@ -51,6 +54,18 @@ public class MainActivity extends AppCompatActivity {
                 editMsg.getText();
             }
         });
+
+        mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
+
+            @Override
+            public void onSuccess() {}
+
+            @Override
+            public void onFailure(int reasonCode) {
+                Log.d(TAG, "Discovery Failed with " + reasonCode);
+            }
+        });
+
     }
 
     @Override

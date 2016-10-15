@@ -9,6 +9,7 @@ import android.os.Bundle;
 public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
     private WifiP2pManager mManager;
     private WifiP2pManager.Channel mChannel;
+    private PeerListFragment peerList;
     private MainActivity mActivity;
 
     public WiFiDirectBroadcastReceiver(WifiP2pManager manager, WifiP2pManager.Channel channel, MainActivity activity) {
@@ -16,6 +17,7 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
         this.mManager = manager;
         this.mChannel = channel;
         this.mActivity = activity;
+        this.peerList = new PeerListFragment();
     }
 
     @Override
@@ -30,7 +32,9 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
                 // Wi-Fi P2P is not enabled
             }
         } else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
-            // Call WifiP2pManager.requestPeers() to get a list of current peers
+            if (mManager != null) {
+                mManager.requestPeers(mChannel, peerList);
+            }
         } else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
             // Respond to new connection or disconnections
         } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
