@@ -15,6 +15,8 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
+import java.util.UUID;
+
 import static android.os.Looper.getMainLooper;
 
 public class MainActivity extends AppCompatActivity {
@@ -23,6 +25,9 @@ public class MainActivity extends AppCompatActivity {
     private WifiP2pManager.Channel mChannel;
     private BroadcastReceiver mReceiver;
     private IntentFilter mIntentFilter;
+    private Channel mMsgChannel;
+    private ChannelList mMsgChannelList;
+    private NetworkManager mNetworkMgr;
     public static final String TAG = "SE464";
 
     private ImageButton sendBtn;
@@ -45,13 +50,18 @@ public class MainActivity extends AppCompatActivity {
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
 
+        mNetworkMgr - new NetworkManager();
+        mMsgChannel = new ChannelImpl(getResources().getString(R.string.public_name), mNetworkMgr);
+        mMsgChannelList = new ChannelListImpl();
+        mMsgChannelList.put(UUID.fromString(getResources().getString(R.string.public_uuid)), mMsgChannel);
+
         sendBtn = (ImageButton) findViewById(R.id.sendBtn);
         editMsg = (EditText) findViewById(R.id.editMsg);
 
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                editMsg.getText();
+                mMsgChannel.send(editMsg.getText().toString());
             }
         });
 
