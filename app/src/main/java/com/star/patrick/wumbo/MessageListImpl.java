@@ -8,7 +8,7 @@ import java.util.Comparator;
 import java.util.List;
 
 public class MessageListImpl implements MessageList {
-    List<Message> messages = new ArrayList<>();
+    private List<Message> messages = new ArrayList<>();
 
     @Override
     public List<Message> getAllMessages() {
@@ -33,7 +33,7 @@ public class MessageListImpl implements MessageList {
 
         while ( index < messages.size() &&
                 index > 1 &&
-                messages.get(index).getReceiveTime().equals(messages.get(index - 1))) {
+                messages.get(index).getReceiveTime().equals(messages.get(index - 1).getReceiveTime())) {
             index--;
         }
 
