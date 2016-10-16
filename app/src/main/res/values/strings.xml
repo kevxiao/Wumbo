@@ -1,7 +1,14 @@
 <resources>
     <string name="app_name">Wumbo</string>
+    <string name="app_intro">WumboIntro</string>
     <string name="action_settings">Settings</string>
-    <string name="message_hint">Write Message Here.</string>
+    <string name="message_hint">Write Message Here</string>
     <string name="public_name">Public</string>
     <string name="public_uuid">1a27c5da-0d6e-4f66-9224-67ae564986ec</string>
+
+    <!-- Strings related to login -->
+    <string name="intro_title">Display Name</string>
+    <string name="prompt_name">Select your display name!</string>
+    <string name="default_name">Anonymous</string>
+    <string name="prompt_continue">Continue</string>
 </resources>
