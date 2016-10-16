@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
 
-        mNetworkMgr - new NetworkManager();
+        mNetworkMgr = new NetworkManagerImpl();
         mMsgChannel = new ChannelImpl(getResources().getString(R.string.public_name), mNetworkMgr);
         mMsgChannelList = new ChannelListImpl();
         mMsgChannelList.put(UUID.fromString(getResources().getString(R.string.public_uuid)), mMsgChannel);
