@@ -1,4 +1,4 @@
-package com.star.patrick.wumbo;
+package com.star.patrick.wumbo.wifidirect;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -15,6 +15,8 @@ import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener;
 import android.os.AsyncTask;
 import android.util.Log;
+
+import com.star.patrick.wumbo.MainActivity;
 
 import java.io.IOException;
 import java.io.InputStream;

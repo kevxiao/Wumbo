@@ -15,6 +15,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
+import com.star.patrick.wumbo.wifidirect.WiFiDirectBroadcastReceiver;
+
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
