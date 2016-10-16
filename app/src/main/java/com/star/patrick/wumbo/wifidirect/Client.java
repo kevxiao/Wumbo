@@ -10,7 +10,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-import com.star.patrick.wumbo.wifidirect.HandshakeDispatcher;
+import com.star.patrick.wumbo.wifidirect.HandshakeDispatcherService;
 
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 
@@ -39,7 +39,7 @@ public class Client implements Device {
             try {
                 socket = new Socket();
                 socket.bind(null);
-                socket.connect(new InetSocketAddress(hostAddress, HandshakeDispatcher.PORT), 500);
+                socket.connect(new InetSocketAddress(hostAddress, HandshakeDispatcherService.PORT), 500);
                 outputStream = socket.getOutputStream();
                 objectOutputStream = new ObjectOutputStream(outputStream);
                 objectOutputStream.writeObject("HANDSHAKE");
