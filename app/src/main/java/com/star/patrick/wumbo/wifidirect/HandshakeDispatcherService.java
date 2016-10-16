@@ -35,7 +35,7 @@ public class HandshakeDispatcherService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "HandshakeDispatcherService starting", Toast.LENGTH_SHORT).show();
 
         try {
             serverSocket = new ServerSocket(PORT);

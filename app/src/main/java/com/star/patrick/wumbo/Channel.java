@@ -1,9 +1,13 @@
 package com.star.patrick.wumbo;
 
-/**
- * Created by Kevin Xiao on 2016-10-15.
- */
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Observer;
 
 public interface Channel {
     void send(String msgText);
+    void addObserver(Observer obs);
+    List<Message> getAllMessages();
+    List<Message> getAllMessagesSince(Timestamp ts);
+
 }
