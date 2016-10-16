@@ -16,7 +16,9 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 
 import com.star.patrick.wumbo.wifidirect.HandshakeDispatcherService;
+import com.star.patrick.wumbo.wifidirect.MessageDispatcherService;
 import com.star.patrick.wumbo.wifidirect.WiFiDirectBroadcastReceiver;
+import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
 import java.util.List;
 import java.util.Observable;
@@ -67,6 +69,15 @@ public class MainActivity extends AppCompatActivity implements Observer {
         listView.setAdapter(chatAdapter);
 
         chatAdapter.notifyDataSetChanged();
+
+        Intent intent = new Intent(this, WifiDirectService.class);
+        startService(intent);
+
+        intent = new Intent(this, HandshakeDispatcherService.class);
+        startService(intent);
+
+        intent = new Intent(this, MessageDispatcherService.class);
+        startService(intent);
     }
 
     @Override
