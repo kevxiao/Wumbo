@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         setSupportActionBar(toolbar);
 
         mNetworkMgr = new NetworkManagerImpl();
-        mMsgChannel = new ChannelImpl(getResources().getString(R.string.public_name), mNetworkMgr);
+        mMsgChannel = new ChannelImpl(getResources().getString(R.string.public_name), mNetworkMgr, this);
         mMsgChannelList = new ChannelListImpl();
         mMsgChannelList.put(UUID.fromString(getResources().getString(R.string.public_uuid)), mMsgChannel);
 
