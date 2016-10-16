@@ -1,5 +1,6 @@
 package com.star.patrick.wumbo.wifidirect;
 
+import android.app.IntentService;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
@@ -18,9 +19,13 @@ import java.util.List;
  * Created by giliam on 10/16/2016.
  */
 
-public class MessageDispatcherService extends Service {
+public class MessageDispatcherService extends IntentService {
     private List<Thread> threadList = new ArrayList<>();
     public final static int PORT = 45455;
+
+    public MessageDispatcherService(String name) {
+        super(name);
+    }
 
     @Override
     public void onCreate() {
@@ -31,8 +36,14 @@ public class MessageDispatcherService extends Service {
 //        serviceHandler = new ServiceHandler();
     }
 
+    @Nullable
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    @Override
+    protected void onHandleIntent(Intent intent) {
         Toast.makeText(this, "message service starting", Toast.LENGTH_SHORT).show();
 
         ServerSocket serverSocket = null;
@@ -57,13 +68,5 @@ public class MessageDispatcherService extends Service {
                 }
             }
         }
-
-        return START_NOT_STICKY;
-    }
-
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
     }
 }

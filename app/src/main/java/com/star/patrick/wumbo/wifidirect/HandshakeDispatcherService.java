@@ -1,6 +1,7 @@
 package com.star.patrick.wumbo.wifidirect;
 
 
+import android.app.IntentService;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
@@ -14,10 +15,14 @@ import android.os.Process;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class HandshakeDispatcherService extends Service {
+public class HandshakeDispatcherService extends IntentService {
     private Looper mServiceLooper;
     private ServerSocket serverSocket;
     public static final int PORT = 45454;
+
+    public HandshakeDispatcherService(String name) {
+        super(name);
+    }
 
     @Override
     public void onCreate() {
@@ -34,7 +39,13 @@ public class HandshakeDispatcherService extends Service {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public IBinder onBind(Intent intent) {
+        // We don't provide binding, so return null
+        return null;
+    }
+
+    @Override
+    protected void onHandleIntent(Intent intent) {
         Toast.makeText(this, "HandshakeDispatcherService starting", Toast.LENGTH_SHORT).show();
 
         try {
@@ -47,15 +58,6 @@ public class HandshakeDispatcherService extends Service {
         catch (Exception e) {
             e.printStackTrace();
         }
-
-        // If we get killed, after returning from here, restart
-        return START_STICKY;
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        // We don't provide binding, so return null
-        return null;
     }
 
     @Override
