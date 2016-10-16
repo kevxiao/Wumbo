@@ -1,5 +1,10 @@
 package com.star.patrick.wumbo;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -9,6 +14,9 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+
+import com.star.patrick.wumbo.wifidirect.HandshakeDispatcherService;
+import com.star.patrick.wumbo.wifidirect.WiFiDirectBroadcastReceiver;
 
 import java.util.List;
 import java.util.Observable;
