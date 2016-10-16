@@ -14,14 +14,19 @@ import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener;
 import android.util.Log;
 
+import com.star.patrick.wumbo.Message;
+
 import java.net.InetAddress;
 
 import static com.star.patrick.wumbo.MainActivity.TAG;
 
 
 public class WifiDirectService extends IntentService {
-    public static final String ADD_PEER_ACTION = "com.star.patrick.wumbo.wifidirect.ADD_PEER_ACTION";
+    public static final String ADD_PEER_ACTION = "com.star.patrick.wumbo.wifidirect.ADD_PEER";
     public static final String EXTRA_INET_ADDRESS = "clientinetaddress";
+
+    public static final String SEND_MESSAGE_ACTION = "com.star.patrick.wumbo.wifidirect.SEND_MESSAGE";
+    public static final String EXTRA_MESSAGE = "message";
 
     private WifiP2pManager manager;
     private Channel channel;
@@ -115,6 +120,16 @@ public class WifiDirectService extends IntentService {
             case ADD_PEER_ACTION: {
                 InetAddress inetAddress = (InetAddress) intent.getSerializableExtra(EXTRA_INET_ADDRESS);
                 device.addClient(inetAddress);
+            } break;
+
+            case SEND_MESSAGE_ACTION: {
+                if (device == null) {
+                    Log.d(TAG, "Device is null!");
+                }
+                else {
+                    Message message = (Message) intent.getSerializableExtra(EXTRA_MESSAGE);
+                    device.sendMessage(message);
+                }
             } break;
         }
     }
