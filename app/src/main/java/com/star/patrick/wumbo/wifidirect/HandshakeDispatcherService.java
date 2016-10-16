@@ -17,7 +17,7 @@ import java.net.Socket;
 public class HandshakeDispatcherService extends Service {
     private Looper mServiceLooper;
     private ServerSocket serverSocket;
-    public static final int port = 45454;
+    public static final int PORT = 45454;
 
     @Override
     public void onCreate() {
@@ -38,7 +38,7 @@ public class HandshakeDispatcherService extends Service {
         Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
 
         try {
-            serverSocket = new ServerSocket(port);
+            serverSocket = new ServerSocket(PORT);
             while (!Thread.currentThread().isInterrupted()) {
                 HandshakeHandler thread = new HandshakeHandler(serverSocket.accept(), this);
                 thread.start();
