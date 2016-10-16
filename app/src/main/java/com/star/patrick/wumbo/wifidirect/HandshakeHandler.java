@@ -10,7 +10,7 @@ import java.net.Socket;
 // Handler that receives messages from the thread
 public final class HandshakeHandler extends Thread {
     private Socket socket;
-    Context context;
+    private Context context;
     HandshakeHandler(Socket s, Context c){
         context = c;
         socket = s;
