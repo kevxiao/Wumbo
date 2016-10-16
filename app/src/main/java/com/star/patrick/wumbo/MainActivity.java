@@ -1,21 +1,14 @@
 package com.star.patrick.wumbo;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.IntentFilter;
-import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
-
-import com.star.patrick.wumbo.wifidirect.WiFiDirectBroadcastReceiver;
 
 import java.util.List;
 import java.util.Observable;
@@ -25,10 +18,6 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements Observer {
 
-    private WifiP2pManager mManager;
-    private WifiP2pManager.Channel mChannel;
-    private BroadcastReceiver mReceiver;
-    private IntentFilter mIntentFilter;
     private Channel mMsgChannel;
     private ChannelList mMsgChannelList;
     private NetworkManager mNetworkMgr;
@@ -70,32 +59,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
         listView.setAdapter(chatAdapter);
 
         chatAdapter.notifyDataSetChanged();
-
-        initWifiDirect();
-    }
-
-    private void initWifiDirect() {
-        mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
-        mChannel = mManager.initialize(this, getMainLooper(), null);
-        mReceiver = new WiFiDirectBroadcastReceiver(mManager, mChannel, this);
-
-        mIntentFilter = new IntentFilter();
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
-
-        mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
-            @Override
-            public void onSuccess() {
-                Log.d(TAG, "Discovery Initialization Success");
-            }
-
-            @Override
-            public void onFailure(int reasonCode) {
-                Log.d(TAG, "Discovery Initialization Failed with " + reasonCode);
-            }
-        });
     }
 
     @Override
@@ -118,18 +81,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        registerReceiver(mReceiver, mIntentFilter);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        unregisterReceiver(mReceiver);
     }
 
     @Override
