@@ -40,17 +40,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
-        mChannel = mManager.initialize(this, getMainLooper(), null);
-        mReceiver = new WiFiDirectBroadcastReceiver(mManager, mChannel, this);
-
-        mIntentFilter = new IntentFilter();
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
-
-        mNetworkMgr - new NetworkManager();
+        mNetworkMgr = new NetworkManager();
         mMsgChannel = new ChannelImpl(getResources().getString(R.string.public_name), mNetworkMgr);
         mMsgChannelList = new ChannelListImpl();
         mMsgChannelList.put(UUID.fromString(getResources().getString(R.string.public_uuid)), mMsgChannel);
@@ -65,17 +55,31 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
+        initWifiDirect();
+    }
 
+    private void initWifiDirect() {
+        mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
+        mChannel = mManager.initialize(this, getMainLooper(), null);
+        mReceiver = new WiFiDirectBroadcastReceiver(mManager, mChannel, this);
+
+        mIntentFilter = new IntentFilter();
+        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
+        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
+        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+
+        mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
             @Override
-            public void onSuccess() {}
+            public void onSuccess() {
+                Log.d(TAG, "Discovery Initialization Success");
+            }
 
             @Override
             public void onFailure(int reasonCode) {
-                Log.d(TAG, "Discovery Failed with " + reasonCode);
+                Log.d(TAG, "Discovery Initialization Failed with " + reasonCode);
             }
         });
-
     }
 
     @Override
