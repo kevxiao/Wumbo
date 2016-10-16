@@ -17,6 +17,7 @@ import java.util.UUID;
 public class ChannelImpl extends Observable implements Channel {
 
     private String name;
+    private Sender me;
     private UUID channelId;
     private MessageList msgs;
     private NetworkManager networkMgr;
@@ -33,12 +34,13 @@ public class ChannelImpl extends Observable implements Channel {
     };
     private Set<UUID> receivedMessageIds = new HashSet<>();
 
-    public ChannelImpl(String name, NetworkManager networkMgr, Context context) {
+    public ChannelImpl(String name, NetworkManager networkMgr, Context context, Sender me) {
         this.name = name;
         this.msgs = new MessageListImpl();
         this.networkMgr = networkMgr;
         this.channelId = UUID.randomUUID();
         this.mainContext = context;
+        this.me = me;
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(WUMBO_MESSAGE_INTENT_ACTION);
@@ -46,7 +48,7 @@ public class ChannelImpl extends Observable implements Channel {
     }
 
     public void send(String msgText) {
-        Message msg = new Message(msgText, new Sender("Anon"), new Timestamp(Calendar.getInstance().getTimeInMillis()), channelId);
+        Message msg = new Message(msgText, me, new Timestamp(Calendar.getInstance().getTimeInMillis()), channelId);
         send(msg);
     }
 

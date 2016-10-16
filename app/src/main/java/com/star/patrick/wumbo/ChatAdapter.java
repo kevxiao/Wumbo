@@ -2,22 +2,28 @@ package com.star.patrick.wumbo;
 
 import android.app.Activity;
 import android.content.Context;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.List;
+import java.util.UUID;
 
 public class ChatAdapter extends BaseAdapter {
 
     private final List<Message> messages;
     private Activity context;
+    private UUID meId;
 
-    public ChatAdapter(Activity context, List<Message> messages) {
+    public ChatAdapter(Activity context, List<Message> messages, UUID meId) {
         this.context = context;
         this.messages = messages;
+        this.meId = meId;
     }
 
     @Override
@@ -39,6 +45,8 @@ public class ChatAdapter extends BaseAdapter {
     public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
         Message msg = getItem(position);
+        RelativeLayout.LayoutParams lparams;
+        LinearLayout.LayoutParams sparams, tparams, cparams;
         LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         if (convertView == null) {
@@ -49,8 +57,25 @@ public class ChatAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        //boolean myMsg = msg.getIsme();//Just a dummy check
-        //to simulate whether it me or other sender
+        lparams = (RelativeLayout.LayoutParams) holder.content.getLayoutParams();
+        sparams = (LinearLayout.LayoutParams) holder.sender.getLayoutParams();
+        tparams = (LinearLayout.LayoutParams) holder.txtInfo.getLayoutParams();
+        cparams = (LinearLayout.LayoutParams) holder.contentWithBg.getLayoutParams();
+        if(msg.getSender().getId() == meId) {
+            lparams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+            sparams.gravity = Gravity.END;
+            tparams.gravity = Gravity.END;
+            cparams.gravity = Gravity.END;
+        } else {
+            lparams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+            sparams.gravity = Gravity.START;
+            tparams.gravity = Gravity.START;
+            cparams.gravity = Gravity.START;
+        }
+        holder.content.setLayoutParams(lparams);
+        holder.sender.setLayoutParams(sparams);
+        holder.txtInfo.setLayoutParams(tparams);
+        holder.contentWithBg.setLayoutParams(cparams);
         holder.txtMessage.setText(msg.getText());
         holder.sender.setText(msg.getSender().getDisplayName());
         holder.txtInfo.setText(msg.getReceiveTime().toString());
@@ -61,8 +86,8 @@ public class ChatAdapter extends BaseAdapter {
     private ViewHolder createViewHolder(View v) {
         ViewHolder holder = new ViewHolder();
         holder.txtMessage = (TextView) v.findViewById(R.id.txtMessage);
-//        holder.content = (LinearLayout) v.findViewById(R.id.content);
-//        holder.contentWithBG = (LinearLayout) v.findViewById(R.id.contentWithBackground);
+        holder.content = (LinearLayout) v.findViewById(R.id.content);
+        holder.contentWithBg = (LinearLayout) v.findViewById(R.id.contentWithBackground);
         holder.txtInfo = (TextView) v.findViewById(R.id.txtInfo);
         holder.sender = (TextView) v.findViewById(R.id.sender);
         return holder;
@@ -80,7 +105,7 @@ public class ChatAdapter extends BaseAdapter {
         private TextView txtMessage;
         private TextView txtInfo;
         private TextView sender;
-//        private LinearLayout content;
-//        private LinearLayout contentWithBG;
+        private LinearLayout content;
+        private LinearLayout contentWithBg;
     }
 }

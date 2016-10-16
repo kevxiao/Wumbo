@@ -5,7 +5,6 @@
         android:id="@+id/content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
         android:orientation="vertical">
 
         <LinearLayout
@@ -16,16 +15,14 @@
             <TextView
                 android:id="@+id/sender"
                 android:layout_width="wrap_content"
-                android:layout_height="30sp"
-                android:layout_gravity="right"
+                android:layout_height="15sp"
                 android:textSize="12sp"
                 android:textColor="@android:color/darker_gray" />
 
             <TextView
                 android:id="@+id/txtInfo"
                 android:layout_width="wrap_content"
-                android:layout_height="30sp"
-                android:layout_gravity="right"
+                android:layout_height="15sp"
                 android:textSize="12sp"
                 android:textColor="@android:color/darker_gray" />
 
@@ -35,10 +32,12 @@
             android:id="@+id/contentWithBackground"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
             android:background="@drawable/chat_box"
             android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="10dp"
             android:paddingBottom="10dp"
+            android:layout_marginBottom="10dp"
             android:orientation="vertical">
 
             <TextView
