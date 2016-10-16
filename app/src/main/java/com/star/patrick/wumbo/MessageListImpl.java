@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 public class MessageListImpl implements MessageList {
@@ -43,5 +44,15 @@ public class MessageListImpl implements MessageList {
     @Override
     public void addMessage(Message msg) {
         messages.add(msg);
+    }
+
+    public static List<Message> getMockMessageList() {
+        List<Message> messages = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            Message msg = new Message("hey" + i, new Sender("davidsu1995"), new Timestamp(new Date().getTime()), null);
+            msg.setReceiveTime(msg.getSendTime());
+            messages.add(msg);
+        }
+        return messages;
     }
 }

@@ -12,6 +12,10 @@
     tools:context="com.star.patrick.wumbo.MainActivity"
     tools:showIn="@layout/activity_main">
 
+    <ListView android:id="@+id/myList"
+        android:layout_height="fill_parent"
+        android:layout_width="wrap_content"/>
+
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

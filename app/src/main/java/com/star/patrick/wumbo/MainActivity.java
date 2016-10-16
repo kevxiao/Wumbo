@@ -3,7 +3,6 @@ package com.star.patrick.wumbo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
-import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -14,12 +13,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListView;
 
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.UUID;
 
-import static android.os.Looper.getMainLooper;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements Observer {
 
     private WifiP2pManager mManager;
     private WifiP2pManager.Channel mChannel;
@@ -29,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
     private ChannelList mMsgChannelList;
     private NetworkManager mNetworkMgr;
     public static final String TAG = "SE464";
+    private ChatAdapter chatAdapter;
+    private ListView listView;
 
     private ImageButton sendBtn;
     private EditText editMsg;
@@ -40,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-//        mNetworkMgr = new NetworkManager();
+        mNetworkMgr = new NetworkManagerImpl();
         mMsgChannel = new ChannelImpl(getResources().getString(R.string.public_name), mNetworkMgr);
         mMsgChannelList = new ChannelListImpl();
         mMsgChannelList.put(UUID.fromString(getResources().getString(R.string.public_uuid)), mMsgChannel);
@@ -52,8 +56,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mMsgChannel.send(editMsg.getText().toString());
+                editMsg.setText("");
             }
         });
+
+        List<Message> messages = MessageListImpl.getMockMessageList();
+
+        chatAdapter = new ChatAdapter(MainActivity.this, messages);
+
+        listView = (ListView) findViewById(R.id.myList);
+        listView.setAdapter(chatAdapter);
+
+        chatAdapter.notifyDataSetChanged();
 
         initWifiDirect();
     }
@@ -114,5 +128,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         unregisterReceiver(mReceiver);
+    }
+
+    @Override
+    public void update(Observable observable, Object o) {
+
     }
 }
