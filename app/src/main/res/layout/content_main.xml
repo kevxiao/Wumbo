@@ -14,13 +14,17 @@
 
     <ListView android:id="@+id/myList"
         android:layout_height="fill_parent"
-        android:layout_width="wrap_content"/>
+        android:layout_width="wrap_content"
+        android:layout_above="@+id/sendBtn"
+        android:divider="@null"
+        android:transcriptMode="alwaysScroll"
+        android:stackFromBottom="true" />
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:inputType="textPersonName"
-        android:text="Write something here."
+        android:hint="@string/message_hint"
         android:ems="10"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
@@ -30,6 +34,7 @@
         android:layout_toStartOf="@+id/sendBtn" />
 
     <ImageButton
+        android:backgroundTint="@color/colorPrimary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:srcCompat="@drawable/ic_send_white_24dp"

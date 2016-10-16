@@ -10,19 +10,21 @@ import java.util.UUID;
 public class ChannelImpl extends Observable implements Channel{
 
     private String name;
+    private Sender me;
     private UUID channelId;
     private MessageList msgs;
     private NetworkManager networkMgr;
 
-    public ChannelImpl(String name, NetworkManager networkMgr) {
+    public ChannelImpl(String name, NetworkManager networkMgr, Sender me) {
         this.name = name;
         this.msgs = new MessageListImpl();
         this.networkMgr = networkMgr;
         this.channelId = UUID.randomUUID();
+        this.me = me;
     }
 
     public void send(String msgText) {
-        Message msg = new Message(msgText, new Sender("Anon"), new Timestamp(Calendar.getInstance().getTimeInMillis()), channelId);
+        Message msg = new Message(msgText, me, new Timestamp(Calendar.getInstance().getTimeInMillis()), channelId);
         msg.setReceiveTime(new Timestamp(new Date().getTime()));
         msgs.addMessage(msg);
         setChanged();

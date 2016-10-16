@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private ChatAdapter chatAdapter;
     private ListView listView;
     private Message lastMessage;
+    private Sender me;
 
     private ImageButton sendBtn;
     private EditText editMsg;
@@ -52,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         mChannel = mManager.initialize(this, getMainLooper(), null);
         mReceiver = new WiFiDirectBroadcastReceiver(mManager, mChannel, this);
+        me = new Sender("Anonymous");
 
         mIntentFilter = new IntentFilter();
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
@@ -60,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
 
         mNetworkMgr = new NetworkManagerImpl();
-        mMsgChannel = new ChannelImpl(getResources().getString(R.string.public_name), mNetworkMgr);
+        mMsgChannel = new ChannelImpl(getResources().getString(R.string.public_name), mNetworkMgr, me);
         mMsgChannelList = new ChannelListImpl();
         mMsgChannelList.put(UUID.fromString(getResources().getString(R.string.public_uuid)), mMsgChannel);
 
@@ -70,8 +72,10 @@ public class MainActivity extends AppCompatActivity implements Observer {
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mMsgChannel.send(editMsg.getText().toString());
-                editMsg.setText("");
+                if(!editMsg.getText().toString().isEmpty()) {
+                    mMsgChannel.send(editMsg.getText().toString());
+                    editMsg.setText("");
+                }
             }
         });
 
@@ -90,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         List<Message> messages = new ArrayList<>();//MessageListImpl.getMockMessageList();
 
-        chatAdapter = new ChatAdapter(MainActivity.this, messages);
+        chatAdapter = new ChatAdapter(MainActivity.this, messages, me.getId());
 
         listView = (ListView) findViewById(R.id.myList);
         listView.setAdapter(chatAdapter);
