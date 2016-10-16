@@ -1,36 +1,27 @@
 package com.star.patrick.wumbo;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.Window;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
 import com.star.patrick.wumbo.wifidirect.HandshakeDispatcherService;
 import com.star.patrick.wumbo.wifidirect.MessageDispatcherService;
-import com.star.patrick.wumbo.wifidirect.WiFiDirectBroadcastReceiver;
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.UUID;
-
-import static android.os.Looper.getMainLooper;
 
 public class MainActivity extends AppCompatActivity implements Observer {
 
@@ -56,12 +47,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
         Bundle extras = getIntent().getExtras();
 
         me = new Sender(extras != null && extras.getString("name") != null && !extras.getString("name").isEmpty() ? extras.getString("name") : "Anonymous");
-
-        mIntentFilter = new IntentFilter();
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
 
         mNetworkMgr = new NetworkManagerImpl();
         mMsgChannel = new ChannelImpl(getResources().getString(R.string.public_name), mNetworkMgr, this, me);
