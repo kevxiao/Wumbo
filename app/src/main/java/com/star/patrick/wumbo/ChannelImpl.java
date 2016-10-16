@@ -1,20 +1,19 @@
 package com.star.patrick.wumbo;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Date;
+import java.util.List;
+import java.util.Observable;
 import java.util.UUID;
 
-public class ChannelImpl implements Channel {
+public class ChannelImpl extends Observable implements Channel {
 
     private String name;
     private UUID channelId;
-    private MessageListImpl msgs;
+    private MessageList msgs;
     private NetworkManager networkMgr;
     private Context mainContext;
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -48,10 +47,23 @@ public class ChannelImpl implements Channel {
 
     public void send(Message msg) {
         if (receivedMessageIds.contains(msg.getId())) {
-            msgs.addMessage(msg);
             receivedMessageIds.add(msg.getId());
+            msg.setReceiveTime(new Timestamp(new Date().getTime()));
+            msgs.addMessage(msg);
+            setChanged();
+            notifyObservers();
             networkMgr.send(msg);
         }
+    }
+
+    @Override
+    public List<Message> getAllMessages() {
+        return msgs.getAllMessages();
+    }
+
+    @Override
+    public List<Message> getAllMessagesSince(Timestamp ts) {
+        return msgs.getAllMessagesSince(ts);
     }
 
     public static final String WUMBO_MESSAGE_INTENT_ACTION = "wumbo_message";

@@ -6,14 +6,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.List;
-
-/**
- * Created by giliam on 10/15/2016.
- */
 
 public class ChatAdapter extends BaseAdapter {
 
@@ -71,6 +66,14 @@ public class ChatAdapter extends BaseAdapter {
         holder.txtInfo = (TextView) v.findViewById(R.id.txtInfo);
         holder.sender = (TextView) v.findViewById(R.id.sender);
         return holder;
+    }
+
+    public void add(Message msg) {
+        messages.add(msg);
+    }
+
+    public void addAll(List<Message> msgs) {
+        messages.addAll(msgs);
     }
 
     private static class ViewHolder {
