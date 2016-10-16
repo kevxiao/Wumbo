@@ -20,7 +20,7 @@ import java.util.List;
 
 public class MessageDispatcherService extends Service {
     private List<Thread> threadList = new ArrayList<>();
-    private final static int PORT = 45455;
+    public final static int PORT = 45455;
 
     @Override
     public void onCreate() {
