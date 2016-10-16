@@ -18,7 +18,7 @@ public final class HandshakeHandler extends Thread {
     public void run(){
         Log.d("Client's InetAddress", "" + socket.getInetAddress());
         //TODO Change the intent's class to the right one
-        Intent intent = new Intent(context, WiFiDirectService.class);
+        Intent intent = new Intent(context, WifiDirectService.class);
         intent.setAction(WifiDirectService.ADD_PEER_ACTION);
         intent.putExtra(WifiDirectService.EXTRA_INET_ADDRESS, socket.getInetAddress());
         context.startService(intent);
