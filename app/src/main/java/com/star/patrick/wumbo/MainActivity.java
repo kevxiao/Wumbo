@@ -14,12 +14,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListView;
 
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.UUID;
 
 import static android.os.Looper.getMainLooper;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements Observer {
 
     private WifiP2pManager mManager;
     private WifiP2pManager.Channel mChannel;
@@ -29,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     private ChannelList mMsgChannelList;
     private NetworkManager mNetworkMgr;
     public static final String TAG = "SE464";
+    private ChatAdapter chatAdapter;
+    private ListView listView;
 
     private ImageButton sendBtn;
     private EditText editMsg;
@@ -62,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mMsgChannel.send(editMsg.getText().toString());
+                editMsg.setText("");
             }
         });
 
@@ -75,6 +82,15 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "Discovery Failed with " + reasonCode);
             }
         });
+
+        List<Message> messages = MessageListImpl.getMockMessageList();
+
+        chatAdapter = new ChatAdapter(MainActivity.this, messages);
+
+        listView = (ListView) findViewById(R.id.myList);
+        listView.setAdapter(chatAdapter);
+
+        chatAdapter.notifyDataSetChanged();
 
     }
 
@@ -110,5 +126,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         unregisterReceiver(mReceiver);
+    }
+
+    @Override
+    public void update(Observable observable, Object o) {
+
     }
 }
