@@ -16,6 +16,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -35,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     public static final String TAG = "SE464";
     private ChatAdapter chatAdapter;
     private ListView listView;
+    private Message lastMessage;
 
     private ImageButton sendBtn;
     private EditText editMsg;
@@ -83,7 +86,9 @@ public class MainActivity extends AppCompatActivity implements Observer {
             }
         });
 
-        List<Message> messages = MessageListImpl.getMockMessageList();
+        mMsgChannel.addObserver(this);
+
+        List<Message> messages = new ArrayList<>();//MessageListImpl.getMockMessageList();
 
         chatAdapter = new ChatAdapter(MainActivity.this, messages);
 
@@ -130,6 +135,30 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
     @Override
     public void update(Observable observable, Object o) {
+        List<Message> newMessages;
 
+        if (null == lastMessage) {
+            newMessages = mMsgChannel.getAllMessages();
+        } else {
+            newMessages = mMsgChannel.getAllMessagesSince(lastMessage.getReceiveTime());
+
+            for ( int i = 0; i < newMessages.size(); i++ ) {
+                if (newMessages.get(i).getReceiveTime() != lastMessage.getReceiveTime()) {
+                    break;
+                }
+                else if (newMessages.get(i).getId() == lastMessage.getId()) {
+                    if (i < newMessages.size() - 1) {
+                        newMessages = newMessages.subList(i + 1, newMessages.size());
+                        break;
+                    }
+                }
+            }
+        }
+        if (null != newMessages && newMessages.size() >= 1) {
+            lastMessage = newMessages.get(newMessages.size()-1);
+
+            chatAdapter.addAll(newMessages);
+            chatAdapter.notifyDataSetChanged();
+        }
     }
 }

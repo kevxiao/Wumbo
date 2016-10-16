@@ -38,7 +38,7 @@ public class MessageListImpl implements MessageList {
             index--;
         }
 
-        return messages.subList(index, messages.size()-1);
+        return messages.subList(index, messages.size());
     }
 
     @Override
