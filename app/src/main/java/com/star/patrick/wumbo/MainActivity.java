@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mNetworkMgr = new NetworkManager();
+//        mNetworkMgr = new NetworkManager();
         mMsgChannel = new ChannelImpl(getResources().getString(R.string.public_name), mNetworkMgr);
         mMsgChannelList = new ChannelListImpl();
         mMsgChannelList.put(UUID.fromString(getResources().getString(R.string.public_uuid)), mMsgChannel);

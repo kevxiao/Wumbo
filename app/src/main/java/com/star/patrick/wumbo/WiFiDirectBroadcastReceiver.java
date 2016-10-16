@@ -13,10 +13,18 @@ import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener;
+import android.os.AsyncTask;
 import android.util.Log;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 import static com.star.patrick.wumbo.MainActivity.TAG;
 
@@ -89,22 +97,116 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
                     // info to find group owner IP
 
                     mManager.requestConnectionInfo(mChannel, new ConnectionInfoListener() {
-                        @Override
-                        public void onConnectionInfoAvailable(WifiP2pInfo info) {
-                            // InetAddress from WifiP2pInfo struct.
-                            InetAddress groupOwnerAddress = info.groupOwnerAddress;
+                        private static final int PORT = 8988;
 
-                            // After the group negotiation, we can determine the group owner.
+                        @Override
+                        public void onConnectionInfoAvailable(final WifiP2pInfo info) {
+                            // InetAddress from WifiP2pInfo struct.
+                            final InetAddress groupOwnerAddress = info.groupOwnerAddress;
+
                             if (info.groupFormed) {
-                                if (info.isGroupOwner) {
-                                    // is group owner
-                                    // group owner doesn't have IP Addresses of clients
-                                }
-                                else {
-                                    // is client
-                                    // clients have IP Address of owner
-                                }
+                                new AsyncTask<Void, Integer, String>() {
+                                    @Override
+                                    protected String doInBackground(Void... params) {
+                                        if (info.isGroupOwner) {
+                                            ServerSocket serverSocket = null;
+                                            Socket socket = null;
+                                            InputStream inputStream = null;
+                                            ObjectInputStream objectInputStream = null;
+                                            try {
+                                                serverSocket = new ServerSocket(PORT);
+                                                socket = serverSocket.accept();
+                                                Log.d("Client's InetAddress", "" + socket.getInetAddress());
+                                                inputStream = socket.getInputStream();
+                                                objectInputStream = new ObjectInputStream(inputStream);
+                                                return (String) objectInputStream.readObject();
+                                            } catch (IOException | ClassNotFoundException e) {
+                                                e.printStackTrace();
+                                                return "";
+                                            } finally {
+                                                if (objectInputStream != null) {
+                                                    try {
+                                                        objectInputStream.close();
+                                                    } catch (IOException e1) {
+                                                        e1.printStackTrace();
+                                                    }
+                                                }
+
+                                                if (inputStream != null) {
+                                                    try {
+                                                        inputStream.close();
+                                                    } catch (IOException e1) {
+                                                        e1.printStackTrace();
+                                                    }
+                                                }
+
+                                                if (socket != null) {
+                                                    try {
+                                                        socket.close();
+                                                    } catch (IOException e1) {
+                                                        e1.printStackTrace();
+                                                    }
+                                                }
+
+                                                if (serverSocket != null) {
+                                                    try {
+                                                        serverSocket.close();
+                                                    } catch (IOException e1) {
+                                                        e1.printStackTrace();
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else {
+                                            Socket socket = null;
+                                            OutputStream outputStream = null;
+                                            ObjectOutputStream objectOutputStream = null;
+                                            try {
+                                                socket = new Socket();
+                                                socket.bind(null);
+                                                socket.connect(new InetSocketAddress(groupOwnerAddress, PORT), 500);
+                                                outputStream = socket.getOutputStream();
+                                                objectOutputStream = new ObjectOutputStream(outputStream);
+                                                objectOutputStream.writeObject("davidsu1995");
+                                                return "";
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                                return "";
+                                            } finally {
+                                                if (objectOutputStream != null) {
+                                                    try {
+                                                        objectOutputStream.close();
+                                                    } catch (IOException e1) {
+                                                        e1.printStackTrace();
+                                                    }
+                                                }
+
+                                                if (outputStream != null) {
+                                                    try {
+                                                        outputStream.close();
+                                                    } catch (IOException e1) {
+                                                        e1.printStackTrace();
+                                                    }
+                                                }
+
+                                                if (socket != null) {
+                                                    try {
+                                                        socket.close();
+                                                    } catch (IOException e1) {
+                                                        e1.printStackTrace();
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    @Override
+                                    protected void onPostExecute(String s) {
+                                        Log.d(TAG, "Message received from client: " + s);
+                                    }
+                                }.execute();
                             }
+
                         }
                     });
                 }
