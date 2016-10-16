@@ -1,6 +1,8 @@
 package com.star.patrick.wumbo.wifidirect;
 
 
+import com.star.patrick.wumbo.Message;
+
 import java.net.InetAddress;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,7 +19,12 @@ public class Host implements Device {
     }
 
     @Override
-    public void onConnect() {
-
+    public void sendMessage(Message message) {
+        for (InetAddress address: clientAddresses) {
+            MessageSender.sendMessage(address, MessageDispatcherService.PORT, message);
+        }
     }
+
+    @Override
+    public void onConnect() {}
 }
