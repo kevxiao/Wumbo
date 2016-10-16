@@ -26,7 +26,8 @@
         android:inputType="textPersonName"
         android:hint="@string/message_hint"
         android:ems="10"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginLeft="@dimen/input_margins"
+        android:layout_marginStart="@dimen/input_margins"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
@@ -35,9 +36,13 @@
         android:layout_toStartOf="@+id/sendBtn" />
 
     <ImageButton
-        android:backgroundTint="@color/colorPrimary"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:background="@drawable/round_button"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
+        android:layout_marginRight="@dimen/input_margins"
+        android:layout_marginLeft="@dimen/input_margins"
+        android:layout_marginStart="@dimen/input_margins"
+        android:layout_marginEnd="@dimen/input_margins"
         app:srcCompat="@drawable/ic_send_white_24dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"

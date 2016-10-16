@@ -5,4 +5,5 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="chat_margin">2dp</dimen>
     <dimen name="circle_button_size">56dp</dimen>
+    <dimen name="input_margins">8dp</dimen>
 </resources>

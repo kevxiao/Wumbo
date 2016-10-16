@@ -37,12 +37,14 @@
                     android:layout_height="wrap_content"
                     android:text="@string/app_name"
                     android:textAlignment="center"
+                    android:textColor="@android:color/white"
                     android:textSize="40sp"
                     android:paddingBottom="25dp"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
                     android:text="@string/prompt_name" />
 
                 <EditText
@@ -51,6 +53,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/default_name"
                     android:inputType="textPersonName"
+                    android:textColor="@android:color/white"
                     android:maxLines="1" />
 
                 <ImageButton
