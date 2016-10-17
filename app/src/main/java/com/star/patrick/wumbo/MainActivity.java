@@ -137,4 +137,18 @@ public class MainActivity extends AppCompatActivity implements Observer {
             chatAdapter.notifyDataSetChanged();
         }
     }
+
+    private Runnable runnable;
+    public void setOnStopCallback(Runnable runnable) {
+        this.runnable = runnable;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        if (runnable != null) {
+            runnable.run();
+        }
+    }
 }

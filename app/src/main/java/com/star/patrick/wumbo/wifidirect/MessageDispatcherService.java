@@ -8,6 +8,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Process;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -23,12 +24,13 @@ public class MessageDispatcherService extends IntentService {
     private List<Thread> threadList = new ArrayList<>();
     public final static int PORT = 45455;
 
-    public MessageDispatcherService(String name) {
-        super(name);
+    public MessageDispatcherService() {
+        super("MessageDispatcherService");
     }
 
     @Override
     public void onCreate() {
+        super.onCreate();
         HandlerThread serviceThread = new HandlerThread("ServiceStartArguments", Process.THREAD_PRIORITY_BACKGROUND);
         serviceThread.start();
 //
@@ -44,7 +46,7 @@ public class MessageDispatcherService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Toast.makeText(this, "message service starting", Toast.LENGTH_SHORT).show();
+        Log.d("SE464", "message service starting");
 
         ServerSocket serverSocket = null;
 

@@ -33,13 +33,19 @@ public class WifiDirectService extends IntentService {
 
     private Device device;
 
-    public WifiDirectService(String name) {
-        super(name);
+    public WifiDirectService() {
+        super("WifiDirectService");
+
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.d("SE464", "wifidirect service created");
+
+        if (manager != null) {
+            return;
+        }
 
         manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         channel = manager.initialize(this, getMainLooper(), null);
@@ -96,6 +102,14 @@ public class WifiDirectService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        Log.d("SE464", "wifidirect service intent received");
+
+        if (intent.getAction() == null) {
+            return;
+        }
+
+        Log.d("SE464", intent.getAction());
+
         switch (intent.getAction()) {
             case WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION: {
                 manager.requestPeers(channel, new PeerListListener(){

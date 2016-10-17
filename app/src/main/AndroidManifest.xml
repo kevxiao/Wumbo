@@ -44,6 +44,8 @@
             </intent-filter>
         </activity>
         <service android:name=".wifidirect.HandshakeDispatcherService" />
+        <service android:name=".wifidirect.WifiDirectService" />
+        <service android:name=".wifidirect.MessageDispatcherService" />
     </application>
 
 </manifest>

@@ -8,7 +8,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Message;
+import android.util.Log;
 import android.widget.Toast;
 import android.os.Process;
 
@@ -20,12 +20,13 @@ public class HandshakeDispatcherService extends IntentService {
     private ServerSocket serverSocket;
     public static final int PORT = 45454;
 
-    public HandshakeDispatcherService(String name) {
-        super(name);
+    public HandshakeDispatcherService() {
+        super("HandshakeDispatcherService");
     }
 
     @Override
     public void onCreate() {
+        super.onCreate();
         // Start up the thread running the service.  Note that we create a
         // separate thread because the service normally runs in the process's
         // main thread, which we don't want to block.  We also make it
@@ -46,8 +47,7 @@ public class HandshakeDispatcherService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Toast.makeText(this, "HandshakeDispatcherService starting", Toast.LENGTH_SHORT).show();
-
+        Log.d("SE4664", "handshake service starting");
         try {
             serverSocket = new ServerSocket(PORT);
             while (!Thread.currentThread().isInterrupted()) {
