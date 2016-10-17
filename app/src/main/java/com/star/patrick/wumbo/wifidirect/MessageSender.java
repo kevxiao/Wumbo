@@ -1,6 +1,7 @@
 package com.star.patrick.wumbo.wifidirect;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -15,6 +16,7 @@ public class MessageSender extends AsyncTask<Void, Void, Throwable> {
     private Object object;
 
     public static MessageSender sendMessage(InetAddress hostAddress, int port, Object object) {
+        Log.d("SE464", "address: "+hostAddress.toString()+" port: "+port);
         MessageSender messageSender = new MessageSender(hostAddress, port, object);
         messageSender.executeOnExecutor(THREAD_POOL_EXECUTOR);
         return messageSender;
@@ -34,10 +36,11 @@ public class MessageSender extends AsyncTask<Void, Void, Throwable> {
         try {
             socket = new Socket();
             socket.bind(null);
-            socket.connect(new InetSocketAddress(hostAddress, port), 500);
+            socket.connect(new InetSocketAddress(hostAddress, port), 0);
             outputStream = socket.getOutputStream();
             objectOutputStream = new ObjectOutputStream(outputStream);
             objectOutputStream.writeObject(object);
+            Log.d("SE464", "Wrote message to socket");
             return null;
         } catch (IOException e) {
             e.printStackTrace();

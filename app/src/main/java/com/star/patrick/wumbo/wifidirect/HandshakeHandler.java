@@ -12,6 +12,7 @@ public final class HandshakeHandler extends Thread {
     private Socket socket;
     private Context context;
     HandshakeHandler(Socket s, Context c){
+        Log.d("SE4664", "Client accepted socket");
         context = c;
         socket = s;
     }
@@ -22,5 +23,10 @@ public final class HandshakeHandler extends Thread {
         intent.setAction(WifiDirectService.ADD_PEER_ACTION);
         intent.putExtra(WifiDirectService.EXTRA_INET_ADDRESS, socket.getInetAddress());
         context.startService(intent);
+        try {
+            socket.close();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }

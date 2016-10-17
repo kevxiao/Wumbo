@@ -18,7 +18,7 @@ import java.net.Socket;
 public class HandshakeDispatcherService extends IntentService {
     private Looper mServiceLooper;
     private ServerSocket serverSocket;
-    public static final int PORT = 45454;
+    public static final int PORT = 63243;
 
     public HandshakeDispatcherService() {
         super("HandshakeDispatcherService");
@@ -51,6 +51,7 @@ public class HandshakeDispatcherService extends IntentService {
         try {
             serverSocket = new ServerSocket(PORT);
             while (!Thread.currentThread().isInterrupted()) {
+                Log.d("SE4664", "Waiting for client to accept socket");
                 HandshakeHandler thread = new HandshakeHandler(serverSocket.accept(), this);
                 thread.start();
             }
@@ -62,6 +63,12 @@ public class HandshakeDispatcherService extends IntentService {
 
     @Override
     public void onDestroy() {
-        Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
+        if (serverSocket != null) {
+            try {
+                serverSocket.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

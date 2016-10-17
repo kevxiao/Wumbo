@@ -28,20 +28,18 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
             case WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION: {
                 Log.d(TAG, "Peers changed.");
                 Intent newIntent = new Intent(context, WifiDirectService.class);
+                newIntent.setAction(intent.getAction());
                 newIntent.putExtras(intent);
                 context.startService(newIntent);
             } break;
 
             // group formed
             case WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION: {
-                NetworkInfo networkInfo = intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
-                if (networkInfo.isConnected()) {
-                    Log.d(TAG, "Peers connected.");
-
-                    Intent newIntent = new Intent(context, WifiDirectService.class);
-                    newIntent.putExtras(intent);
-                    context.startService(newIntent);
-                }
+                Log.d(TAG, "Connection changed.");
+                Intent newIntent = new Intent(context, WifiDirectService.class);
+                newIntent.setAction(intent.getAction());
+                newIntent.putExtras(intent);
+                context.startService(newIntent);
             } break;
         }
     }

@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.util.Log;
 
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
@@ -27,6 +28,7 @@ public class ChannelImpl extends Observable implements Channel {
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d("SE464", "Channel received a message");
             String action = intent.getAction();
             if (WUMBO_MESSAGE_INTENT_ACTION.equals(action)) {
                 Message msg = (Message) intent.getSerializableExtra(WUMBO_MESSAGE_EXTRA);

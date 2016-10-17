@@ -22,7 +22,8 @@ import java.util.List;
 
 public class MessageDispatcherService extends IntentService {
     private List<Thread> threadList = new ArrayList<>();
-    public final static int PORT = 45455;
+    public final static int PORT = 63244;
+    private ServerSocket serverSocket;
 
     public MessageDispatcherService() {
         super("MessageDispatcherService");
@@ -48,8 +49,6 @@ public class MessageDispatcherService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         Log.d("SE464", "message service starting");
 
-        ServerSocket serverSocket = null;
-
         try {
             serverSocket = new ServerSocket(PORT);
             while (!Thread.currentThread().isInterrupted()) {
@@ -68,6 +67,17 @@ public class MessageDispatcherService extends IntentService {
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }
+            }
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        if (serverSocket != null) {
+            try {
+                serverSocket.close();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }

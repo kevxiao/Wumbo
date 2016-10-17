@@ -19,19 +19,23 @@ public class MessageHandler implements Runnable {
     private MessageDispatcherService messageDispatcherService;
 
     public MessageHandler(Socket socket, MessageDispatcherService messageDispatcherService) {
+        Log.d("SE464", "Creat MessageHandler");
         this.socket = socket;
         this.messageDispatcherService = messageDispatcherService;
     }
 
     @Override
     public void run() {
+        Log.d("SE464", "MessageHandler thread run");
         InputStream inputStream = null;
         ObjectInputStream objectInputStream = null;
         try {
-            //Log.d("Client's InetAddress", "" + socket.getInetAddress());
+
             inputStream = socket.getInputStream();
             objectInputStream = new ObjectInputStream(inputStream);
             Message msg = (Message) objectInputStream.readObject();
+
+            Log.d("SE464", "Messsage Received: " + msg.toString());
 
             Intent messageIntent = new Intent(ChannelImpl.WUMBO_MESSAGE_INTENT_ACTION, null, messageDispatcherService, Channel.class);
             messageIntent.putExtra(ChannelImpl.WUMBO_MESSAGE_EXTRA, msg);
