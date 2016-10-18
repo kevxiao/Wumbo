@@ -59,12 +59,6 @@ public class MessageDispatcherService extends IntentService {
         try {
             serverSocket = new ServerSocket(PORT);
             while (!Thread.currentThread().isInterrupted()) {
-
-                Message msg = new Message("intent message", new Sender("buddy"), new Timestamp(Calendar.getInstance().getTimeInMillis()), UUID.randomUUID());
-                Intent messageIntent = new Intent(ChannelImpl.WUMBO_MESSAGE_INTENT_ACTION);
-                messageIntent.putExtra(ChannelImpl.WUMBO_MESSAGE_EXTRA, msg);
-                sendBroadcast(messageIntent);
-
                 Thread thread = new Thread(new MessageHandler(serverSocket.accept(), this));
                 threadList.add(thread);
                 thread.start();
