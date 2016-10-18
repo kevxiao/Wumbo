@@ -36,7 +36,7 @@ public class MessageSender extends AsyncTask<Void, Void, Throwable> {
         try {
             socket = new Socket();
             socket.bind(null);
-            socket.connect(new InetSocketAddress(hostAddress, port), 0);
+            socket.connect(new InetSocketAddress(hostAddress, port), 5000);
             outputStream = socket.getOutputStream();
             objectOutputStream = new ObjectOutputStream(outputStream);
             objectOutputStream.writeObject(object);
