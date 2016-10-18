@@ -35,6 +35,13 @@ public class MessageHandler implements Runnable {
             objectInputStream = new ObjectInputStream(inputStream);
             Message msg = (Message) objectInputStream.readObject();
 
+            Log.d("Client's InetAddress", "" + socket.getInetAddress());
+            //TODO Change the intent's class to the right one
+            Intent intent = new Intent(messageDispatcherService, WifiDirectService.class);
+            intent.setAction(WifiDirectService.ADD_PEER_ACTION);
+            intent.putExtra(WifiDirectService.EXTRA_INET_ADDRESS, socket.getInetAddress());
+            messageDispatcherService.startService(intent);
+
             Log.d("SE464", "Messsage Received: " + msg.toString());
 
             Intent messageIntent = new Intent(ChannelImpl.WUMBO_MESSAGE_INTENT_ACTION);
