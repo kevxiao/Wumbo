@@ -17,7 +17,9 @@ import com.star.patrick.wumbo.wifidirect.HandshakeDispatcherService;
 import com.star.patrick.wumbo.wifidirect.MessageDispatcherService;
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -85,6 +87,11 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         intent = new Intent(this, MessageDispatcherService.class);
         startService(intent);
+
+//        Message msg = new Message("intent message", me, new Timestamp(Calendar.getInstance().getTimeInMillis()), UUID.randomUUID());
+//        Intent messageIntent = new Intent(ChannelImpl.WUMBO_MESSAGE_INTENT_ACTION);
+//        messageIntent.putExtra(ChannelImpl.WUMBO_MESSAGE_EXTRA, msg);
+//        sendBroadcast(messageIntent);
     }
 
     @Override

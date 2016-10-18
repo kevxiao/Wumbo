@@ -37,7 +37,7 @@ public class MessageHandler implements Runnable {
 
             Log.d("SE464", "Messsage Received: " + msg.toString());
 
-            Intent messageIntent = new Intent(ChannelImpl.WUMBO_MESSAGE_INTENT_ACTION, null, messageDispatcherService, Channel.class);
+            Intent messageIntent = new Intent(ChannelImpl.WUMBO_MESSAGE_INTENT_ACTION);
             messageIntent.putExtra(ChannelImpl.WUMBO_MESSAGE_EXTRA, msg);
 
             messageDispatcherService.sendBroadcast(messageIntent);
