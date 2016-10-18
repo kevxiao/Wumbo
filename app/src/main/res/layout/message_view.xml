@@ -7,26 +7,19 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/sender"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="15sp"
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray" />
 
-            <TextView
-                android:id="@+id/sender"
-                android:layout_width="wrap_content"
-                android:layout_height="15sp"
-                android:textSize="12sp"
-                android:textColor="@android:color/darker_gray" />
-
-            <TextView
-                android:id="@+id/txtInfo"
-                android:layout_width="wrap_content"
-                android:layout_height="15sp"
-                android:textSize="12sp"
-                android:textColor="@android:color/darker_gray" />
-
-        </LinearLayout>
+        <TextView
+            android:id="@+id/txtInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="15sp"
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray" />
 
         <LinearLayout
             android:id="@+id/contentWithBackground"
