@@ -29,7 +29,7 @@ import java.util.UUID;
 
 public class MessageDispatcherService extends IntentService {
     private List<Thread> threadList = new ArrayList<>();
-    public final static int PORT = 63244;
+    public final static int PORT = 56410;
     private ServerSocket serverSocket;
 
     public MessageDispatcherService() {

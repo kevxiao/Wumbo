@@ -19,7 +19,7 @@ import java.net.Socket;
 public class HandshakeDispatcherService extends IntentService {
     private Looper mServiceLooper;
     private ServerSocket serverSocket;
-    public static final int PORT = 56410;
+    public static final int PORT = 63244;
 
     public HandshakeDispatcherService() {
         super("HandshakeDispatcherService");
