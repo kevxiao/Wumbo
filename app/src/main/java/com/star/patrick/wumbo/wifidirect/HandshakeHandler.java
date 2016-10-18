@@ -8,7 +8,7 @@ import android.util.Log;
 import java.net.Socket;
 
 // Handler that receives messages from the thread
-public final class HandshakeHandler extends Thread {
+public final class HandshakeHandler implements Runnable {
     private Socket socket;
     private Context context;
     HandshakeHandler(Socket s, Context c){
@@ -16,6 +16,7 @@ public final class HandshakeHandler extends Thread {
         context = c;
         socket = s;
     }
+    @Override
     public void run(){
         Log.d("Client's InetAddress", "" + socket.getInetAddress());
         //TODO Change the intent's class to the right one

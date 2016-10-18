@@ -1,6 +1,8 @@
 package com.star.patrick.wumbo.wifidirect;
 
 
+import android.util.Log;
+
 import com.star.patrick.wumbo.Message;
 
 import java.net.InetAddress;
@@ -21,6 +23,7 @@ public class Host implements Device {
     @Override
     public void sendMessage(Message message) {
         for (InetAddress address: clientAddresses) {
+            Log.d("SE464", "Host sending to " + address.toString());
             MessageSender.sendMessage(address, MessageDispatcherService.PORT, message);
         }
     }

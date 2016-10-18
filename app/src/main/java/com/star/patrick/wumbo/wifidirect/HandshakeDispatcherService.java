@@ -12,6 +12,7 @@ import android.util.Log;
 import android.widget.Toast;
 import android.os.Process;
 
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -47,17 +48,27 @@ public class HandshakeDispatcherService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Log.d("SE4664", "handshake service starting");
+        Log.d("SE464", "message service starting");
+
         try {
             serverSocket = new ServerSocket(PORT);
             while (!Thread.currentThread().isInterrupted()) {
-                Log.d("SE4664", "Waiting for client to accept socket");
-                HandshakeHandler thread = new HandshakeHandler(serverSocket.accept(), this);
+                Thread thread = new Thread(new HandshakeHandler(serverSocket.accept(), this));
+                //threadList.add(thread);
                 thread.start();
             }
         }
         catch (Exception e) {
             e.printStackTrace();
+        }
+        finally {
+            if (serverSocket != null) {
+                try {
+                    serverSocket.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
         }
     }
 
