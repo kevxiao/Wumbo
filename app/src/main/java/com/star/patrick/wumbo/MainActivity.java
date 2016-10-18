@@ -157,8 +157,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onDestroy() {
+        super.onDestroy();
 
         if (onStopCallback != null) {
             onStopCallback.run();
