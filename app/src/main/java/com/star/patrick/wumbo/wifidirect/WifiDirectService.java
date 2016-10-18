@@ -107,7 +107,9 @@ public class WifiDirectService extends Service {
         Log.d("SE464", "group formed " + hostAddress + ", Am I host? " + isHost);
 
         if (isHost) {
-            device = new Host();
+            if (!(device instanceof Host)) {
+                device = new Host();
+            }
         }
         else {
             device = new Client(hostAddress);
@@ -144,6 +146,9 @@ public class WifiDirectService extends Service {
 
             case ADD_PEER_ACTION: {
                 InetAddress inetAddress = (InetAddress) intent.getSerializableExtra(EXTRA_INET_ADDRESS);
+                if (!(device instanceof Host)) {
+                   device = new Host();
+                }
                 device.addClient(inetAddress);
             } break;
 
