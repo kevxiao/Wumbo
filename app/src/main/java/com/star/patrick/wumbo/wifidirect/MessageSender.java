@@ -44,6 +44,7 @@ public class MessageSender extends AsyncTask<Void, Void, Throwable> {
         Socket socket = null;
         OutputStream outputStream = null;
         ObjectOutputStream objectOutputStream = null;
+        Exception exception = null;
         for (int i = 0; i <= numRetries; i++) {
             try {
                 socket = new Socket();
@@ -55,6 +56,7 @@ public class MessageSender extends AsyncTask<Void, Void, Throwable> {
                 Log.d("SE464", "Wrote message to socket");
                 return null;
             } catch (IOException e) {
+                exception = e;
                 e.printStackTrace();
             } finally {
                 if (objectOutputStream != null) {
@@ -82,5 +84,6 @@ public class MessageSender extends AsyncTask<Void, Void, Throwable> {
                 }
             }
         }
+        return exception;
     }
 }
