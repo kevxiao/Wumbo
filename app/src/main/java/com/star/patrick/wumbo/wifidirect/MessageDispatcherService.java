@@ -11,10 +11,17 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.star.patrick.wumbo.ChannelImpl;
+import com.star.patrick.wumbo.Message;
+import com.star.patrick.wumbo.Sender;
+
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by giliam on 10/16/2016.
@@ -52,6 +59,12 @@ public class MessageDispatcherService extends IntentService {
         try {
             serverSocket = new ServerSocket(PORT);
             while (!Thread.currentThread().isInterrupted()) {
+
+                Message msg = new Message("intent message", new Sender("buddy"), new Timestamp(Calendar.getInstance().getTimeInMillis()), UUID.randomUUID());
+                Intent messageIntent = new Intent(ChannelImpl.WUMBO_MESSAGE_INTENT_ACTION);
+                messageIntent.putExtra(ChannelImpl.WUMBO_MESSAGE_EXTRA, msg);
+                sendBroadcast(messageIntent);
+
                 Thread thread = new Thread(new MessageHandler(serverSocket.accept(), this));
                 threadList.add(thread);
                 thread.start();

@@ -39,8 +39,9 @@ public class MessageHandler implements Runnable {
 
             Intent messageIntent = new Intent(ChannelImpl.WUMBO_MESSAGE_INTENT_ACTION);
             messageIntent.putExtra(ChannelImpl.WUMBO_MESSAGE_EXTRA, msg);
-
             messageDispatcherService.sendBroadcast(messageIntent);
+
+            Log.d("SE464", "MessageHandler sent broadcast");
 
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
