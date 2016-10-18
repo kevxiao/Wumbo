@@ -104,7 +104,7 @@ public class WifiDirectService extends Service {
     }
 
     private void onGroupFormed(boolean isHost, InetAddress hostAddress) {
-        Log.d("SE464", "group formed " + hostAddress);
+        Log.d("SE464", "group formed " + hostAddress + ", Am I host? " + isHost);
 
         if (isHost) {
             device = new Host();
