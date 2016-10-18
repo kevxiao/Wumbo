@@ -17,6 +17,8 @@ public class MessageSender extends AsyncTask<Void, Void, Throwable> {
     private Object object;
     private int numRetries;
 
+    public static final int TIMEOUT_MS = 1000;
+
     public static MessageSender sendMessage(InetAddress hostAddress, int port, Object object) {
         return sendMessage(hostAddress, port, object, 1);
     }
@@ -49,7 +51,7 @@ public class MessageSender extends AsyncTask<Void, Void, Throwable> {
             try {
                 socket = new Socket();
                 socket.bind(null);
-                socket.connect(new InetSocketAddress(hostAddress, port), 5000);
+                socket.connect(new InetSocketAddress(hostAddress, port), TIMEOUT_MS);
                 outputStream = socket.getOutputStream();
                 objectOutputStream = new ObjectOutputStream(outputStream);
                 objectOutputStream.writeObject(object);
