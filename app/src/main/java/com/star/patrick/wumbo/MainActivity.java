@@ -1,8 +1,6 @@
 package com.star.patrick.wumbo;
 
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -17,9 +15,7 @@ import com.star.patrick.wumbo.wifidirect.HandshakeDispatcherService;
 import com.star.patrick.wumbo.wifidirect.MessageDispatcherService;
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -38,6 +34,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
     private ImageButton sendBtn;
     private EditText editMsg;
+
+    private Runnable onStartCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +65,10 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 }
             }
         });
+
+        if (onStartCallback != null) {
+            onStartCallback.run();
+        }
 
         mMsgChannel.addObserver(this);
 
@@ -145,17 +147,21 @@ public class MainActivity extends AppCompatActivity implements Observer {
         }
     }
 
-    private Runnable runnable;
+    private Runnable onStopCallback;
     public void setOnStopCallback(Runnable runnable) {
-        this.runnable = runnable;
+        this.onStopCallback = runnable;
+    }
+
+    public void setOnStartCallback(Runnable runnable) {
+        this.onStartCallback = runnable;
     }
 
     @Override
     protected void onStop() {
         super.onStop();
 
-        if (runnable != null) {
-            runnable.run();
+        if (onStopCallback != null) {
+            onStopCallback.run();
         }
     }
 }

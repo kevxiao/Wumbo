@@ -46,13 +46,23 @@ public class ChannelImpl extends Observable implements Channel {
         this.mainContext = context;
         this.me = me;
 
-        IntentFilter filter = new IntentFilter();
+        final IntentFilter filter = new IntentFilter();
         filter.addAction(WUMBO_MESSAGE_INTENT_ACTION);
-        mainContext.registerReceiver(receiver, filter);
+
+        mainContext.setOnStartCallback(new Runnable() {
+            @Override
+            public void run() {
+                mainContext.registerReceiver(receiver, filter);
+            }
+        });
         mainContext.setOnStopCallback(new Runnable() {
             @Override
             public void run() {
-                mainContext.unregisterReceiver(receiver);
+                try {
+                    mainContext.unregisterReceiver(receiver);
+                } catch (IllegalArgumentException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
