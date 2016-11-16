@@ -5,10 +5,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
+import com.star.patrick.wumbo.wifidirect.WifiDirectService;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 public class ChannelManagerImpl implements ChannelManager {
     private MainActivity mainContext;
     private ChannelList channels = new ChannelListImpl();
+    private Set<UUID> receivedMessageIds = new HashSet<>();
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -48,7 +54,21 @@ public class ChannelManagerImpl implements ChannelManager {
 
     @Override
     public void receive(Message msg) {
-        channels.get(msg.getChannelId()).receive(msg);
+        if (!receivedMessageIds.contains(msg.getId())) {
+            send(msg);
+            if (channels.containsKey(msg.getChannelId())) {
+                channels.get(msg.getChannelId()).receive(msg);
+            }
+        }
+    }
+
+    @Override
+    public void send(Message msg) {
+        receivedMessageIds.add(msg.getId());
+        Intent sendMsgIntent = new Intent(mainContext, WifiDirectService.class);
+        sendMsgIntent.setAction(WifiDirectService.SEND_MESSAGE_ACTION);
+        sendMsgIntent.putExtra(WifiDirectService.EXTRA_MESSAGE, msg);
+        mainContext.startService(sendMsgIntent);
     }
 
     @Override

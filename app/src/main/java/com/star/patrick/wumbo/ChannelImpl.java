@@ -26,15 +26,16 @@ public class ChannelImpl extends Observable implements Channel {
     private MessageList msgs;
     private NetworkManager networkMgr;
     private MainActivity mainContext;
-    private Set<UUID> receivedMessageIds = new HashSet<>();
+    private ChannelManager channelManager;
 
-    public ChannelImpl(String name, NetworkManager networkMgr, MainActivity context, Sender me) {
+    public ChannelImpl(String name, NetworkManager networkMgr, MainActivity context, Sender me, ChannelManager channelManager) {
         this.name = name;
         this.msgs = new MessageListImpl();
         this.networkMgr = networkMgr;
         this.id = UUID.randomUUID();
         this.mainContext = context;
         this.me = me;
+        this.channelManager = channelManager;
     }
 
     public void send(String msgText) {
@@ -45,22 +46,20 @@ public class ChannelImpl extends Observable implements Channel {
     public void send(Uri imagePath){}
 
     public void send(Message msg) {
-        receivedMessageIds.add(msg.getId());
+        add(msg);
+        channelManager.send(msg);
+    }
+
+    public void receive(Message msg) {
+        add(msg);
+        //add notif
+    }
+
+    private void add(Message msg) {
         msg.setReceiveTime(new Timestamp(new Date().getTime()));
         msgs.addMessage(msg);
         setChanged();
         notifyObservers();
-        Intent sendMsgIntent = new Intent(mainContext, WifiDirectService.class);
-        sendMsgIntent.setAction(WifiDirectService.SEND_MESSAGE_ACTION);
-        sendMsgIntent.putExtra(WifiDirectService.EXTRA_MESSAGE, msg);
-        mainContext.startService(sendMsgIntent);
-    }
-
-    public void receive(Message msg) {
-        if (!receivedMessageIds.contains(msg.getId())) {
-            send(msg);
-            //add notif
-        }
     }
 
     @Override

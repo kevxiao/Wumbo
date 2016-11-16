@@ -26,6 +26,7 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements Observer {
 
+    private ChannelManager channelManager;
     private Channel msgChannel;
     private ChannelList msgChannelList;
     private NetworkManager networkManager;
@@ -52,8 +53,10 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         me = new Sender(extras != null && extras.getString("name") != null && !extras.getString("name").isEmpty() ? extras.getString("name") : "Anonymous");
 
+        channelManager = new ChannelManagerImpl(this);
         networkManager = new NetworkManagerImpl();
-        msgChannel = new ChannelImpl(getResources().getString(R.string.public_name), networkManager, this, me);
+        msgChannel = new ChannelImpl(getResources().getString(R.string.public_name), networkManager, this, me, channelManager);
+        channelManager.addChannel(msgChannel);
         msgChannelList = new ChannelListImpl();
         msgChannelList.put(UUID.fromString(getResources().getString(R.string.public_uuid)), msgChannel);
 
