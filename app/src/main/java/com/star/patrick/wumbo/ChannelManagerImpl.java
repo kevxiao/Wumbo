@@ -6,10 +6,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
-/**
- * Created by giliam on 11/15/2016.
- */
-
 public class ChannelManagerImpl implements ChannelManager {
     private MainActivity mainContext;
     private ChannelList channels = new ChannelListImpl();
@@ -52,7 +48,7 @@ public class ChannelManagerImpl implements ChannelManager {
 
     @Override
     public void receive(Message msg) {
-
+        channels.get(msg.getChannelId()).receive(msg);
     }
 
     @Override
