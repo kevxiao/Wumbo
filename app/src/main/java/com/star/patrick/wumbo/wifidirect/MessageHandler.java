@@ -3,15 +3,12 @@ package com.star.patrick.wumbo.wifidirect;
 
 import android.content.Intent;
 import android.util.Log;
-
-import com.star.patrick.wumbo.Channel;
-import com.star.patrick.wumbo.ChannelImpl;
+import com.star.patrick.wumbo.ChannelManagerImpl;
 import com.star.patrick.wumbo.Message;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.net.ServerSocket;
 import java.net.Socket;
 
 public class MessageHandler implements Runnable {
@@ -44,8 +41,8 @@ public class MessageHandler implements Runnable {
 
             Log.d("SE464", "Messsage Received: " + msg.toString());
 
-            Intent messageIntent = new Intent(ChannelImpl.WUMBO_MESSAGE_INTENT_ACTION);
-            messageIntent.putExtra(ChannelImpl.WUMBO_MESSAGE_EXTRA, msg);
+            Intent messageIntent = new Intent(ChannelManagerImpl.WUMBO_MESSAGE_INTENT_ACTION);
+            messageIntent.putExtra(ChannelManagerImpl.WUMBO_MESSAGE_EXTRA, msg);
             messageDispatcherService.sendBroadcast(messageIntent);
 
             Log.d("SE464", "MessageHandler sent broadcast");

@@ -1,7 +1,10 @@
 package com.star.patrick.wumbo;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -23,9 +26,10 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements Observer {
 
-    private Channel mMsgChannel;
-    private ChannelList mMsgChannelList;
-    private NetworkManager mNetworkMgr;
+    private ChannelManager channelManager;
+    private Channel msgChannel;
+    private ChannelList msgChannelList;
+    private NetworkManager networkManager;
     public static final String TAG = "SE464";
     private ChatAdapter chatAdapter;
     private ListView listView;
@@ -33,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private Sender me;
 
     private ImageButton sendBtn;
+    private ImageButton cameraBtn;
     private EditText editMsg;
 
     private Runnable onStartCallback;
@@ -48,21 +53,36 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         me = new Sender(extras != null && extras.getString("name") != null && !extras.getString("name").isEmpty() ? extras.getString("name") : "Anonymous");
 
-        mNetworkMgr = new NetworkManagerImpl();
-        mMsgChannel = new ChannelImpl(getResources().getString(R.string.public_name), mNetworkMgr, this, me);
-        mMsgChannelList = new ChannelListImpl();
-        mMsgChannelList.put(UUID.fromString(getResources().getString(R.string.public_uuid)), mMsgChannel);
+        channelManager = new ChannelManagerImpl(this);
+        networkManager = new NetworkManagerImpl();
+        msgChannel = new ChannelImpl(UUID.fromString(getResources().getString(R.string.public_uuid)), getResources().getString(R.string.public_name), networkManager, this, me, channelManager);
+        channelManager.addChannel(msgChannel);
+        msgChannelList = new ChannelListImpl();
+        msgChannelList.put(UUID.fromString(getResources().getString(R.string.public_uuid)), msgChannel);
 
         sendBtn = (ImageButton) findViewById(R.id.sendBtn);
+        cameraBtn = (ImageButton) findViewById(R.id.cameraIcon);
         editMsg = (EditText) findViewById(R.id.editMsg);
 
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(!editMsg.getText().toString().isEmpty()) {
-                    mMsgChannel.send(editMsg.getText().toString());
+                    msgChannel.send(editMsg.getText().toString());
                     editMsg.setText("");
                 }
+            }
+        });
+
+        cameraBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//                startActivityForResult(takePicture, 0);//zero can be replaced with any action code
+
+                Intent pickPhoto = new Intent(Intent.ACTION_PICK,
+                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(pickPhoto , 1);//one can be replaced with any action code
             }
         });
 
@@ -70,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
             onStartCallback.run();
         }
 
-        mMsgChannel.addObserver(this);
+        msgChannel.addObserver(this);
 
         List<Message> messages = new ArrayList<>();//MessageListImpl.getMockMessageList();
 
@@ -123,9 +143,9 @@ public class MainActivity extends AppCompatActivity implements Observer {
         List<Message> newMessages;
 
         if (null == lastMessage) {
-            newMessages = mMsgChannel.getAllMessages();
+            newMessages = msgChannel.getAllMessages();
         } else {
-            newMessages = mMsgChannel.getAllMessagesSince(lastMessage.getReceiveTime());
+            newMessages = msgChannel.getAllMessagesSince(lastMessage.getReceiveTime());
 
             for ( int i = 0; i < newMessages.size(); i++ ) {
                 if (newMessages.get(i).getReceiveTime() != lastMessage.getReceiveTime()) {
@@ -154,6 +174,25 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
     public void setOnStartCallback(Runnable runnable) {
         this.onStartCallback = runnable;
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
+        super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
+        switch(requestCode) {
+//            case 0:
+//                if(resultCode == RESULT_OK){
+//                    Uri selectedImage = imageReturnedIntent.getData();
+//                    //imageview.setImageURI(selectedImage);
+//                }
+//
+//                break;
+            case 1:
+                if(resultCode == RESULT_OK){
+                    Uri selectedImage = imageReturnedIntent.getData();
+                    //imageview.setImageURI(selectedImage);
+                }
+                break;
+        }
     }
 
     @Override
