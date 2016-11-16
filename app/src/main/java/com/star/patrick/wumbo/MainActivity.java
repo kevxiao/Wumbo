@@ -1,7 +1,10 @@
 package com.star.patrick.wumbo;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -33,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private Sender me;
 
     private ImageButton sendBtn;
+    private ImageButton cameraBtn;
     private EditText editMsg;
 
     private Runnable onStartCallback;
@@ -54,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         msgChannelList.put(UUID.fromString(getResources().getString(R.string.public_uuid)), msgChannel);
 
         sendBtn = (ImageButton) findViewById(R.id.sendBtn);
+        cameraBtn = (ImageButton) findViewById(R.id.cameraIcon);
         editMsg = (EditText) findViewById(R.id.editMsg);
 
         sendBtn.setOnClickListener(new View.OnClickListener() {
@@ -63,6 +68,18 @@ public class MainActivity extends AppCompatActivity implements Observer {
                     msgChannel.send(editMsg.getText().toString());
                     editMsg.setText("");
                 }
+            }
+        });
+
+        cameraBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//                startActivityForResult(takePicture, 0);//zero can be replaced with any action code
+
+                Intent pickPhoto = new Intent(Intent.ACTION_PICK,
+                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(pickPhoto , 1);//one can be replaced with any action code
             }
         });
 
@@ -154,6 +171,25 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
     public void setOnStartCallback(Runnable runnable) {
         this.onStartCallback = runnable;
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
+        super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
+        switch(requestCode) {
+//            case 0:
+//                if(resultCode == RESULT_OK){
+//                    Uri selectedImage = imageReturnedIntent.getData();
+//                    //imageview.setImageURI(selectedImage);
+//                }
+//
+//                break;
+            case 1:
+                if(resultCode == RESULT_OK){
+                    Uri selectedImage = imageReturnedIntent.getData();
+                    //imageview.setImageURI(selectedImage);
+                }
+                break;
+        }
     }
 
     @Override

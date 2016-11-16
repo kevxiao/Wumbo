@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.util.Log;
 
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
@@ -40,6 +41,8 @@ public class ChannelImpl extends Observable implements Channel {
         Message msg = new Message(msgText, me, new Timestamp(Calendar.getInstance().getTimeInMillis()), id);
         send(msg);
     }
+
+    public void send(Uri imagePath){}
 
     public void send(Message msg) {
         receivedMessageIds.add(msg.getId());
