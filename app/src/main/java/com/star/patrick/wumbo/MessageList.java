@@ -1,5 +1,7 @@
 package com.star.patrick.wumbo;
 
+import com.star.patrick.wumbo.message.Message;
+
 import java.sql.Timestamp;
 import java.util.List;
 

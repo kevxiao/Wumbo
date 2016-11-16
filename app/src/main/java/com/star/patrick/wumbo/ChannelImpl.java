@@ -1,18 +1,11 @@
 package com.star.patrick.wumbo;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.Uri;
-import android.util.Log;
 
-import com.star.patrick.wumbo.wifidirect.WifiDirectService;
+import com.star.patrick.wumbo.message.Message;
 
 import java.sql.Timestamp;
 import java.util.Calendar;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.Date;
 import java.util.List;
 import java.util.Observable;

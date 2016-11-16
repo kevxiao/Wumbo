@@ -4,7 +4,7 @@ package com.star.patrick.wumbo.wifidirect;
 import android.content.Intent;
 import android.util.Log;
 import com.star.patrick.wumbo.ChannelManagerImpl;
-import com.star.patrick.wumbo.Message;
+import com.star.patrick.wumbo.message.Message;
 
 import java.io.IOException;
 import java.io.InputStream;

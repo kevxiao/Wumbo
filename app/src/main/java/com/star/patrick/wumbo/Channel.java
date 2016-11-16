@@ -2,6 +2,8 @@ package com.star.patrick.wumbo;
 
 import android.net.Uri;
 
+import com.star.patrick.wumbo.message.Message;
+
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Observer;

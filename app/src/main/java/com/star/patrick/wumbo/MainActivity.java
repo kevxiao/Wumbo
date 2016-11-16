@@ -1,10 +1,8 @@
 package com.star.patrick.wumbo;
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -14,6 +12,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
+import com.star.patrick.wumbo.message.Message;
 import com.star.patrick.wumbo.wifidirect.HandshakeDispatcherService;
 import com.star.patrick.wumbo.wifidirect.MessageDispatcherService;
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;

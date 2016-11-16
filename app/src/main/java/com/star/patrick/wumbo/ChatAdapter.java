@@ -11,6 +11,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.star.patrick.wumbo.message.Message;
+
 import java.util.List;
 import java.util.UUID;
 

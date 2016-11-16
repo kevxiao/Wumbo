@@ -1,4 +1,6 @@
-package com.star.patrick.wumbo;
+package com.star.patrick.wumbo.message;
+
+import com.star.patrick.wumbo.Sender;
 
 import java.io.Serializable;
 import java.sql.Timestamp;

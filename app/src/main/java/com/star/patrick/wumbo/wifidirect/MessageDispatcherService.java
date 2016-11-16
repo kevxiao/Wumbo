@@ -1,27 +1,17 @@
 package com.star.patrick.wumbo.wifidirect;
 
 import android.app.IntentService;
-import android.app.Service;
 import android.content.Intent;
-import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Process;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.widget.Toast;
-
-import com.star.patrick.wumbo.ChannelImpl;
-import com.star.patrick.wumbo.Message;
-import com.star.patrick.wumbo.Sender;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Created by giliam on 10/16/2016.
