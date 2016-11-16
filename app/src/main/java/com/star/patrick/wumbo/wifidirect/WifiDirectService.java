@@ -21,6 +21,8 @@ import android.util.Log;
 
 import com.star.patrick.wumbo.Message;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 
 import static com.star.patrick.wumbo.MainActivity.TAG;
@@ -64,7 +66,24 @@ public class WifiDirectService extends Service {
         return null;
     }
 
+    private void deletePersistentGroups(){
+        try {
+            Class WifiDirectManagerClass = Class.forName("android.net.wifi.p2p.WifiP2pManager");
+            Method deletePersistentGroup = WifiDirectManagerClass.getMethod(
+                "deletePersistentGroup", Channel.class, int.class, ActionListener.class
+            );
+
+            for (int netid = 0; netid < 32; netid++) {
+                deletePersistentGroup.invoke(manager, channel, netid, null);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void discoverPeers() {
+        deletePersistentGroups();
+
         manager.discoverPeers(channel, new ActionListener() {
             @Override
             public void onSuccess() {
