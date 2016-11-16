@@ -13,6 +13,11 @@ public class Text implements MessageContent {
     }
 
     @Override
+    public MessageType getType(){
+        return type;
+    }
+
+    @Override
     public Object getMessageContent() {
         return content;
     }

@@ -6,6 +6,7 @@ package com.star.patrick.wumbo.message;
 
 public interface MessageContent {
     Object getMessageContent();
+    MessageType getType();
     enum MessageType{
         TEXT,
         IMAGE

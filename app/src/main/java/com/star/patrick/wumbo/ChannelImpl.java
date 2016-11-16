@@ -2,6 +2,7 @@ package com.star.patrick.wumbo;
 
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
 
 import com.star.patrick.wumbo.message.Message;
 
@@ -48,7 +49,11 @@ public class ChannelImpl extends Observable implements Channel {
         send(msg);
     }
 
-    public void send(Uri imagePath, Context context){}
+    public void send(Uri imagePath, Context context) {
+        Log.d("SE464", "Channel send image");
+        Message msg = new Message(imagePath, context, me, new Timestamp(Calendar.getInstance().getTimeInMillis()), id);
+        send(msg);
+    }
 
     public void send(Message msg) {
         Log.d("SE464", "Channel send message");
@@ -64,6 +69,7 @@ public class ChannelImpl extends Observable implements Channel {
 
     private void add(Message msg) {
         msg.setReceiveTime(new Timestamp(new Date().getTime()));
+        msg.handleContentOnReceive();
         msgs.addMessage(msg);
         setChanged();
         notifyObservers();
