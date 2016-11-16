@@ -32,7 +32,18 @@ public class ChannelImpl extends Observable implements Channel {
         this.channelManager = channelManager;
     }
 
+    public ChannelImpl(UUID id, String name, NetworkManager networkMgr, MainActivity context, Sender me, ChannelManager channelManager) {
+        this.name = name;
+        this.msgs = new MessageListImpl();
+        this.networkMgr = networkMgr;
+        this.id = id;
+        this.mainContext = context;
+        this.me = me;
+        this.channelManager = channelManager;
+    }
+
     public void send(String msgText) {
+        Log.d("SE464", "Channel send string");
         Message msg = new Message(msgText, me, new Timestamp(Calendar.getInstance().getTimeInMillis()), id);
         send(msg);
     }
@@ -40,11 +51,13 @@ public class ChannelImpl extends Observable implements Channel {
     public void send(Uri imagePath, Context context){}
 
     public void send(Message msg) {
+        Log.d("SE464", "Channel send message");
         add(msg);
         channelManager.send(msg);
     }
 
     public void receive(Message msg) {
+        Log.d("SE464", "Channel receive");
         add(msg);
         //add notif
     }

@@ -56,7 +56,9 @@ public class ChannelManagerImpl implements ChannelManager {
 
     @Override
     public void receive(Message msg) {
+        Log.d("SE464", "ChannelManager receive");
         if (!receivedMessageIds.contains(msg.getId())) {
+            Log.d("SE464", "ChannelManager first time receiving");
             send(msg);
             if (channels.containsKey(msg.getChannelId())) {
                 channels.get(msg.getChannelId()).receive(msg);
@@ -66,6 +68,7 @@ public class ChannelManagerImpl implements ChannelManager {
 
     @Override
     public void send(Message msg) {
+        Log.d("SE464", "ChannelManager send");
         receivedMessageIds.add(msg.getId());
         Intent sendMsgIntent = new Intent(mainContext, WifiDirectService.class);
         sendMsgIntent.setAction(WifiDirectService.SEND_MESSAGE_ACTION);
