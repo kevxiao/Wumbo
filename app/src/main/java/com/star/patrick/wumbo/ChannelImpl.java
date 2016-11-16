@@ -21,68 +21,42 @@ public class ChannelImpl extends Observable implements Channel {
 
     private String name;
     private Sender me;
-    private UUID channelId;
+    private UUID id;
     private MessageList msgs;
     private NetworkManager networkMgr;
     private MainActivity mainContext;
-    private final BroadcastReceiver receiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d("SE464", "Channel received a message");
-            String action = intent.getAction();
-            if (WUMBO_MESSAGE_INTENT_ACTION.equals(action)) {
-                Message msg = (Message) intent.getSerializableExtra(WUMBO_MESSAGE_EXTRA);
-                send(msg);
-            }
-        }
-    };
     private Set<UUID> receivedMessageIds = new HashSet<>();
 
     public ChannelImpl(String name, NetworkManager networkMgr, MainActivity context, Sender me) {
         this.name = name;
         this.msgs = new MessageListImpl();
         this.networkMgr = networkMgr;
-        this.channelId = UUID.randomUUID();
+        this.id = UUID.randomUUID();
         this.mainContext = context;
         this.me = me;
-
-        final IntentFilter filter = new IntentFilter();
-        filter.addAction(WUMBO_MESSAGE_INTENT_ACTION);
-
-        mainContext.setOnStartCallback(new Runnable() {
-            @Override
-            public void run() {
-                mainContext.registerReceiver(receiver, filter);
-            }
-        });
-        mainContext.setOnStopCallback(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    mainContext.unregisterReceiver(receiver);
-                } catch (IllegalArgumentException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
     }
 
     public void send(String msgText) {
-        Message msg = new Message(msgText, me, new Timestamp(Calendar.getInstance().getTimeInMillis()), channelId);
+        Message msg = new Message(msgText, me, new Timestamp(Calendar.getInstance().getTimeInMillis()), id);
         send(msg);
     }
 
     public void send(Message msg) {
+        receivedMessageIds.add(msg.getId());
+        msg.setReceiveTime(new Timestamp(new Date().getTime()));
+        msgs.addMessage(msg);
+        setChanged();
+        notifyObservers();
+        Intent sendMsgIntent = new Intent(mainContext, WifiDirectService.class);
+        sendMsgIntent.setAction(WifiDirectService.SEND_MESSAGE_ACTION);
+        sendMsgIntent.putExtra(WifiDirectService.EXTRA_MESSAGE, msg);
+        mainContext.startService(sendMsgIntent);
+    }
+
+    public void receive(Message msg) {
         if (!receivedMessageIds.contains(msg.getId())) {
-            receivedMessageIds.add(msg.getId());
-            msg.setReceiveTime(new Timestamp(new Date().getTime()));
-            msgs.addMessage(msg);
-            setChanged();
-            notifyObservers();
-            Intent sendMsgIntent = new Intent(mainContext, WifiDirectService.class);
-            sendMsgIntent.setAction(WifiDirectService.SEND_MESSAGE_ACTION);
-            sendMsgIntent.putExtra(WifiDirectService.EXTRA_MESSAGE, msg);
-            mainContext.startService(sendMsgIntent);
+            send(msg);
+            //add notif
         }
     }
 
@@ -96,6 +70,8 @@ public class ChannelImpl extends Observable implements Channel {
         return msgs.getAllMessagesSince(ts);
     }
 
-    public static final String WUMBO_MESSAGE_INTENT_ACTION = "com.star.patrick.wumbo.MESSAGE";
-    public static final String WUMBO_MESSAGE_EXTRA = "message";
+    @Override
+    public UUID getId() {
+        return id;
+    }
 }
