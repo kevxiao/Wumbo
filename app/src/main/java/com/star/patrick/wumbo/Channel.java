@@ -1,5 +1,6 @@
 package com.star.patrick.wumbo;
 
+import android.content.Context;
 import android.net.Uri;
 
 import com.star.patrick.wumbo.message.Message;
@@ -11,7 +12,7 @@ import java.util.UUID;
 
 public interface Channel {
     void send(String msgText);
-    void send(Uri imagePath);
+    void send(Uri imagePath, Context context);
     void addObserver(Observer obs);
     List<Message> getAllMessages();
     List<Message> getAllMessagesSince(Timestamp ts);

@@ -1,5 +1,6 @@
 package com.star.patrick.wumbo;
 
+import android.content.Context;
 import android.net.Uri;
 
 import com.star.patrick.wumbo.message.Message;
@@ -36,7 +37,7 @@ public class ChannelImpl extends Observable implements Channel {
         send(msg);
     }
 
-    public void send(Uri imagePath){}
+    public void send(Uri imagePath, Context context){}
 
     public void send(Message msg) {
         add(msg);
