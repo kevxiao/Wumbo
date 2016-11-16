@@ -26,9 +26,9 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements Observer {
 
-    private Channel mMsgChannel;
-    private ChannelList mMsgChannelList;
-    private NetworkManager mNetworkMgr;
+    private Channel msgChannel;
+    private ChannelList msgChannelList;
+    private NetworkManager networkManager;
     public static final String TAG = "SE464";
     private ChatAdapter chatAdapter;
     private ListView listView;
@@ -52,10 +52,10 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         me = new Sender(extras != null && extras.getString("name") != null && !extras.getString("name").isEmpty() ? extras.getString("name") : "Anonymous");
 
-        mNetworkMgr = new NetworkManagerImpl();
-        mMsgChannel = new ChannelImpl(getResources().getString(R.string.public_name), mNetworkMgr, this, me);
-        mMsgChannelList = new ChannelListImpl();
-        mMsgChannelList.put(UUID.fromString(getResources().getString(R.string.public_uuid)), mMsgChannel);
+        networkManager = new NetworkManagerImpl();
+        msgChannel = new ChannelImpl(getResources().getString(R.string.public_name), networkManager, this, me);
+        msgChannelList = new ChannelListImpl();
+        msgChannelList.put(UUID.fromString(getResources().getString(R.string.public_uuid)), msgChannel);
 
         sendBtn = (ImageButton) findViewById(R.id.sendBtn);
         cameraBtn = (ImageButton) findViewById(R.id.cameraIcon);
@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
             @Override
             public void onClick(View v) {
                 if(!editMsg.getText().toString().isEmpty()) {
-                    mMsgChannel.send(editMsg.getText().toString());
+                    msgChannel.send(editMsg.getText().toString());
                     editMsg.setText("");
                 }
             }
@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
             onStartCallback.run();
         }
 
-        mMsgChannel.addObserver(this);
+        msgChannel.addObserver(this);
 
         List<Message> messages = new ArrayList<>();//MessageListImpl.getMockMessageList();
 
@@ -140,9 +140,9 @@ public class MainActivity extends AppCompatActivity implements Observer {
         List<Message> newMessages;
 
         if (null == lastMessage) {
-            newMessages = mMsgChannel.getAllMessages();
+            newMessages = msgChannel.getAllMessages();
         } else {
-            newMessages = mMsgChannel.getAllMessagesSince(lastMessage.getReceiveTime());
+            newMessages = msgChannel.getAllMessagesSince(lastMessage.getReceiveTime());
 
             for ( int i = 0; i < newMessages.size(); i++ ) {
                 if (newMessages.get(i).getReceiveTime() != lastMessage.getReceiveTime()) {
