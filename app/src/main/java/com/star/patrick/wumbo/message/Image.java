@@ -1,9 +1,13 @@
 package com.star.patrick.wumbo.message;
 
 import android.content.Context;
+import android.content.ContextWrapper;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import com.star.patrick.wumbo.MainActivity;
 
@@ -25,12 +29,19 @@ public class Image implements MessageContent, Serializable {
     private String filepath;
     private UUID id;
 
-    Image(Uri file, UUID id){
+    Image(Uri uri, Context c, UUID id){
         this.id = id;
-        filepath = id.toString() + ".png";
+        filepath = id.toString() + ".jpg";
+
+        ContextWrapper cw = new ContextWrapper(c);
+        // path to /data/data/yourapp/app_data/imageDir
+        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
+        // Create imageDir
+        File mypath=new File(directory,filepath);
+        filepath = mypath.getAbsolutePath();
 
         try {
-            copyFile(new File(file.getPath()), new File(filepath));
+            copyFile(new File(getAbsolutePath(uri, c)), mypath);
         } catch (Exception e){
             e.printStackTrace();
         }
@@ -40,6 +51,8 @@ public class Image implements MessageContent, Serializable {
         if (!sourceFile.exists()) {
             return;
         }
+
+        Log.d("SE464","Copying image from "+sourceFile.getAbsolutePath()+" to "+destFile.getAbsolutePath());
 
         FileChannel source = null;
         FileChannel destination = null;
@@ -54,12 +67,11 @@ public class Image implements MessageContent, Serializable {
         if (destination != null) {
             destination.close();
         }
-
     }
 
     public void createImageFromFilepath(Context c){
         try{
-            content = MediaStore.Images.Media.getBitmap(c.getContentResolver(), Uri.parse(filepath));
+            content = MediaStore.Images.Media.getBitmap(c.getContentResolver(), Uri.fromFile(new File(filepath)));
         } catch (Exception e){
             e.printStackTrace();
         }
@@ -93,5 +105,37 @@ public class Image implements MessageContent, Serializable {
     @Override
     public Object getMessageContent() {
         return content;
+    }
+
+    public String getAbsolutePath(Uri uri, Context c) {
+        if (Build.VERSION.SDK_INT >= 19) {
+            String id = "";
+            if (uri.getLastPathSegment().split(":").length > 1)
+                id = uri.getLastPathSegment().split(":")[1];
+            else if (uri.getLastPathSegment().split(":").length > 0)
+                id = uri.getLastPathSegment().split(":")[0];
+            if (id.length() > 0) {
+                final String[] imageColumns = {MediaStore.Images.Media.DATA, MediaStore.Images.Media.ORIENTATION};
+                Uri tempUri = uri;
+                Cursor imageCursor = c.getContentResolver().query(tempUri, imageColumns, MediaStore.Images.Media._ID + "=" + id, null, null);
+                if (imageCursor.moveToFirst()) {
+                    return imageCursor.getString(imageCursor.getColumnIndex(MediaStore.Images.Media.DATA));
+                } else {
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        } else {
+            String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.ORIENTATION};
+            Cursor cursor = c.getContentResolver().query(uri, projection, null, null, null);
+            if (cursor != null) {
+                int column_index = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+                cursor.moveToFirst();
+                return cursor.getString(column_index);
+            } else
+                return null;
+        }
+
     }
 }
