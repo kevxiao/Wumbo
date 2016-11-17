@@ -29,12 +29,12 @@ public class Message implements Serializable {
         this.id = UUID.randomUUID();
     }
 
-    public Message(Uri path, Context context, Sender sender, Timestamp sendTime, UUID channelId) {
+    public Message(Uri path, Sender sender, Timestamp sendTime, UUID channelId) {
         this.sender = sender;
         this.sendTime = sendTime;
         this.channelId = channelId;
         this.id = UUID.randomUUID();
-        this.content = new Image(path, context, id);
+        this.content = new Image(path, id);
     }
 
     public UUID getId() {

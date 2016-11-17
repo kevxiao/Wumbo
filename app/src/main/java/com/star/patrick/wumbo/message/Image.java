@@ -23,12 +23,10 @@ public class Image implements MessageContent, Serializable {
     private MessageType type = MessageType.IMAGE;
     private Bitmap content;
     private String filepath;
-    private Context c;
     private UUID id;
 
-    Image(Uri file, Context context, UUID id){
+    Image(Uri file, UUID id){
         this.id = id;
-        c = context;
         filepath = id.toString() + ".png";
 
         try {
@@ -59,7 +57,7 @@ public class Image implements MessageContent, Serializable {
 
     }
 
-    public void createImageFromFilepath(){
+    public void createImageFromFilepath(Context c){
         try{
             content = MediaStore.Images.Media.getBitmap(c.getContentResolver(), Uri.parse(filepath));
         } catch (Exception e){

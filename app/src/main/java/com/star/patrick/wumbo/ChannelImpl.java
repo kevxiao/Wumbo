@@ -51,7 +51,7 @@ public class ChannelImpl extends Observable implements Channel {
 
     public void send(Uri imagePath, Context context) {
         Log.d("SE464", "Channel send image");
-        Message msg = new Message(imagePath, context, me, new Timestamp(Calendar.getInstance().getTimeInMillis()), id);
+        Message msg = new Message(imagePath, me, new Timestamp(Calendar.getInstance().getTimeInMillis()), id);
         send(msg);
     }
 

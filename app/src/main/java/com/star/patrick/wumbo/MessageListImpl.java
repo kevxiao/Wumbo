@@ -25,7 +25,7 @@ public class MessageListImpl implements MessageList {
                 return msg1.getReceiveTime().compareTo(msg2.getReceiveTime());
             }
         };
-        Message key = new Message(null, null, null, null);
+        Message key = new Message("", null, null, null);
         key.setReceiveTime(ts);
         int index = Collections.binarySearch(messages, key, receiveTimeComparator);
 

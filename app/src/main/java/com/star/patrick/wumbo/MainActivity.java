@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
 //
 //                break;
             case 1:
-                if(resultCode == RESULT_OK && imageReturnedIntent != null){
+                if(imageReturnedIntent != null){
                     Uri selectedImage = imageReturnedIntent.getData();
                     Log.d("SE464", "Selected image: "+selectedImage.getPath());
                     msgChannel.send(selectedImage, this);
