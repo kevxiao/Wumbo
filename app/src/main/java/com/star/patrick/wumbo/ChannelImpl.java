@@ -69,7 +69,7 @@ public class ChannelImpl extends Observable implements Channel {
 
     private void add(Message msg) {
         msg.setReceiveTime(new Timestamp(new Date().getTime()));
-        msg.handleContentOnReceive();
+        msg.handleContentOnReceive(mainContext);
         msgs.addMessage(msg);
         setChanged();
         notifyObservers();

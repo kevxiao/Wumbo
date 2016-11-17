@@ -31,17 +31,11 @@ public class Image implements MessageContent, Serializable {
 
     Image(Uri uri, Context c, UUID id){
         this.id = id;
-        filepath = id.toString() + ".jpg";
 
-        ContextWrapper cw = new ContextWrapper(c);
-        // path to /data/data/yourapp/app_data/imageDir
-        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
-        // Create imageDir
-        File mypath=new File(directory,filepath);
-        filepath = mypath.getAbsolutePath();
+        setFilepath(c);
 
         try {
-            copyFile(new File(getAbsolutePath(uri, c)), mypath);
+            copyFile(new File(getAbsolutePath(uri, c)), new File(filepath));
         } catch (Exception e){
             e.printStackTrace();
         }
@@ -81,8 +75,9 @@ public class Image implements MessageContent, Serializable {
         content = null;
     }
 
-    public void saveBitmap() {
+    public void saveBitmap(Context c) {
         if (content != null) {
+            setFilepath(c);
             FileOutputStream out = null;
             try{
                 out = new FileOutputStream(filepath);
@@ -107,7 +102,7 @@ public class Image implements MessageContent, Serializable {
         return content;
     }
 
-    public String getAbsolutePath(Uri uri, Context c) {
+    private String getAbsolutePath(Uri uri, Context c) {
         if (Build.VERSION.SDK_INT >= 19) {
             String id = "";
             if (uri.getLastPathSegment().split(":").length > 1)
@@ -137,5 +132,15 @@ public class Image implements MessageContent, Serializable {
                 return null;
         }
 
+    }
+    private void setFilepath(Context c){
+        filepath = id.toString() + ".jpg";
+
+        ContextWrapper cw = new ContextWrapper(c);
+        // path to /data/data/yourapp/app_data/imageDir
+        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
+        // Create imageDir
+        File mypath=new File(directory,filepath);
+        filepath = mypath.getAbsolutePath();
     }
 }

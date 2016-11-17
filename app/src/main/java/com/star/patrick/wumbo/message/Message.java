@@ -45,11 +45,11 @@ public class Message implements Serializable {
         return content;
     }
 
-    public void handleContentOnReceive(){
+    public void handleContentOnReceive(Context c){
         switch(this.content.getType()){
             case IMAGE:
                 Image temp = (Image)(this.content);
-                temp.saveBitmap();
+                temp.saveBitmap(c);
                 temp.deleteBitmap();
         }
 
