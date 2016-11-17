@@ -1,7 +1,12 @@
 package com.star.patrick.wumbo;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.star.patrick.wumbo.message.Message;
@@ -63,8 +68,25 @@ public class ChannelImpl extends Observable implements Channel {
 
     public void receive(Message msg) {
         Log.d("SE464", "Channel receive");
+
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(mainContext)
+                        .setSmallIcon(R.drawable.ic_wumbo)
+                        .setContentTitle(this.name)
+                        .setContentText(msg.getText());
+        Intent resultIntent = new Intent(mainContext, MainActivity.class);
+        resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(mainContext);
+        stackBuilder.addParentStack(MainActivity.class);
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent = PendingIntent.getActivity(mainContext.getApplicationContext(), (int)System.currentTimeMillis(), resultIntent, 0);
+        mBuilder.setAutoCancel(true);
+        mBuilder.setContentIntent(resultPendingIntent);
+        NotificationManager mNotificationManager =
+                (NotificationManager) mainContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.notify(0, mBuilder.build());
+
         add(msg);
-        //add notif
     }
 
     private void add(Message msg) {
