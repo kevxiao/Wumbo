@@ -89,20 +89,16 @@ public class ChatAdapter extends BaseAdapter {
 
         switch(msg.getContent().getType()){
             case TEXT:
+                holder.txtMessage.setVisibility(View.VISIBLE);
                 holder.txtMessage.setText((String)msg.getContent().getMessageContent());
-                if (holder.imgMessage != null) {
-                    ((ViewManager) holder.txtMessage.getParent()).removeView(holder.imgMessage);
-                }
+                holder.imgMessage.setImageResource(0);
                 break;
             case IMAGE:
                 ((Image)msg.getContent()).createImageFromFilepath(context);
                 holder.imgMessage.setImageBitmap((Bitmap)msg.getContent().getMessageContent());
-                if (holder.txtMessage !=null) {
-                    ((ViewManager) holder.imgMessage.getParent()).removeView(holder.txtMessage);
-                }
+                holder.txtMessage.setVisibility(View.GONE);
                 break;
         }
-
 
         return convertView;
     }
@@ -133,5 +129,6 @@ public class ChatAdapter extends BaseAdapter {
         private TextView sender;
         private LinearLayout content;
         private LinearLayout contentWithBg;
+        private UUID id;
     }
 }
