@@ -1,10 +1,12 @@
 package com.star.patrick.wumbo.message;
 
+import java.io.Serializable;
+
 /**
  * Created by jesse on 16/11/16.
  */
 
-public class Text implements MessageContent {
+public class Text implements MessageContent, Serializable{
     private MessageType type = MessageType.TEXT;
     String content;
 

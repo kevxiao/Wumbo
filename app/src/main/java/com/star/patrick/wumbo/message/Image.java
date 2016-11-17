@@ -5,10 +5,13 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
 
+import com.star.patrick.wumbo.MainActivity;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.channels.FileChannel;
 import java.util.UUID;
 
@@ -16,7 +19,7 @@ import java.util.UUID;
  * Created by jesse on 16/11/16.
  */
 
-public class Image implements MessageContent {
+public class Image implements MessageContent, Serializable {
     private MessageType type = MessageType.IMAGE;
     private Bitmap content;
     private String filepath;

@@ -41,8 +41,8 @@ public class Message implements Serializable {
         return id;
     }
 
-    public Object getContent() {
-        return content.getMessageContent();
+    public MessageContent getContent() {
+        return content;
     }
 
     public void handleContentOnReceive(){
