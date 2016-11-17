@@ -2,15 +2,19 @@ package com.star.patrick.wumbo;
 
 import android.app.Activity;
 import android.content.Context;
+import android.net.Uri;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewManager;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.star.patrick.wumbo.message.Image;
 import com.star.patrick.wumbo.message.Message;
 import com.star.patrick.wumbo.message.MessageContent;
 
@@ -85,9 +89,13 @@ public class ChatAdapter extends BaseAdapter {
         switch(msg.getContent().getType()){
             case TEXT:
                 holder.txtMessage.setText((String)msg.getContent().getMessageContent());
+                ((ViewManager)holder.txtMessage.getParent()).removeView(holder.imgMessage);
                 break;
             case IMAGE:
-                
+                ((Image)msg.getContent()).createImageFromFilepath(context);
+                holder.imgMessage.setImageURI(Uri.parse((String)msg.getContent().getMessageContent()));
+                ((ViewManager)holder.imgMessage.getParent()).removeView(holder.txtMessage);
+                break;
         }
 
 
@@ -98,6 +106,7 @@ public class ChatAdapter extends BaseAdapter {
         ViewHolder holder = new ViewHolder();
         holder.txtMessage = (TextView) v.findViewById(R.id.txtMessage);
         holder.content = (LinearLayout) v.findViewById(R.id.content);
+        holder.imgMessage = (ImageView) v.findViewById(R.id.imgMessage);
         holder.contentWithBg = (LinearLayout) v.findViewById(R.id.contentWithBackground);
         holder.txtInfo = (TextView) v.findViewById(R.id.txtInfo);
         holder.sender = (TextView) v.findViewById(R.id.sender);
@@ -114,6 +123,7 @@ public class ChatAdapter extends BaseAdapter {
 
     private static class ViewHolder {
         private TextView txtMessage;
+        private ImageView imgMessage;
         private TextView txtInfo;
         private TextView sender;
         private LinearLayout content;
