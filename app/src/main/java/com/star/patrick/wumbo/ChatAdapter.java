@@ -12,6 +12,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.star.patrick.wumbo.message.Message;
+import com.star.patrick.wumbo.message.MessageContent;
 
 import java.util.List;
 import java.util.UUID;
@@ -78,9 +79,17 @@ public class ChatAdapter extends BaseAdapter {
         holder.sender.setLayoutParams(sparams);
         holder.txtInfo.setLayoutParams(tparams);
         holder.contentWithBg.setLayoutParams(cparams);
-        holder.txtMessage.setText(msg.getText());
         holder.sender.setText(msg.getSender().getDisplayName());
         holder.txtInfo.setText(msg.getReceiveTime().toString());
+
+        switch(msg.getContent().getType()){
+            case TEXT:
+                holder.txtMessage.setText((String)msg.getContent().getMessageContent());
+                break;
+            case IMAGE:
+                
+        }
+
 
         return convertView;
     }
