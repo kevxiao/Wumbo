@@ -90,12 +90,16 @@ public class ChatAdapter extends BaseAdapter {
         switch(msg.getContent().getType()){
             case TEXT:
                 holder.txtMessage.setText((String)msg.getContent().getMessageContent());
-                ((ViewManager)holder.txtMessage.getParent()).removeView(holder.imgMessage);
+                if (holder.imgMessage != null) {
+                    ((ViewManager) holder.txtMessage.getParent()).removeView(holder.imgMessage);
+                }
                 break;
             case IMAGE:
                 ((Image)msg.getContent()).createImageFromFilepath(context);
                 holder.imgMessage.setImageBitmap((Bitmap)msg.getContent().getMessageContent());
-                ((ViewManager)holder.imgMessage.getParent()).removeView(holder.txtMessage);
+                if (holder.txtMessage !=null) {
+                    ((ViewManager) holder.imgMessage.getParent()).removeView(holder.txtMessage);
+                }
                 break;
         }
 
