@@ -65,6 +65,8 @@ public class Image implements MessageContent, Serializable {
 
     public void createImageFromFilepath(Context c){
         try{
+            Log.d("SE464","Create bitmap from " + filepath);
+            new Exception().printStackTrace();
             content = MediaStore.Images.Media.getBitmap(c.getContentResolver(), Uri.fromFile(new File(filepath)));
         } catch (Exception e){
             e.printStackTrace();
@@ -76,12 +78,15 @@ public class Image implements MessageContent, Serializable {
     }
 
     public void saveBitmap(Context c) {
+        Log.d("SE464", "Save Bitmap if not null");
         if (content != null) {
             setFilepath(c);
+            Log.d("SE464", "Saving bitmap to " + filepath);
+            new Exception().printStackTrace();
             FileOutputStream out = null;
             try{
                 out = new FileOutputStream(filepath);
-                content.compress(Bitmap.CompressFormat.PNG, 100, out);
+                content.compress(Bitmap.CompressFormat.JPEG, 100, out);
             } catch (Exception e){
                 e.printStackTrace();
             }
@@ -103,35 +108,16 @@ public class Image implements MessageContent, Serializable {
     }
 
     private String getAbsolutePath(Uri uri, Context c) {
-        if (Build.VERSION.SDK_INT >= 19) {
-            String id = "";
-            if (uri.getLastPathSegment().split(":").length > 1)
-                id = uri.getLastPathSegment().split(":")[1];
-            else if (uri.getLastPathSegment().split(":").length > 0)
-                id = uri.getLastPathSegment().split(":")[0];
-            if (id.length() > 0) {
-                final String[] imageColumns = {MediaStore.Images.Media.DATA, MediaStore.Images.Media.ORIENTATION};
-                Uri tempUri = uri;
-                Cursor imageCursor = c.getContentResolver().query(tempUri, imageColumns, MediaStore.Images.Media._ID + "=" + id, null, null);
-                if (imageCursor.moveToFirst()) {
-                    return imageCursor.getString(imageCursor.getColumnIndex(MediaStore.Images.Media.DATA));
-                } else {
-                    return null;
-                }
-            } else {
-                return null;
-            }
-        } else {
-            String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.ORIENTATION};
-            Cursor cursor = c.getContentResolver().query(uri, projection, null, null, null);
-            if (cursor != null) {
-                int column_index = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
-                cursor.moveToFirst();
-                return cursor.getString(column_index);
-            } else
-                return null;
+        String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.ORIENTATION};
+        Cursor cursor = c.getContentResolver().query(uri, projection, null, null, null);
+        String path = uri.getPath();
+        if (cursor != null) {
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+            cursor.moveToFirst();
+            path = cursor.getString(column_index);
+            cursor.close();
         }
-
+        return path;
     }
     private void setFilepath(Context c){
         filepath = id.toString() + ".jpg";
@@ -140,7 +126,7 @@ public class Image implements MessageContent, Serializable {
         // path to /data/data/yourapp/app_data/imageDir
         File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
         // Create imageDir
-        File mypath=new File(directory,filepath);
+        File mypath = new File(directory, filepath);
         filepath = mypath.getAbsolutePath();
     }
 }
