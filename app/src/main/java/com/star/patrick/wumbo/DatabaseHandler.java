@@ -108,7 +108,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     // Adding new contact
     public void addMessage(Message msg) {
-        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.getWritableDatabase();
 
         addSender(msg.getSender());
 
