@@ -4,11 +4,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.provider.Contacts;
 
 import com.star.patrick.wumbo.message.Message;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -124,4 +126,31 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return getAllMessagesSince(new Timestamp(0));
     }
 
+    public Sender getSender(UUID id) {
+        return null;
+    }
+
+    public void addSender(Sender user) {
+
+    }
+
+    public void updateSenderDisplayName(UUID id, String displayName) {
+
+    }
+
+    public Channel getChannel(UUID id) {
+        return null;
+    }
+
+    public void addChannel(Channel channel) {
+
+    }
+
+    public void removeChannel(UUID id) {
+
+    }
+
+    public Map<UUID, Channel> getChannesl() {
+        return null;
+    }
 }
