@@ -86,12 +86,12 @@ public class ChannelImpl extends Observable implements Channel {
                 (NotificationManager) mainContext.getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.notify(0, mBuilder.build());
 
+        msg.handleContentOnReceive(mainContext);
         add(msg);
     }
 
     private void add(Message msg) {
         msg.setReceiveTime(new Timestamp(new Date().getTime()));
-        msg.handleContentOnReceive(mainContext);
         msgs.addMessage(msg);
         setChanged();
         notifyObservers();
