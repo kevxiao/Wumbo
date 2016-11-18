@@ -9,6 +9,7 @@ import android.provider.Contacts;
 import com.star.patrick.wumbo.message.Message;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -37,6 +38,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String MESSAGE_TYPE = "type";
     private static final String MESSAGE_CUUID = "cuuid";
     private static final String MESSAGE_SUUID = "suuid";
+    private static final String MESSAGE_RTIME = "rtime";
+    private static final String MESSAGE_STIME = "stime";
 
     // Channel Table Column names
     private static final String CHANNEL_UUID = "uuid";
@@ -53,13 +56,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // Creating Tables
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String CREATE_CONTACTS_TABLE = "CREATE TABLE " + TABLE_MESSAGE + "("
+        db.execSQL("PRAGMA foreign_keys = ON;");
+
+        String CREATE_MESSAGES_TABLE = "CREATE TABLE " + TABLE_MESSAGE + "("
                 + MESSAGE_UUID + " TEXT PRIMARY KEY,"
                 + MESSAGE_TYPE + " INTEGER,"
+                + MESSAGE_RTIME + " INTEGER,"
+                + MESSAGE_STIME + " INTEGER,"
                 + MESSAGE_CUUID + " TEXT,"
                 + MESSAGE_SUUID + "TEXT,"
-                + MESSAGE_CONTENT + " TEXT" + ")";
-        db.execSQL(CREATE_CONTACTS_TABLE);
+                + MESSAGE_CONTENT + " TEXT,"
+                + "FOREIGN KEY(cuuid) REFERENCES channels(id),"
+                + "FOREIGN KEY(suuid) REFERENCES senders(id)" + ")";
+        db.execSQL(CREATE_MESSAGES_TABLE);
 
         String CREATE_CHANNEL_TABLE =
                 "CREATE TABLE " + CHANNEL_TABLE + " ( " +
@@ -102,14 +111,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             return null;
 
         Message msg = null;
-        Sender snd = null;
+        Sender snd = getSender(UUID.fromString(cursor.getString(cursor.getColumnIndex("suuid"))));
         switch (cursor.getInt(cursor.getColumnIndex("type"))){
             case 0:
                 msg = new Message(UUID.fromString(cursor.getString(cursor.getColumnIndex("uuid"))),
                         cursor.getString(cursor.getColumnIndex("content")),
                         snd,
-                        null,
-                        null);
+                        new Timestamp(cursor.getLong(cursor.getColumnIndex("stime"))),
+                        UUID.fromString(cursor.getString(cursor.getColumnIndex("cuuid"))));
                 break;
         }
 
@@ -119,7 +128,28 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     // Getting All Contacts
     public List<Message> getAllMessagesSince(Timestamp ts) {
-        return null;
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM messages WHERE rtime > ? ORDERBY rtime DESC;", new String[]{String.valueOf(ts.getTime())});
+
+        List<Message> msgs= new ArrayList<>();
+
+        while (cursor!=null && cursor.moveToNext()){
+            Message msg = null;
+            Sender snd = getSender(UUID.fromString(cursor.getString(cursor.getColumnIndex("suuid"))));
+            switch (cursor.getInt(cursor.getColumnIndex("type"))){
+                case 0:
+                    msg = new Message(UUID.fromString(cursor.getString(cursor.getColumnIndex("uuid"))),
+                            cursor.getString(cursor.getColumnIndex("content")),
+                            snd,
+                            new Timestamp(cursor.getLong(cursor.getColumnIndex("stime"))),
+                            UUID.fromString(cursor.getString(cursor.getColumnIndex("cuuid"))));
+                    msgs.add(msg);
+                    break;
+            }
+        }
+
+        return msgs;
     }
 
     public List<Message> getAllMessages() {
