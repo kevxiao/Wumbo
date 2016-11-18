@@ -1,4 +1,9 @@
-package com.star.patrick.wumbo;
+package com.star.patrick.wumbo.message;
+
+import android.content.Context;
+import android.net.Uri;
+
+import com.star.patrick.wumbo.Sender;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -10,26 +15,48 @@ import java.util.UUID;
 
 public class Message implements Serializable {
     private UUID id;
-    private String text;
+    private MessageContent content;
     private Sender sender;
     private Timestamp sendTime;
     private Timestamp receiveTime;
     private UUID channelId;
 
     public Message(String text, Sender sender, Timestamp sendTime, UUID channelId) {
-        this.text = text;
+        this.content = new Text(text);
         this.sender = sender;
         this.sendTime = sendTime;
         this.channelId = channelId;
         this.id = UUID.randomUUID();
     }
 
+    public Message(Uri path, Context context, Sender sender, Timestamp sendTime, UUID channelId) {
+        this.sender = sender;
+        this.sendTime = sendTime;
+        this.channelId = channelId;
+        this.id = UUID.randomUUID();
+        this.content = new Image(path, context, id);
+    }
+
     public UUID getId() {
         return id;
     }
 
+    public MessageContent getContent() {
+        return content;
+    }
+
+    public void handleContentOnReceive(Context c){
+        switch(this.content.getType()){
+            case IMAGE:
+                Image temp = (Image)(this.content);
+                temp.saveBitmap(c);
+                temp.deleteBitmap();
+        }
+
+    }
+
     public String getText() {
-        return text;
+        return "Use get content instead";
     }
 
     public Sender getSender() {

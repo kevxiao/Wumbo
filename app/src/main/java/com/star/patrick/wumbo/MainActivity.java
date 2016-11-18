@@ -1,11 +1,13 @@
 package com.star.patrick.wumbo;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +17,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
+import com.star.patrick.wumbo.message.Message;
 import com.star.patrick.wumbo.wifidirect.HandshakeDispatcherService;
 import com.star.patrick.wumbo.wifidirect.MessageDispatcherService;
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
@@ -202,8 +205,10 @@ public class MainActivity extends AppCompatActivity implements Observer {
 //
 //                break;
             case 1:
-                if(resultCode == RESULT_OK){
+                if(imageReturnedIntent != null){
                     Uri selectedImage = imageReturnedIntent.getData();
+                    Log.d("SE464", "Selected image: "+selectedImage.getPath());
+                    msgChannel.send(selectedImage, this);
                     //imageview.setImageURI(selectedImage);
                 }
                 break;

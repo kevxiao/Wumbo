@@ -3,6 +3,8 @@ package com.star.patrick.wumbo;
 import java.util.Map;
 import java.util.UUID;
 
+import com.star.patrick.wumbo.message.Message;
+
 public interface ChannelManager {
     void receive(Message msg);
     void send(Message msg);

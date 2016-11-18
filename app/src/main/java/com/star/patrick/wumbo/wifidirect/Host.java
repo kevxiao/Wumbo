@@ -3,7 +3,7 @@ package com.star.patrick.wumbo.wifidirect;
 
 import android.util.Log;
 
-import com.star.patrick.wumbo.Message;
+import com.star.patrick.wumbo.message.Message;
 
 import java.net.InetAddress;
 import java.util.HashSet;

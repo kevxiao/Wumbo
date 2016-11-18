@@ -1,7 +1,7 @@
 package com.star.patrick.wumbo.wifidirect;
 
 
-import com.star.patrick.wumbo.Message;
+import com.star.patrick.wumbo.message.Message;
 
 import java.net.InetAddress;
 

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
+import com.star.patrick.wumbo.message.Message;
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
 import java.util.HashSet;

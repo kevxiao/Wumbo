@@ -1,8 +1,9 @@
 package com.star.patrick.wumbo;
 
+import com.star.patrick.wumbo.message.Message;
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -24,7 +25,7 @@ public class MessageListImpl implements MessageList {
                 return msg1.getReceiveTime().compareTo(msg2.getReceiveTime());
             }
         };
-        Message key = new Message(null, null, null, null);
+        Message key = new Message("", null, null, null);
         key.setReceiveTime(ts);
         int index = Collections.binarySearch(messages, key, receiveTimeComparator);
 

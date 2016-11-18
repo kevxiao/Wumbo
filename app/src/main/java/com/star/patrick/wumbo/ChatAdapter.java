@@ -2,14 +2,22 @@ package com.star.patrick.wumbo;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewManager;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.star.patrick.wumbo.message.Image;
+import com.star.patrick.wumbo.message.Message;
+import com.star.patrick.wumbo.message.MessageContent;
 
 import java.util.List;
 import java.util.UUID;
@@ -76,9 +84,21 @@ public class ChatAdapter extends BaseAdapter {
         holder.sender.setLayoutParams(sparams);
         holder.txtInfo.setLayoutParams(tparams);
         holder.contentWithBg.setLayoutParams(cparams);
-        holder.txtMessage.setText(msg.getText());
         holder.sender.setText(msg.getSender().getDisplayName());
         holder.txtInfo.setText(msg.getReceiveTime().toString());
+
+        switch(msg.getContent().getType()){
+            case TEXT:
+                holder.txtMessage.setVisibility(View.VISIBLE);
+                holder.txtMessage.setText((String)msg.getContent().getMessageContent());
+                holder.imgMessage.setImageResource(0);
+                break;
+            case IMAGE:
+                ((Image)msg.getContent()).createImageFromFilepath(context);
+                holder.imgMessage.setImageBitmap((Bitmap)msg.getContent().getMessageContent());
+                holder.txtMessage.setVisibility(View.GONE);
+                break;
+        }
 
         return convertView;
     }
@@ -87,6 +107,7 @@ public class ChatAdapter extends BaseAdapter {
         ViewHolder holder = new ViewHolder();
         holder.txtMessage = (TextView) v.findViewById(R.id.txtMessage);
         holder.content = (LinearLayout) v.findViewById(R.id.content);
+        holder.imgMessage = (ImageView) v.findViewById(R.id.imgMessage);
         holder.contentWithBg = (LinearLayout) v.findViewById(R.id.contentWithBackground);
         holder.txtInfo = (TextView) v.findViewById(R.id.txtInfo);
         holder.sender = (TextView) v.findViewById(R.id.sender);
@@ -103,9 +124,11 @@ public class ChatAdapter extends BaseAdapter {
 
     private static class ViewHolder {
         private TextView txtMessage;
+        private ImageView imgMessage;
         private TextView txtInfo;
         private TextView sender;
         private LinearLayout content;
         private LinearLayout contentWithBg;
+        private UUID id;
     }
 }
