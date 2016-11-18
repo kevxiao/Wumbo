@@ -1,5 +1,6 @@
 package com.star.patrick.wumbo;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -106,7 +107,27 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     // Adding new contact
-    public void addMessage(Message msg) {}
+    public void addMessage(Message msg) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        addSender(msg.getSender());
+
+        ContentValues values = new ContentValues();
+        values.put(MESSAGE_UUID, msg.getId().toString());
+        values.put(MESSAGE_CUUID, msg.getChannelId().toString());
+        values.put(MESSAGE_SUUID, msg.getSender().getId().toString());
+        values.put(MESSAGE_STIME, msg.getSendTime().getTime());
+        values.put(MESSAGE_RTIME, msg.getReceiveTime().getTime());
+
+        values.put(MESSAGE_TYPE, msg.getContent().getType().ordinal());
+        switch (msg.getContent().getType()) {
+            case TEXT:
+                values.put(MESSAGE_CONTENT, (String)msg.getContent().getMessageContent());
+                break;
+        }
+
+        db.insert(TABLE_MESSAGE, null, values);
+    }
 
     // Getting single contact
     public Message getMessage(UUID id) {
