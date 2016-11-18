@@ -199,15 +199,30 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             return null;
         }
 
-        return new Sender(id, cursor.getString(cursor.getColumnIndex(USER_DISPLAY_NAME)));
+        Sender user = new Sender(id, cursor.getString(cursor.getColumnIndex(USER_DISPLAY_NAME)));
+        
+        cursor.close();
+
+        return user;
     }
 
     public void addSender(Sender user) {
+        SQLiteDatabase db = this.getWritableDatabase();
 
+        ContentValues values = new ContentValues();
+        values.put(USER_UUID, user.getId().toString());
+        values.put(USER_DISPLAY_NAME, user.getDisplayName());
+
+        db.insert(USER_TABLE, null, values);
     }
 
     public void updateSenderDisplayName(UUID id, String displayName) {
+        SQLiteDatabase db = this.getWritableDatabase();
 
+        ContentValues values = new ContentValues();
+        values.put(USER_DISPLAY_NAME, displayName);
+
+        db.update(CHANNEL_TABLE, values, USER_DISPLAY_NAME + " = ? ", new String[]{id.toString()});
     }
 
     public Channel getChannel(UUID id) {
@@ -224,7 +239,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             return null;
         }
 
-        return new ChannelImpl(
+        Channel channel = new ChannelImpl(
                 id,
                 cursor.getString(cursor.getColumnIndex(CHANNEL_NAME)),
                 new NetworkManagerImpl(),
@@ -232,21 +247,25 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 me,
                 channelManager
         );
+        cursor.close();
+
+        return channel;
     }
 
     public void addChannel(Channel channel) {
+        SQLiteDatabase db = this.getWritableDatabase();
 
+        ContentValues values = new ContentValues();
+        values.put(CHANNEL_UUID, channel.getId().toString());
+        values.put(CHANNEL_NAME, channel.getName());
+
+        db.insert(CHANNEL_TABLE, null, values);
     }
 
     public void removeChannel(UUID id) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        db.beginTransaction();
-        db.execSQL(
-                "DELETE FROM " + CHANNEL_TABLE + " WHERE " + CHANNEL_UUID + " = ? ",
-                new String[]{id.toString()}
-        );
-        db.endTransaction();
+        db.delete(CHANNEL_TABLE, CHANNEL_UUID + " = ? ", new String[]{id.toString()});
     }
 
     public Map<UUID, Channel> getChannels() {
@@ -277,6 +296,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             channels.put(channel.getId(), channel);
         } while ( !cursor.moveToNext() );
 
+        cursor.close();
         return channels;
     }
 }
