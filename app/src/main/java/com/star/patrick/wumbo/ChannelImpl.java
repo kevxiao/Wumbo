@@ -11,6 +11,7 @@ import android.util.Log;
 
 import com.star.patrick.wumbo.message.Image;
 import com.star.patrick.wumbo.message.Message;
+import com.star.patrick.wumbo.message.MessageContent;
 
 import java.sql.Timestamp;
 import java.util.Calendar;
@@ -75,7 +76,7 @@ public class ChannelImpl extends Observable implements Channel {
                 new NotificationCompat.Builder(mainContext)
                         .setSmallIcon(R.drawable.ic_wumbo)
                         .setContentTitle(this.name)
-                        .setContentText(msg.getText());
+                        .setContentText(msg.getContent().getType() == MessageContent.MessageType.TEXT ? (String) msg.getContent().getMessageContent() : "Open to see image.");
         Intent resultIntent = new Intent(mainContext, MainActivity.class);
         resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(mainContext);
