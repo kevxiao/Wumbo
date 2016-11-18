@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -49,14 +51,28 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private ListView channelListView;
 
     private Runnable onStartCallback;
+    private ActionBar supportActionBar;
+    private ActionBarDrawerToggle drawerToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setNavigationIcon(R.drawable.ic_menu_white_24dp);
+
+        setSupportActionBar(toolbar);
+        supportActionBar = getSupportActionBar();
+
+        drawerToggle = new ActionBarDrawerToggle(
+                this,
+                drawerLayout,
+                toolbar,
+                R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close
+        );
         Bundle extras = getIntent().getExtras();
 
         me = new Sender(extras != null && extras.getString("name") != null && !extras.getString("name").isEmpty() ? extras.getString("name") : "Anonymous");
@@ -123,7 +139,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
 //        messageIntent.putExtra(ChannelImpl.WUMBO_MESSAGE_EXTRA, msg);
 //        sendBroadcast(messageIntent);
 
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         channelListView = (ListView) findViewById(R.id.channel_list);
 
         channels = new ArrayList<>();
@@ -246,7 +261,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private class ChannelListItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            //msgChannel =
+            //supportActionBar.setTitle(?);
         }
     }
 }
