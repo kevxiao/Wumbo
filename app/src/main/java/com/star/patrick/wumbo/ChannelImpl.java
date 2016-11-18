@@ -89,4 +89,9 @@ public class ChannelImpl extends Observable implements Channel {
     public UUID getId() {
         return id;
     }
+
+    @Override
+    public String getName() {
+        return name;
+    }
 }

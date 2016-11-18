@@ -5,15 +5,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
+
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Observable;
 import java.util.Set;
 import java.util.UUID;
 
-public class ChannelManagerImpl implements ChannelManager {
+public class ChannelManagerImpl extends Observable implements ChannelManager {
     private MainActivity mainContext;
-    private ChannelList channels = new ChannelListImpl();
+    private Map<UUID,Channel> channels = new LinkedHashMap<>();
+    private Map<UUID,String> channelNames = new LinkedHashMap<>();
     private Set<UUID> receivedMessageIds = new HashSet<>();
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -77,11 +82,24 @@ public class ChannelManagerImpl implements ChannelManager {
     @Override
     public void addChannel(Channel channel) {
         channels.put(channel.getId(), channel);
+        channelNames.put(channel.getId(), channel.getName());
+        setChanged();
+        notifyObservers();
     }
 
     @Override
     public void removeChannel(Channel channel) {
         channels.remove(channel.getId());
+    }
+
+    @Override
+    public Map<UUID, String> getChannels() {
+        return channelNames;
+    }
+
+    @Override
+    public Channel getChannel(UUID channelId) {
+        return channels.get(channelId);
     }
 
     public static final String WUMBO_MESSAGE_INTENT_ACTION = "com.star.patrick.wumbo.MESSAGE";

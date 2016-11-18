@@ -1,15 +1,16 @@
 package com.star.patrick.wumbo;
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -20,6 +21,7 @@ import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.UUID;
@@ -35,10 +37,13 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private ListView listView;
     private Message lastMessage;
     private Sender me;
+    private List<ChannelListItem> channels;
 
     private ImageButton sendBtn;
     private ImageButton cameraBtn;
     private EditText editMsg;
+    private DrawerLayout drawerLayout;
+    private ListView channelListView;
 
     private Runnable onStartCallback;
 
@@ -114,6 +119,16 @@ public class MainActivity extends AppCompatActivity implements Observer {
 //        Intent messageIntent = new Intent(ChannelImpl.WUMBO_MESSAGE_INTENT_ACTION);
 //        messageIntent.putExtra(ChannelImpl.WUMBO_MESSAGE_EXTRA, msg);
 //        sendBroadcast(messageIntent);
+
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        channelListView = (ListView) findViewById(R.id.channel_list);
+
+        channels = new ArrayList<>();
+        for (Map.Entry<UUID,String> c : channelManager.getChannels().entrySet()) {
+            channels.add(new ChannelListItem(c.getValue(), c.getKey()));
+        }
+        channelListView.setAdapter(new ArrayAdapter<>(this, R.layout.channel_list_item, channels));
+        channelListView.setOnItemClickListener(new ChannelListItemClickListener());
     }
 
     @Override
@@ -201,6 +216,32 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         if (onStopCallback != null) {
             onStopCallback.run();
+        }
+    }
+
+    private static class ChannelListItem {
+        String name;
+        UUID id;
+
+        public ChannelListItem(String name, UUID id) {
+            this.name = name;
+            this.id = id;
+        }
+
+        public String toString() {
+            return name;
+        }
+
+        public UUID getId() {
+            return id;
+        }
+
+    }
+
+    private class ChannelListItemClickListener implements ListView.OnItemClickListener {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            //msgChannel =
         }
     }
 }
