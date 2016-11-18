@@ -9,6 +9,7 @@ import android.provider.Contacts;
 import com.star.patrick.wumbo.message.Message;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -110,7 +111,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             return null;
 
         Message msg = null;
-        Sender snd = null; //get sender
+        Sender snd = getSender(UUID.fromString(cursor.getString(cursor.getColumnIndex("suuid"))));
         switch (cursor.getInt(cursor.getColumnIndex("type"))){
             case 0:
                 msg = new Message(UUID.fromString(cursor.getString(cursor.getColumnIndex("uuid"))),
@@ -127,7 +128,28 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     // Getting All Contacts
     public List<Message> getAllMessagesSince(Timestamp ts) {
-        return null;
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM messages WHERE rtime > ? ORDERBY rtime DESC;", new String[]{String.valueOf(ts.getTime())});
+
+        List<Message> msgs= new ArrayList<>();
+
+        while (cursor!=null && cursor.moveToNext()){
+            Message msg = null;
+            Sender snd = getSender(UUID.fromString(cursor.getString(cursor.getColumnIndex("suuid"))));
+            switch (cursor.getInt(cursor.getColumnIndex("type"))){
+                case 0:
+                    msg = new Message(UUID.fromString(cursor.getString(cursor.getColumnIndex("uuid"))),
+                            cursor.getString(cursor.getColumnIndex("content")),
+                            snd,
+                            new Timestamp(cursor.getLong(cursor.getColumnIndex("stime"))),
+                            UUID.fromString(cursor.getString(cursor.getColumnIndex("cuuid"))));
+                    msgs.add(msg);
+                    break;
+            }
+        }
+
+        return msgs;
     }
 
     public List<Message> getAllMessages() {
