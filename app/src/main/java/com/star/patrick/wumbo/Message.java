@@ -11,14 +11,14 @@ import java.util.UUID;
 public class Message implements Serializable {
     private UUID id;
     private String text;
-    private Sender sender;
+    private User user;
     private Timestamp sendTime;
     private Timestamp receiveTime;
     private UUID channelId;
 
-    public Message(String text, Sender sender, Timestamp sendTime, UUID channelId) {
+    public Message(String text, User user, Timestamp sendTime, UUID channelId) {
         this.text = text;
-        this.sender = sender;
+        this.user = user;
         this.sendTime = sendTime;
         this.channelId = channelId;
         this.id = UUID.randomUUID();
@@ -32,8 +32,8 @@ public class Message implements Serializable {
         return text;
     }
 
-    public Sender getSender() {
-        return sender;
+    public User getUser() {
+        return user;
     }
 
     public Timestamp getSendTime() {

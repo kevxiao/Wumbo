@@ -9,7 +9,6 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 
 public class MessageSender extends AsyncTask<Void, Void, Throwable> {
     private InetAddress hostAddress;

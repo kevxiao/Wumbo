@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
+
+import com.star.patrick.wumbo.wifidirect.SalutManager;
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
 import java.util.HashSet;
@@ -12,6 +14,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class ChannelManagerImpl implements ChannelManager {
+    private final SalutManager salut;
     private MainActivity mainContext;
     private ChannelList channels = new ChannelListImpl();
     private Set<UUID> receivedMessageIds = new HashSet<>();
@@ -28,28 +31,33 @@ public class ChannelManagerImpl implements ChannelManager {
         }
     };
 
-    public ChannelManagerImpl(MainActivity context) {
+//    public ChannelManagerImpl(MainActivity context) {
+//        this.mainContext = context;
+//
+//        final IntentFilter filter = new IntentFilter();
+//        filter.addAction(WUMBO_MESSAGE_INTENT_ACTION);
+//
+//        mainContext.setOnStartCallback(new Runnable() {
+//            @Override
+//            public void run() {
+//                mainContext.registerReceiver(receiver, filter);
+//            }
+//        });
+//        mainContext.setOnStopCallback(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    mainContext.unregisterReceiver(receiver);
+//                } catch (IllegalArgumentException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
+//    }
+
+    public ChannelManagerImpl(MainActivity context, SalutManager salut) {
         this.mainContext = context;
-
-        final IntentFilter filter = new IntentFilter();
-        filter.addAction(WUMBO_MESSAGE_INTENT_ACTION);
-
-        mainContext.setOnStartCallback(new Runnable() {
-            @Override
-            public void run() {
-                mainContext.registerReceiver(receiver, filter);
-            }
-        });
-        mainContext.setOnStopCallback(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    mainContext.unregisterReceiver(receiver);
-                } catch (IllegalArgumentException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        this.salut = salut;
     }
 
     @Override
@@ -68,10 +76,12 @@ public class ChannelManagerImpl implements ChannelManager {
     public void send(Message msg) {
         Log.d("SE464", "ChannelManager send");
         receivedMessageIds.add(msg.getId());
-        Intent sendMsgIntent = new Intent(mainContext, WifiDirectService.class);
-        sendMsgIntent.setAction(WifiDirectService.SEND_MESSAGE_ACTION);
-        sendMsgIntent.putExtra(WifiDirectService.EXTRA_MESSAGE, msg);
-        mainContext.startService(sendMsgIntent);
+//        Intent sendMsgIntent = new Intent(mainContext, WifiDirectService.class);
+//        sendMsgIntent.setAction(WifiDirectService.SEND_MESSAGE_ACTION);
+//        sendMsgIntent.putExtra(WifiDirectService.EXTRA_MESSAGE, msg);
+//        mainContext.startService(sendMsgIntent);
+        salut.send(msg);
+
     }
 
     @Override

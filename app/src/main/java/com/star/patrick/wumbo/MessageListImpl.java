@@ -2,7 +2,6 @@ package com.star.patrick.wumbo;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -49,7 +48,7 @@ public class MessageListImpl implements MessageList {
     public static List<Message> getMockMessageList() {
         List<Message> messages = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
-            Message msg = new Message("hey" + i, new Sender("davidsu1995"), new Timestamp(new Date().getTime()), null);
+            Message msg = new Message("hey" + i, new User("davidsu1995"), new Timestamp(new Date().getTime()), null);
             msg.setReceiveTime(msg.getSendTime());
             messages.add(msg);
         }

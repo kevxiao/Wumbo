@@ -4,7 +4,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.net.NetworkInfo;
-import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
@@ -13,10 +12,6 @@ import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.ActionListener;
-import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
-import android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener;
-import android.net.wifi.p2p.WifiP2pManager.DnsSdTxtRecordListener;
-import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -25,9 +20,7 @@ import com.star.patrick.wumbo.Message;
 
 import java.lang.reflect.Method;
 import java.net.InetAddress;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import static com.star.patrick.wumbo.MainActivity.TAG;
@@ -44,22 +37,11 @@ public class WifiDirectService extends Service {
     private Channel channel;
     private Device device;
 
-    private boolean inGroup = false;
-
-    Set<String> peers = new HashSet<>();
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d("SE464", "wifidirect service created");
-
-//        if (manager != null) {
-//            return;
-//        }
-
-//        WifiManager wifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
-//        wifiManager.setWifiEnabled(false);
-//        wifiManager.setWifiEnabled(true);
 
         manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
 
@@ -192,46 +174,4 @@ public class WifiDirectService extends Service {
         return START_NOT_STICKY;
     }
 
-    private void startRegistration() {
-        //  Create a string map containing information about your service.
-        Map<String, String> record = new HashMap<>();
-        record.put("listenport", String.valueOf(MessageDispatcherService.PORT));
-
-        // Service information.  Pass it an instance name, service type
-        // _protocol._transportlayer , and the map containing
-        // information other devices will want once they connect to this one.
-        WifiP2pDnsSdServiceInfo serviceInfo =
-                WifiP2pDnsSdServiceInfo.newInstance("_test", "_presence._tcp", record);
-
-        // Add the local service, sending the service info, network channel,
-        // and listener that will be used to indicate success or failure of
-        // the request.
-        manager.addLocalService(channel, serviceInfo, new ActionListener() {
-            @Override
-            public void onSuccess() {
-                Log.d(TAG, "Broadcasting local service succeeded");
-            }
-
-            @Override
-            public void onFailure(int errno) {
-                Log.d(TAG, "Broadcasting local service failed " + errno);
-            }
-        });
-    }
-
-    private void discoverService() {
-        DnsSdTxtRecordListener txtListener = new DnsSdTxtRecordListener() {
-            @Override
-            /* Callback includes:
-             * fullDomain: full domain name: e.g "printer._ipp._tcp.local."
-             * record: TXT record dta as a map of key/value pairs.
-             * device: The device running the advertised service.
-             */
-
-            public void onDnsSdTxtRecordAvailable(String fullDomain, Map record, WifiP2pDevice device) {
-                Log.d(TAG, "DnsSdTxtRecord available -" + record.toString());
-                peers.add(device.deviceAddress);
-            }
-        };
-    }
 }

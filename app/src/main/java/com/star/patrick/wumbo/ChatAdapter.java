@@ -61,7 +61,7 @@ public class ChatAdapter extends BaseAdapter {
         sparams = (LinearLayout.LayoutParams) holder.sender.getLayoutParams();
         tparams = (LinearLayout.LayoutParams) holder.txtInfo.getLayoutParams();
         cparams = (LinearLayout.LayoutParams) holder.contentWithBg.getLayoutParams();
-        if(msg.getSender().getId() == meId) {
+        if(msg.getUser().getId() == meId) {
             lparams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
             sparams.gravity = Gravity.END;
             tparams.gravity = Gravity.END;
@@ -77,7 +77,7 @@ public class ChatAdapter extends BaseAdapter {
         holder.txtInfo.setLayoutParams(tparams);
         holder.contentWithBg.setLayoutParams(cparams);
         holder.txtMessage.setText(msg.getText());
-        holder.sender.setText(msg.getSender().getDisplayName());
+        holder.sender.setText(msg.getUser().getDisplayName());
         holder.txtInfo.setText(msg.getReceiveTime().toString());
 
         return convertView;
@@ -89,7 +89,7 @@ public class ChatAdapter extends BaseAdapter {
         holder.content = (LinearLayout) v.findViewById(R.id.content);
         holder.contentWithBg = (LinearLayout) v.findViewById(R.id.contentWithBackground);
         holder.txtInfo = (TextView) v.findViewById(R.id.txtInfo);
-        holder.sender = (TextView) v.findViewById(R.id.sender);
+        holder.sender = (TextView) v.findViewById(R.id.user);
         return holder;
     }
 

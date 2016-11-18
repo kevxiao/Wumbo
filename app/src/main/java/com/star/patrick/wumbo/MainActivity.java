@@ -1,10 +1,8 @@
 package com.star.patrick.wumbo;
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -16,6 +14,8 @@ import android.widget.ListView;
 
 import com.star.patrick.wumbo.wifidirect.HandshakeDispatcherService;
 import com.star.patrick.wumbo.wifidirect.MessageDispatcherService;
+import com.star.patrick.wumbo.wifidirect.SalutManager;
+import com.star.patrick.wumbo.wifidirect.SalutManager2;
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
 import java.util.ArrayList;
@@ -29,18 +29,19 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private ChannelManager channelManager;
     private Channel msgChannel;
     private ChannelList msgChannelList;
-    private NetworkManager networkManager;
     public static final String TAG = "SE464";
     private ChatAdapter chatAdapter;
     private ListView listView;
     private Message lastMessage;
-    private Sender me;
+    private User me;
 
     private ImageButton sendBtn;
     private ImageButton cameraBtn;
     private EditText editMsg;
 
     private Runnable onStartCallback;
+    private SalutManager salut;
+    private SalutManager2 salut2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,14 +49,15 @@ public class MainActivity extends AppCompatActivity implements Observer {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        salut = new SalutManager(this);
+        salut2 = new SalutManager2(this);
 
         Bundle extras = getIntent().getExtras();
 
-        me = new Sender(extras != null && extras.getString("name") != null && !extras.getString("name").isEmpty() ? extras.getString("name") : "Anonymous");
+        me = new User(extras != null && extras.getString("name") != null && !extras.getString("name").isEmpty() ? extras.getString("name") : "Anonymous");
 
-        channelManager = new ChannelManagerImpl(this);
-        networkManager = new NetworkManagerImpl();
-        msgChannel = new ChannelImpl(UUID.fromString(getResources().getString(R.string.public_uuid)), getResources().getString(R.string.public_name), networkManager, this, me, channelManager);
+        channelManager = new ChannelManagerImpl(this, salut);
+        msgChannel = new ChannelImpl(UUID.fromString(getResources().getString(R.string.public_uuid)), getResources().getString(R.string.public_name), this, me, channelManager);
         channelManager.addChannel(msgChannel);
         msgChannelList = new ChannelListImpl();
         msgChannelList.put(UUID.fromString(getResources().getString(R.string.public_uuid)), msgChannel);
@@ -114,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
 //        Intent messageIntent = new Intent(ChannelImpl.WUMBO_MESSAGE_INTENT_ACTION);
 //        messageIntent.putExtra(ChannelImpl.WUMBO_MESSAGE_EXTRA, msg);
 //        sendBroadcast(messageIntent);
+
     }
 
     @Override
