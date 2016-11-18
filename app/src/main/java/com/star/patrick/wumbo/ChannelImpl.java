@@ -43,13 +43,8 @@ public class ChannelImpl extends Observable implements Channel {
     }
 
     public ChannelImpl(UUID id, String name, NetworkManager networkMgr, MainActivity context, Sender me, ChannelManager channelManager) {
-        this.name = name;
-        this.msgs = new MessageListImpl();
-        this.networkMgr = networkMgr;
+        this(name, networkMgr, context, me, channelManager);
         this.id = id;
-        this.mainContext = context;
-        this.me = me;
-        this.channelManager = channelManager;
     }
 
     public void send(String msgText) {

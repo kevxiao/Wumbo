@@ -4,11 +4,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.provider.Contacts;
 
 import com.star.patrick.wumbo.message.Message;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -24,8 +26,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // Database Name
     private static final String DATABASE_NAME = "Wumbo";
 
-    // Contacts table name
+    // table names
     private static final String TABLE_MESSAGE = "messages";
+    private static final String CHANNEL_TABLE = "channels";
+    private static final String USER_TABLE = "users";
 
     // Contacts Table Columns names
     private static final String MESSAGE_UUID = "uuid";
@@ -35,6 +39,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String MESSAGE_SUUID = "suuid";
     private static final String MESSAGE_RTIME = "rtime";
     private static final String MESSAGE_STIME = "stime";
+
+    // Channel Table Column names
+    private static final String CHANNEL_UUID = "uuid";
+    private static final String CHANNEL_NAME = "name";
+
+    // Sender Table Column names
+    private static final String USER_UUID = "uuid";
+    private static final String USER_DISPLAY_NAME = "display_name";
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -56,6 +68,22 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + "FOREIGN KEY(cuuid) REFERENCES channels(id),"
                 + "FOREIGN KEY(suuid) REFERENCES senders(id)" + ")";
         db.execSQL(CREATE_MESSAGES_TABLE);
+
+        String CREATE_CHANNEL_TABLE =
+                "CREATE TABLE " + CHANNEL_TABLE + " ( " +
+                    CHANNEL_UUID + " TEXT PRIMARY KEY " +
+                    ", " +
+                    CHANNEL_NAME + " TEXT " +
+                ") ";
+        db.execSQL(CREATE_CHANNEL_TABLE);
+
+        String CREATE_USER_TABLE =
+                "CREATE TABLE " + USER_TABLE + " ( " +
+                    USER_UUID + " TEXT PRIMARY KEY " +
+                    ", " +
+                    USER_DISPLAY_NAME + " TEXT " +
+                ") ";
+        db.execSQL(CREATE_USER_TABLE);
     }
 
     // Upgrading database
@@ -106,4 +134,31 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return getAllMessagesSince(new Timestamp(0));
     }
 
+    public Sender getSender(UUID id) {
+        return null;
+    }
+
+    public void addSender(Sender user) {
+
+    }
+
+    public void updateSenderDisplayName(UUID id, String displayName) {
+
+    }
+
+    public Channel getChannel(UUID id) {
+        return null;
+    }
+
+    public void addChannel(Channel channel) {
+
+    }
+
+    public void removeChannel(UUID id) {
+
+    }
+
+    public Map<UUID, Channel> getChannesl() {
+        return null;
+    }
 }
