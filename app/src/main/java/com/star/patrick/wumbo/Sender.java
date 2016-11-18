@@ -16,6 +16,11 @@ public class Sender implements Serializable {
         this.displayName = displayName;
     }
 
+    public Sender(UUID id, String displayName) {
+        this.id = id;
+        this.displayName = displayName;
+    }
+
     public String getDisplayName() {
         return displayName;
     }

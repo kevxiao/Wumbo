@@ -33,6 +33,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String MESSAGE_TYPE = "type";
     private static final String MESSAGE_CUUID = "cuuid";
     private static final String MESSAGE_SUUID = "suuid";
+    private static final String MESSAGE_RTIME = "rtime";
+    private static final String MESSAGE_STIME = "stime";
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -41,13 +43,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // Creating Tables
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String CREATE_CONTACTS_TABLE = "CREATE TABLE " + TABLE_MESSAGE + "("
+        db.execSQL("PRAGMA foreign_keys = ON;");
+
+        String CREATE_MESSAGES_TABLE = "CREATE TABLE " + TABLE_MESSAGE + "("
                 + MESSAGE_UUID + " TEXT PRIMARY KEY,"
                 + MESSAGE_TYPE + " INTEGER,"
+                + MESSAGE_RTIME + " INTEGER,"
+                + MESSAGE_STIME + " INTEGER,"
                 + MESSAGE_CUUID + " TEXT,"
                 + MESSAGE_SUUID + "TEXT,"
-                + MESSAGE_CONTENT + " TEXT" + ")";
-        db.execSQL(CREATE_CONTACTS_TABLE);
+                + MESSAGE_CONTENT + " TEXT,"
+                + "FOREIGN KEY(cuuid) REFERENCES channels(id),"
+                + "FOREIGN KEY(suuid) REFERENCES senders(id)" + ")";
+        db.execSQL(CREATE_MESSAGES_TABLE);
     }
 
     // Upgrading database
@@ -74,14 +82,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             return null;
 
         Message msg = null;
-        Sender snd = null;
+        Sender snd = null; //get sender
         switch (cursor.getInt(cursor.getColumnIndex("type"))){
             case 0:
                 msg = new Message(UUID.fromString(cursor.getString(cursor.getColumnIndex("uuid"))),
                         cursor.getString(cursor.getColumnIndex("content")),
                         snd,
-                        null,
-                        null);
+                        new Timestamp(cursor.getLong(cursor.getColumnIndex("stime"))),
+                        UUID.fromString(cursor.getString(cursor.getColumnIndex("cuuid"))));
                 break;
         }
 
