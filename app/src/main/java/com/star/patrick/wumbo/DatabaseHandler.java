@@ -127,7 +127,20 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     public Sender getSender(UUID id) {
-        return null;
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT * FROM users WHERE uuid = ? ",
+                new String[]{id.toString()}
+        );
+
+        if (null != cursor) {
+            cursor.moveToFirst();
+        } else {
+            return null;
+        }
+
+        return new Sender(id, cursor.getString(cursor.getColumnIndex(USER_DISPLAY_NAME)));
     }
 
     public void addSender(Sender user) {
@@ -139,7 +152,27 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     public Channel getChannel(UUID id) {
-        return null;
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT * FROM channels WHERE uuid = ? ",
+                new String[]{id.toString()}
+        );
+
+        if (null != cursor) {
+            cursor.moveToFirst();
+        } else {
+            return null;
+        }
+
+        return new ChannelImpl(
+                id,
+                cursor.getString(cursor.getColumnIndex(CHANNEL_NAME)),
+                new NetworkManagerImpl(),
+                mainActivity,
+                me,
+                channelManager
+        );
     }
 
     public void addChannel(Channel channel) {
