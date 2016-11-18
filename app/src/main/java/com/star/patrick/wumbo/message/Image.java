@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
@@ -11,6 +12,7 @@ import android.util.Log;
 
 import com.star.patrick.wumbo.MainActivity;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -25,7 +27,7 @@ import java.util.UUID;
 
 public class Image implements MessageContent, Serializable {
     private MessageType type = MessageType.IMAGE;
-    private Bitmap content;
+    private byte[] content;
     private String filepath;
     private UUID id;
 
@@ -66,8 +68,9 @@ public class Image implements MessageContent, Serializable {
     public void createImageFromFilepath(Context c){
         try{
             Log.d("SE464","Create bitmap from " + filepath);
-            new Exception().printStackTrace();
-            content = MediaStore.Images.Media.getBitmap(c.getContentResolver(), Uri.fromFile(new File(filepath)));
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            MediaStore.Images.Media.getBitmap(c.getContentResolver(), Uri.fromFile(new File(filepath))).compress(Bitmap.CompressFormat.PNG, 100, stream);
+            content = stream.toByteArray();
         } catch (Exception e){
             e.printStackTrace();
         }
@@ -78,15 +81,14 @@ public class Image implements MessageContent, Serializable {
     }
 
     public void saveBitmap(Context c) {
-        Log.d("SE464", "Save Bitmap if not null");
         if (content != null) {
             setFilepath(c);
             Log.d("SE464", "Saving bitmap to " + filepath);
-            new Exception().printStackTrace();
             FileOutputStream out = null;
             try{
+                Bitmap bitmapImg = BitmapFactory.decodeByteArray(content, 0, content.length);
                 out = new FileOutputStream(filepath);
-                content.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                bitmapImg.compress(Bitmap.CompressFormat.JPEG, 100, out);
             } catch (Exception e){
                 e.printStackTrace();
             }

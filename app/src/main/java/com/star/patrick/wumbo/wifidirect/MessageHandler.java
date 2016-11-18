@@ -31,6 +31,9 @@ public class MessageHandler implements Runnable {
             inputStream = socket.getInputStream();
             objectInputStream = new ObjectInputStream(inputStream);
             Message msg = (Message) objectInputStream.readObject();
+            if(msg.getContent().getMessageContent() == null) {
+                Log.d("SE464", "Received message content is null");
+            }
 
             Log.d("Client's InetAddress", "" + socket.getInetAddress());
             //TODO Change the intent's class to the right one

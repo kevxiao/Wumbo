@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.star.patrick.wumbo.message.Image;
 import com.star.patrick.wumbo.message.Message;
 
 import java.sql.Timestamp;
@@ -57,6 +58,7 @@ public class ChannelImpl extends Observable implements Channel {
     public void send(Uri imagePath, Context context) {
         Log.d("SE464", "Channel send image");
         Message msg = new Message(imagePath, context, me, new Timestamp(Calendar.getInstance().getTimeInMillis()), id);
+        ((Image)msg.getContent()).createImageFromFilepath(context);
         send(msg);
     }
 

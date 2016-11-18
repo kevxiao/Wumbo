@@ -173,6 +173,9 @@ public class WifiDirectService extends Service {
                 }
                 else {
                     Message message = (Message) intent.getSerializableExtra(EXTRA_MESSAGE);
+                    if(message.getContent().getMessageContent() == null) {
+                        Log.d(TAG, "Message content is null!");
+                    }
                     device.sendMessage(message);
                 }
             } break;

@@ -3,6 +3,7 @@ package com.star.patrick.wumbo;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.util.Log;
@@ -97,7 +98,8 @@ public class ChatAdapter extends BaseAdapter {
                 break;
             case IMAGE:
                 ((Image)msg.getContent()).createImageFromFilepath(context);
-                Bitmap original = (Bitmap)msg.getContent().getMessageContent();
+                byte[] imgArray = (byte[])msg.getContent().getMessageContent();
+                Bitmap original = BitmapFactory.decodeByteArray(imgArray, 0, imgArray.length);
                 if(original != null) {
                     int size = (int) (original.getHeight() * (512.0 / original.getWidth()));
                     Bitmap scaled = Bitmap.createScaledBitmap(original, 512, size, true);
