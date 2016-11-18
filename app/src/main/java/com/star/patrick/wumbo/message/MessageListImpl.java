@@ -1,6 +1,6 @@
-package com.star.patrick.wumbo;
+package com.star.patrick.wumbo.message;
 
-import com.star.patrick.wumbo.message.Message;
+import com.star.patrick.wumbo.Sender;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;

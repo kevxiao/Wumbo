@@ -12,6 +12,8 @@ import android.util.Log;
 import com.star.patrick.wumbo.message.Image;
 import com.star.patrick.wumbo.message.Message;
 import com.star.patrick.wumbo.message.MessageContent;
+import com.star.patrick.wumbo.message.MessageList;
+import com.star.patrick.wumbo.message.MessageListImpl;
 
 import java.sql.Timestamp;
 import java.util.Calendar;

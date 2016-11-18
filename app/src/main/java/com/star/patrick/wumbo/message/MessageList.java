@@ -1,4 +1,4 @@
-package com.star.patrick.wumbo;
+package com.star.patrick.wumbo.message;
 
 import com.star.patrick.wumbo.message.Message;
 
