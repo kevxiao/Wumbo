@@ -24,8 +24,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // Database Name
     private static final String DATABASE_NAME = "Wumbo";
 
-    // Contacts table name
+    // table names
     private static final String TABLE_MESSAGE = "messages";
+    private static final String CHANNEL_TABLE = "channels";
+    private static final String USER_TABLE = "users";
 
     // Contacts Table Columns names
     private static final String MESSAGE_UUID = "uuid";
@@ -33,6 +35,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String MESSAGE_TYPE = "type";
     private static final String MESSAGE_CUUID = "cuuid";
     private static final String MESSAGE_SUUID = "suuid";
+
+    // Channel Table Column names
+    private static final String CHANNEL_UUID = "uuid";
+    private static final String CHANNEL_NAME = "name";
+
+    // Sender Table Column names
+    private static final String USER_UUID = "uuid";
+    private static final String USER_DISPLAY_NAME = "display_name";
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -48,6 +58,22 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + MESSAGE_SUUID + "TEXT,"
                 + MESSAGE_CONTENT + " TEXT" + ")";
         db.execSQL(CREATE_CONTACTS_TABLE);
+
+        String CREATE_CHANNEL_TABLE =
+                "CREATE TABLE " + CHANNEL_TABLE + " ( " +
+                    CHANNEL_UUID + " TEXT PRIMARY KEY " +
+                    ", " +
+                    CHANNEL_NAME + " TEXT " +
+                ") ";
+        db.execSQL(CREATE_CHANNEL_TABLE);
+
+        String CREATE_USER_TABLE =
+                "CREATE TABLE " + USER_TABLE + " ( " +
+                    USER_UUID + " TEXT PRIMARY KEY " +
+                    ", " +
+                    USER_DISPLAY_NAME + " TEXT " +
+                ") ";
+        db.execSQL(CREATE_USER_TABLE);
     }
 
     // Upgrading database
