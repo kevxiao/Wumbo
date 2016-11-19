@@ -21,4 +21,5 @@ public interface Channel {
     List<Message> getAllMessagesSince(Timestamp ts);
     UUID getId();
     String getName();
+    String getKey();
 }

@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
+import android.util.Base64;
 import android.util.Log;
 
 import com.star.patrick.wumbo.message.EncryptedMessage;
@@ -58,7 +59,7 @@ public class ChannelImpl extends Observable implements Channel {
     }
 
     public ChannelImpl(UUID id, String name, MainActivity context, MessageCourier messageCourier, SecretKey key) {
-        this(id, name, context, messageCourier, key, new MessageListImpl());
+        this(id, name, context, messageCourier, key, new DatabaseHandler(context, messageCourier).getAllMessages(id));
     }
 
     public ChannelImpl(UUID id, String name, MainActivity context, MessageCourier messageCourier, SecretKey key, MessageList msgs) {
@@ -132,7 +133,9 @@ public class ChannelImpl extends Observable implements Channel {
         setChanged();
         notifyObservers();
 
-        //ADD MESSAGE TO THE DATABASE
+        //Add to database
+        DatabaseHandler db = new DatabaseHandler(mainContext, messageCourier);
+        db.addMessage(msg);
     }
 
     private void createNotification(Message msg) {
@@ -172,5 +175,10 @@ public class ChannelImpl extends Observable implements Channel {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public String getKey() {
+        return Base64.encodeToString(encKey.getEncoded(), Base64.DEFAULT);
     }
 }

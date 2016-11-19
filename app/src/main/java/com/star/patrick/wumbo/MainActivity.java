@@ -131,7 +131,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
         messageCourier = new MessageCourierImpl(this);
         channelManager = new ChannelManagerImpl(this, messageCourier);
         messageReceiver = new MessageReceiver(this, messageCourier, channelManager);
-        DatabaseHandler db = new DatabaseHandler(this, this, messageCourier);
 
         byte[] encodedKey = Base64.decode(getResources().getString(R.string.public_secret_key), Base64.DEFAULT);
         msgChannel = new ChannelImpl(
@@ -139,8 +138,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 getResources().getString(R.string.public_name),
                 this,
                 messageCourier,
-                new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES"),
-                db.getAllMessages(UUID.fromString(getResources().getString(R.string.public_uuid)))
+                new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES")
         );
         msgChannel.addObserver(this);
         channelManager.addChannel(msgChannel);
@@ -178,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
             onStartCallback.run();
         }
 
-        chatAdapter = new ChatAdapter(MainActivity.this, msgChannel.getAllMessages(), me.getId());
+        chatAdapter = new ChatAdapter(MainActivity.this, new ArrayList<Message>(), me.getId());
 
         listView = (ListView) findViewById(R.id.myList);
         listView.setAdapter(chatAdapter);
@@ -224,6 +222,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
 //        } else {
 //            Log.d("SE464", "Uh oh, retreived times are different");
 //        }
+        update(null, null);
     }
 
     @Override
