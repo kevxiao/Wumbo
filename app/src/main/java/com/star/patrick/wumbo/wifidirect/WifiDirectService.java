@@ -101,11 +101,18 @@ public class WifiDirectService extends Service {
 
 //        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 //        NetworkInfo networkInfo = connectivityManager.getNetworkInfo();
+        requestConnectionInfo();
+    }
+
+    private void requestConnectionInfo() {
         manager.requestConnectionInfo(channel, new WifiP2pManager.ConnectionInfoListener() {
             @Override
             public void onConnectionInfoAvailable(WifiP2pInfo info) {
                 if (info.groupFormed) {
                     onGroupFormed(info.isGroupOwner, info.groupOwnerAddress);
+                }
+                else {
+                    requestConnectionInfo();
                 }
             }
         });
