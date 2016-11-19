@@ -41,7 +41,9 @@ public class SettingsActivity extends PreferenceActivity {
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
                                           String key) {
         if (key.equals("pref_user_name")) {
-            DatabaseHandler db = new DatabaseHandler(getApplicationContext(), null, null, null);
+            DatabaseHandler db = new DatabaseHandler((MainActivity)getApplicationContext(), null);
+            User me = db.getMe();
+            db.updateSenderDisplayName(me.getId(), sharedPreferences.getString("pref_user_name", "Anonymous"));
         }
     }
 
