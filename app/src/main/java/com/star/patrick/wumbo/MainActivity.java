@@ -219,16 +219,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
         channelListView.setAdapter(new ArrayAdapter<>(this, R.layout.channel_list_item, channels));
         channelListView.setOnItemClickListener(new ChannelListItemClickListener());
 
-        View settings = findViewById(R.id.action_settings);
-        settings.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent myIntent = new Intent(MainActivity.this, SettingsActivity.class);
-                //myIntent.putExtra("activity", ); //Optional parameters
-                MainActivity.this.startActivity(myIntent);
-            }
-        });
-
         //DatabaseHandler db = new DatabaseHandler(this.getApplicationContext(), me, this, channelManager);
 
 //        Message dbTestMsg = new Message("FUCK ME", me, new Timestamp(10), UUID.fromString(getResources().getString(R.string.public_uuid)));
@@ -264,7 +254,9 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            Intent myIntent = new Intent(MainActivity.this, SettingsActivity.class);
+            //myIntent.putExtra("activity", ); //Optional parameters
+            MainActivity.this.startActivity(myIntent);
         } else if (drawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
