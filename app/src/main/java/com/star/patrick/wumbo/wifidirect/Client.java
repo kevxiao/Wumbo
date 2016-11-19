@@ -16,7 +16,7 @@ public class Client implements Device {
 
     @Override
     public void onConnect() {
-        MessageSender.sendMessage(hostAddress, HandshakeDispatcherService.PORT, "HANDSHAKE", 5);
+        new MessageSender(hostAddress, HandshakeDispatcherService.PORT, "HANDSHAKE", 5);
     }
 
     @Override
@@ -24,6 +24,6 @@ public class Client implements Device {
 
     @Override
     public void sendMessage(Message message) {
-        MessageSender.sendMessage(hostAddress, MessageDispatcherService.PORT, message);
+        new MessageSender(hostAddress, MessageDispatcherService.PORT, message);
     }
 }
