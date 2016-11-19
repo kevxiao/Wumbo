@@ -17,17 +17,20 @@ import java.util.Set;
 import java.util.UUID;
 
 public class ChannelManagerImpl extends Observable implements ChannelManager {
+    private final MessageCourier messageCourier;
     private MainActivity mainContext;
     private Map<UUID,Channel> channels = new LinkedHashMap<>();
     private Map<UUID,String> channelNames = new LinkedHashMap<>();
 
-    //Why the fuck is this shit here????
-    private DatabaseHandler db;
-
     public ChannelManagerImpl(MainActivity context, MessageCourier messageCourier) {
         this.mainContext = context;
+        this.messageCourier = messageCourier;
 
-        db = new DatabaseHandler(context, mainContext, messageCourier);
+        DatabaseHandler db = new DatabaseHandler(context, messageCourier);
+        channels = db.getChannels();
+        for (Channel channel : channels.values()) {
+            channelNames.put(channel.getId(), channel.getName());
+        }
     }
 
     @Override
@@ -44,11 +47,19 @@ public class ChannelManagerImpl extends Observable implements ChannelManager {
         channelNames.put(channel.getId(), channel.getName());
         setChanged();
         notifyObservers();
+
+        //Add to db
+        DatabaseHandler db = new DatabaseHandler(mainContext, messageCourier);
+        db.addChannel(channel);
     }
 
     @Override
     public void removeChannel(Channel channel) {
         channels.remove(channel.getId());
+
+        //Remove from  db
+        DatabaseHandler db = new DatabaseHandler(mainContext, messageCourier);
+        db.removeChannel(channel.getId());
     }
 
     @Override

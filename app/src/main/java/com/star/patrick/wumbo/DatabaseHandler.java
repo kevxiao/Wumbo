@@ -60,11 +60,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private MainActivity mainActivity;
     private MessageCourier messageCourier;
 
-    public DatabaseHandler(Context context, MainActivity mainActivity, MessageCourier messageCourier) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    public DatabaseHandler(MainActivity mainActivity, MessageCourier messageCourier) {
+        super(mainActivity, DATABASE_NAME, null, DATABASE_VERSION);
         this.mainActivity = mainActivity;
         this.messageCourier = messageCourier;
-
     }
 
     // Creating Tables
@@ -255,7 +254,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             return null;
         }
 
-        byte[] encodedKey = Base64.decode(mainActivity.getResources().getString(cursor.getColumnIndex(CHANNEL_KEY)), Base64.DEFAULT);
+        byte[] encodedKey = Base64.decode(cursor.getString(cursor.getColumnIndex(CHANNEL_KEY)), Base64.DEFAULT);
         Channel channel = new ChannelImpl(
                 id,
                 cursor.getString(cursor.getColumnIndex(CHANNEL_NAME)),
@@ -276,6 +275,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(CHANNEL_UUID, channel.getId().toString());
         values.put(CHANNEL_NAME, channel.getName());
+        values.put(CHANNEL_KEY, channel.getKey());
 
         db.insert(CHANNEL_TABLE, null, values);
         db.close();
@@ -299,11 +299,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         );
 
         if (cursor == null || !cursor.isBeforeFirst() || !cursor.moveToFirst()) {
-            return null;
+            return channels;
         }
 
         do {
-            byte[] encodedKey = Base64.decode(mainActivity.getResources().getString(cursor.getColumnIndex(CHANNEL_KEY)), Base64.DEFAULT);
+            byte[] encodedKey = Base64.decode(cursor.getString(cursor.getColumnIndex(CHANNEL_KEY)), Base64.DEFAULT);
             Channel channel = new ChannelImpl(
                     UUID.fromString(cursor.getString(cursor.getColumnIndex(CHANNEL_UUID))),
                     cursor.getString(cursor.getColumnIndex(CHANNEL_NAME)),
