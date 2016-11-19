@@ -69,7 +69,7 @@ public class ChatAdapter extends BaseAdapter {
         sparams = (LinearLayout.LayoutParams) holder.sender.getLayoutParams();
         tparams = (LinearLayout.LayoutParams) holder.txtInfo.getLayoutParams();
         cparams = (LinearLayout.LayoutParams) holder.contentWithBg.getLayoutParams();
-        if(msg.getUser().getId() == meId) {
+        if(msg.getUser().getId().equals(meId)) {
             lparams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
             sparams.gravity = Gravity.END;
             tparams.gravity = Gravity.END;

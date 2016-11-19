@@ -1,7 +1,6 @@
 package com.star.patrick.wumbo;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -38,6 +37,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String TABLE_MESSAGE = "messages";
     private static final String CHANNEL_TABLE = "channels";
     private static final String USER_TABLE = "users";
+    private static final String ME_TABLE = "me";
 
     // Messages Table Columns names
     private static final String MESSAGE_UUID = "uuid";
@@ -56,6 +56,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // User Table Column names
     private static final String USER_UUID = "uuid";
     private static final String USER_DISPLAY_NAME = "display_name";
+
+    // Me Table Column names
+    private static final String ME_UUID = "uuid";
 
     private MainActivity mainActivity;
     private MessageCourier messageCourier;
@@ -100,7 +103,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                     ", " +
                     USER_DISPLAY_NAME + " TEXT " +
                 ") ";
+        Log.d("SE464", CREATE_USER_TABLE);
         db.execSQL(CREATE_USER_TABLE);
+
+        String CREATE_ME_TABLE =
+                "CREATE TABLE IF NOT EXISTS " + ME_TABLE + " ( " +
+                    ME_UUID + " TEXT PRIMARY KEY, " +
+                    "FOREIGN KEY(" + ME_UUID + ") REFERENCES " + USER_TABLE + "(" + USER_UUID + ") " +
+                ") ";
+        db.execSQL(CREATE_ME_TABLE);
     }
 
     // Upgrading database
@@ -110,6 +121,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_MESSAGE);
         db.execSQL("DROP TABLE IF EXISTS " + CHANNEL_TABLE);
         db.execSQL("DROP TABLE IF EXISTS " + USER_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + ME_TABLE);
 
         // Create tables again
         onCreate(db);
@@ -120,7 +132,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Log.d("SE464", "Saving a message to the database");
         SQLiteDatabase db = this.getWritableDatabase();
 
-        addSender(msg.getUser());
+        setUser(msg.getUser());
 
         ContentValues values = new ContentValues();
         values.put(MESSAGE_UUID, msg.getId().toString());
@@ -149,7 +161,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
 
         Message msg = null;
-        User snd = getSender(UUID.fromString(cursor.getString(cursor.getColumnIndex("suuid"))));
+        User snd = getUser(UUID.fromString(cursor.getString(cursor.getColumnIndex("suuid"))));
         switch (cursor.getInt(cursor.getColumnIndex("type"))){
             case 0:
                 msg = new Message(UUID.fromString(cursor.getString(cursor.getColumnIndex("uuid"))),
@@ -177,7 +189,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         while (cursor!=null && cursor.moveToNext()){
             Message msg = null;
-            User snd = getSender(UUID.fromString(cursor.getString(cursor.getColumnIndex("suuid"))));
+            User snd = getUser(UUID.fromString(cursor.getString(cursor.getColumnIndex("suuid"))));
             switch (cursor.getInt(cursor.getColumnIndex("type"))){
                 case 0:
                     msg = new Message(UUID.fromString(cursor.getString(cursor.getColumnIndex("uuid"))),
@@ -202,7 +214,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return getAllMessagesSince(new Timestamp(1));
     }
 
-    public User getSender(UUID id) {
+    public User getUser(UUID id) {
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.rawQuery(
@@ -222,7 +234,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return user;
     }
 
-    public void addSender(User user) {
+    public void setUser(User user) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -330,7 +342,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         while (cursor!=null && cursor.moveToNext()){
             Message msg = null;
-            User snd = getSender(UUID.fromString(cursor.getString(cursor.getColumnIndex("suuid"))));
+            User snd = getUser(UUID.fromString(cursor.getString(cursor.getColumnIndex("suuid"))));
             switch (cursor.getInt(cursor.getColumnIndex("type"))){
                 case 0:
                     msg = new Message(UUID.fromString(cursor.getString(cursor.getColumnIndex("uuid"))),
@@ -348,5 +360,56 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close();
 
         return msgs;
+    }
+
+    public void setMe(UUID id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(ME_UUID, id.toString());
+
+        db.insert(ME_TABLE, null, values);
+
+        db.close();
+    }
+
+    public User getMe() {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT " +
+                    "m." + ME_UUID + " mid, " +
+                    "u." + USER_DISPLAY_NAME + " udn " +
+                "FROM " + ME_TABLE + " m " +
+                "INNER JOIN " + USER_TABLE + " u " +
+                "ON m." + ME_UUID + " = u." + USER_UUID,
+                new String[]{}
+        );
+
+        if (cursor == null || !cursor.isBeforeFirst() || !cursor.moveToFirst()) {
+            return null;
+        }
+
+        User user = new User(
+                UUID.fromString(cursor.getString(cursor.getColumnIndex("mid"))),
+                cursor.getString(cursor.getColumnIndex("udn"))
+        );
+
+        cursor.close();
+        db.close();
+        return user;
+    }
+
+    public void addUser(User user) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        Log.d("SE464", "DatabaseHandler: (uuid,display_name) = " + user.getId().toString() + "," + user.getDisplayName());
+        ContentValues values = new ContentValues();
+        values.put(USER_UUID, user.getId().toString());
+        values.put(USER_DISPLAY_NAME, user.getDisplayName());
+        Log.d("SE464", "DatabaseHandler: (uuid,display_name) = " + values.getAsString(USER_UUID) + "," + values.getAsString(USER_DISPLAY_NAME));
+
+        db.insert(USER_TABLE, null, values);
+        db.close();
     }
 }

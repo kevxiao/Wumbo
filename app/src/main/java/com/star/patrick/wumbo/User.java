@@ -10,7 +10,11 @@ public class User implements Serializable {
     private PublicKey publicKey;
 
     public User(String displayName, PublicKey p) {
-        this.id = UUID.randomUUID();
+        this(UUID.randomUUID(), displayName, p);
+    }
+
+    public User(UUID id, String displayName, PublicKey p) {
+        this.id = id;
         this.displayName = displayName;
         this.publicKey = p;
     }

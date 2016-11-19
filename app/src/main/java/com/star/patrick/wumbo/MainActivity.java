@@ -125,10 +125,21 @@ public class MainActivity extends AppCompatActivity implements Observer {
         }
         */
 
-        me = new User(senderName, userKeys != null ? userKeys.getPublic() : null);
+        messageCourier = new MessageCourierImpl(this);
+
+        DatabaseHandler db = new DatabaseHandler(this, messageCourier);
+        me = db.getMe();
+        if (null == me) {
+            Log.d("SE464", "MainActivity: did not find me");
+            me = new User(senderName, userKeys != null ? userKeys.getPublic() : null);
+            db.addUser(me);
+            db.setMe(me.getId());
+        } else {
+            Log.d("SE464", "MainActivity: me existed");
+            me = new User(me.getId(), senderName, userKeys != null ? userKeys.getPublic() : null);
+        }
         mePrivateKey = userKeys != null ? userKeys.getPrivate() : null;
 
-        messageCourier = new MessageCourierImpl(this);
         channelManager = new ChannelManagerImpl(this, messageCourier);
         messageReceiver = new MessageReceiver(this, messageCourier, channelManager);
 
