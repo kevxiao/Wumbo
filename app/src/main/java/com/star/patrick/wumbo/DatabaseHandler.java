@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.Contacts;
+import android.util.Log;
 import android.util.Base64;
 
 import com.star.patrick.wumbo.message.Message;
@@ -37,7 +38,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String CHANNEL_TABLE = "channels";
     private static final String USER_TABLE = "users";
 
-    // Contacts Table Columns names
+    // Messages Table Columns names
     private static final String MESSAGE_UUID = "uuid";
     private static final String MESSAGE_CONTENT = "content";
     private static final String MESSAGE_TYPE = "type";
@@ -69,22 +70,23 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // Creating Tables
     @Override
     public void onCreate(SQLiteDatabase db) {
+        Log.d("SE464", "Creating THE BIG DB");
         db.execSQL("PRAGMA foreign_keys = ON;");
 
-        String CREATE_MESSAGES_TABLE = "CREATE TABLE " + TABLE_MESSAGE + "("
+        String CREATE_MESSAGES_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_MESSAGE + "("
                 + MESSAGE_UUID + " TEXT PRIMARY KEY,"
                 + MESSAGE_TYPE + " INTEGER,"
                 + MESSAGE_RTIME + " INTEGER,"
                 + MESSAGE_STIME + " INTEGER,"
                 + MESSAGE_CUUID + " TEXT,"
-                + MESSAGE_SUUID + "TEXT,"
+                + MESSAGE_SUUID + " TEXT,"
                 + MESSAGE_CONTENT + " TEXT,"
-                + "FOREIGN KEY(cuuid) REFERENCES channels(id),"
-                + "FOREIGN KEY(suuid) REFERENCES senders(id)" + ")";
+                + "FOREIGN KEY(cuuid) REFERENCES channels(uuid),"
+                + "FOREIGN KEY(suuid) REFERENCES users(uuid)" + ")";
         db.execSQL(CREATE_MESSAGES_TABLE);
 
         String CREATE_CHANNEL_TABLE =
-                "CREATE TABLE " + CHANNEL_TABLE + " ( " +
+                "CREATE TABLE IF NOT EXISTS " + CHANNEL_TABLE + " ( " +
                     CHANNEL_UUID + " TEXT PRIMARY KEY " +
                     ", " +
                     CHANNEL_NAME + " TEXT " +
@@ -94,7 +96,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.execSQL(CREATE_CHANNEL_TABLE);
 
         String CREATE_USER_TABLE =
-                "CREATE TABLE " + USER_TABLE + " ( " +
+                "CREATE TABLE IF NOT EXISTS " + USER_TABLE + " ( " +
                     USER_UUID + " TEXT PRIMARY KEY " +
                     ", " +
                     USER_DISPLAY_NAME + " TEXT " +
@@ -116,6 +118,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     // Adding new contact
     public void addMessage(Message msg) {
+        Log.d("SE464", "Saving a message to the database");
         SQLiteDatabase db = this.getWritableDatabase();
 
         addSender(msg.getSender());
@@ -142,10 +145,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT * FROM messages WHERE uuid=?;", new String[]{id.toString()});
-        if (cursor != null)
-            cursor.moveToFirst();
-        else
+        if (cursor == null || !cursor.isBeforeFirst() || !cursor.moveToFirst()) {
             return null;
+        }
 
         Message msg = null;
         Sender snd = getSender(UUID.fromString(cursor.getString(cursor.getColumnIndex("suuid"))));
@@ -156,6 +158,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                         snd,
                         new Timestamp(cursor.getLong(cursor.getColumnIndex("stime"))),
                         UUID.fromString(cursor.getString(cursor.getColumnIndex("cuuid"))));
+                msg.setReceiveTime(new Timestamp(cursor.getLong(cursor.getColumnIndex("rtime"))));
                 break;
         }
 
@@ -169,7 +172,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public List<Message> getAllMessagesSince(Timestamp ts) {
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT * FROM messages WHERE rtime > ? ORDERBY rtime DESC;", new String[]{String.valueOf(ts.getTime())});
+        Cursor cursor = db.rawQuery("SELECT * FROM messages WHERE rtime > ? ORDER BY rtime ASC;", new String[]{String.valueOf(ts.getTime())});
 
         List<Message> msgs= new ArrayList<>();
 
@@ -183,6 +186,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                             snd,
                             new Timestamp(cursor.getLong(cursor.getColumnIndex("stime"))),
                             UUID.fromString(cursor.getString(cursor.getColumnIndex("cuuid"))));
+                    msg.setReceiveTime(new Timestamp(cursor.getLong(cursor.getColumnIndex("rtime"))));
                     msgs.add(msg);
                     break;
             }
@@ -190,11 +194,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         db.close();
 
+        Log.d("SE464", "Retrieving " + msgs.size() + " messages from the database");
+
         return msgs;
     }
 
     public List<Message> getAllMessages() {
-        return getAllMessagesSince(new Timestamp(0));
+        return getAllMessagesSince(new Timestamp(1));
     }
 
     public Sender getSender(UUID id) {
@@ -205,9 +211,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 new String[]{id.toString()}
         );
 
-        if (null != cursor) {
-            cursor.moveToFirst();
-        } else {
+        if (cursor == null || !cursor.isBeforeFirst() || !cursor.moveToFirst()) {
             return null;
         }
 
@@ -247,9 +251,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 new String[]{id.toString()}
         );
 
-        if (null != cursor) {
-            cursor.moveToFirst();
-        } else {
+        if (cursor == null || !cursor.isBeforeFirst() || !cursor.moveToFirst()) {
             return null;
         }
 
@@ -297,10 +299,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 new String[]{}
         );
 
-        if (null != cursor) {
-            cursor.moveToFirst();
-        } else {
-            return channels;
+        if (cursor == null || !cursor.isBeforeFirst() || !cursor.moveToFirst()) {
+            return null;
         }
 
         do {

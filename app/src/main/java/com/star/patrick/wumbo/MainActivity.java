@@ -2,7 +2,6 @@ package com.star.patrick.wumbo;
 
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -147,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         me = new Sender(senderName, userKeys != null ? userKeys.getPublic() : null);
         mePrivateKey = userKeys != null ? userKeys.getPrivate() : null;
 
-        channelManager = new ChannelManagerImpl(this);
+        channelManager = new ChannelManagerImpl(this, me);
         networkManager = new NetworkManagerImpl();
 
         byte[] encodedKey = Base64.decode(getResources().getString(R.string.public_secret_key), Base64.DEFAULT);
@@ -188,7 +187,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         msgChannel.addObserver(this);
 
-        List<Message> messages = new ArrayList<>();//MessageListImpl.getMockMessageList();
+        DatabaseHandler db = new DatabaseHandler(this, me, this, channelManager);
+        List<Message> messages = db.getAllMessages();//new ArrayList<>();//MessageListImpl.getMockMessageList();x`x`x`
 
         chatAdapter = new ChatAdapter(MainActivity.this, messages, me.getId());
 
@@ -219,6 +219,23 @@ public class MainActivity extends AppCompatActivity implements Observer {
         }
         channelListView.setAdapter(new ArrayAdapter<>(this, R.layout.channel_list_item, channels));
         channelListView.setOnItemClickListener(new ChannelListItemClickListener());
+
+        //DatabaseHandler db = new DatabaseHandler(this.getApplicationContext(), me, this, channelManager);
+
+//        Message dbTestMsg = new Message("FUCK ME", me, new Timestamp(10), UUID.fromString(getResources().getString(R.string.public_uuid)));
+//        dbTestMsg.setReceiveTime(new Timestamp(10));
+//        db.addMessage(dbTestMsg);
+//        Message dbRetreivedMsg = db.getMessage(dbTestMsg.getId());
+//        if (null == dbRetreivedMsg) {
+//            Log.d("SE464", "retrieved is null");
+//        } else {
+//            Log.d("SE464", "id: "+dbRetreivedMsg.getId() + " text: "+dbRetreivedMsg.getContent().getMessageContent()+" receiveTime: "+dbRetreivedMsg.getReceiveTime());
+//        }
+//        if (dbRetreivedMsg.getReceiveTime().equals(dbTestMsg.getReceiveTime())) {
+//            Log.d("SE464", "This message seemed to be retreived right");
+//        } else {
+//            Log.d("SE464", "Uh oh, retreived times are different");
+//        }
     }
 
     @Override
