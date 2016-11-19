@@ -119,6 +119,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
 
         db.insert(TABLE_MESSAGE, null, values);
+        db.close();
     }
 
     // Getting single contact
@@ -142,6 +143,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                         UUID.fromString(cursor.getString(cursor.getColumnIndex("cuuid"))));
                 break;
         }
+
+        db.close();
 
         // return contact
         return msg;
@@ -169,6 +172,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                     break;
             }
         }
+
+        db.close();
 
         return msgs;
     }
