@@ -106,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         KeyPair userKeys = null;
         String senderName = (extras != null && extras.getString("name") != null && !extras.getString("name").isEmpty()) ? extras.getString("name") : "Anonymous";
 
+        /*
         try {
             KeyPairGenerator kpg;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -141,6 +142,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         } catch (NoSuchProviderException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
+        */
 
         me = new Sender(senderName, userKeys != null ? userKeys.getPublic() : null);
         mePrivateKey = userKeys != null ? userKeys.getPrivate() : null;
