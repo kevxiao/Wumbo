@@ -101,6 +101,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Drop older table if existed
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_MESSAGE);
+        db.execSQL("DROP TABLE IF EXISTS " + CHANNEL_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + USER_TABLE);
 
         // Create tables again
         onCreate(db);
@@ -200,8 +202,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
 
         Sender user = new Sender(id, cursor.getString(cursor.getColumnIndex(USER_DISPLAY_NAME)));
-        
+
         cursor.close();
+        db.close();
 
         return user;
     }
@@ -223,6 +226,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(USER_DISPLAY_NAME, displayName);
 
         db.update(CHANNEL_TABLE, values, USER_DISPLAY_NAME + " = ? ", new String[]{id.toString()});
+        db.close();
     }
 
     public Channel getChannel(UUID id) {
@@ -248,6 +252,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 channelManager
         );
         cursor.close();
+        db.close();
 
         return channel;
     }
@@ -260,12 +265,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(CHANNEL_NAME, channel.getName());
 
         db.insert(CHANNEL_TABLE, null, values);
+        db.close();
     }
 
     public void removeChannel(UUID id) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         db.delete(CHANNEL_TABLE, CHANNEL_UUID + " = ? ", new String[]{id.toString()});
+        db.close();
     }
 
     public Map<UUID, Channel> getChannels() {
@@ -297,6 +304,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         } while ( !cursor.moveToNext() );
 
         cursor.close();
+        db.close();
+
         return channels;
     }
 }
