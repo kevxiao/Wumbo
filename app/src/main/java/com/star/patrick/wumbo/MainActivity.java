@@ -297,4 +297,10 @@ public class MainActivity extends AppCompatActivity implements Observer {
             //supportActionBar.setTitle(?);
         }
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+    }
 }
