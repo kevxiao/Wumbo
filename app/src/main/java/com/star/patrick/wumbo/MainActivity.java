@@ -355,4 +355,10 @@ public class MainActivity extends AppCompatActivity implements Observer {
             //supportActionBar.setTitle(?);
         }
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+    }
 }

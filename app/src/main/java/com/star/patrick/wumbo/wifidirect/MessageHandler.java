@@ -18,7 +18,7 @@ public class MessageHandler implements Runnable {
     private MessageDispatcherService messageDispatcherService;
 
     public MessageHandler(Socket socket, MessageDispatcherService messageDispatcherService) {
-        Log.d("SE464", "Creat MessageHandler");
+        Log.d("SE464", "Create MessageHandler");
         this.socket = socket;
         this.messageDispatcherService = messageDispatcherService;
     }

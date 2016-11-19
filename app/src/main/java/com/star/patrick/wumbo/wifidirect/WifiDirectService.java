@@ -3,6 +3,7 @@ package com.star.patrick.wumbo.wifidirect;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
@@ -64,14 +65,20 @@ public class WifiDirectService extends Service {
     }
 
     private void deletePersistentGroups(){
+        manager.cancelConnect(channel, null);
+        manager.clearLocalServices(channel, null);
+        manager.clearServiceRequests(channel, null);
+        manager.removeGroup(channel, null);
+//        manager.stopPeerDiscovery(channel, null);
+
         try {
             Class WifiDirectManagerClass = Class.forName("android.net.wifi.p2p.WifiP2pManager");
             Method deletePersistentGroup = WifiDirectManagerClass.getMethod(
-                "deletePersistentGroup", Channel.class, int.class, ActionListener.class
+                    "deletePersistentGroup", WifiP2pManager.Channel.class, int.class, WifiP2pManager.ActionListener.class
             );
 
-            for (int netid = 0; netid < 32; netid++) {
-                deletePersistentGroup.invoke(manager, channel, netid, null);
+            for (int netId = 0; netId < 32; netId++) {
+                deletePersistentGroup.invoke(manager, channel, netId, null);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -92,6 +99,24 @@ public class WifiDirectService extends Service {
                 Log.d(TAG, "Peer discovery initiation failed");
             }
         });
+
+//        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+//        NetworkInfo networkInfo = connectivityManager.getNetworkInfo();
+        requestConnectionInfo();
+    }
+
+    private void requestConnectionInfo() {
+        manager.requestConnectionInfo(channel, new WifiP2pManager.ConnectionInfoListener() {
+            @Override
+            public void onConnectionInfoAvailable(WifiP2pInfo info) {
+                if (info.groupFormed) {
+                    onGroupFormed(info.isGroupOwner, info.groupOwnerAddress);
+                }
+                else {
+                    requestConnectionInfo();
+                }
+            }
+        });
     }
 
     private void onPeerListChanged(WifiP2pDeviceList peers) {
@@ -103,6 +128,8 @@ public class WifiDirectService extends Service {
             Log.d(TAG, "Peers found: " + device.deviceAddress);
             config.deviceAddress = device.deviceAddress;
 
+
+
             if (device.status != WifiP2pDevice.CONNECTED && device.status != WifiP2pDevice.INVITED) {
                 manager.connect(channel, config, new ActionListener() {
                     @Override
@@ -113,6 +140,17 @@ public class WifiDirectService extends Service {
                     @Override
                     public void onFailure(int reason) {
                         Log.d(TAG, "Failed to connect to peer. " + reason);
+                        manager.cancelConnect(channel, new ActionListener() {
+                            @Override
+                            public void onSuccess() {
+                                Log.d(TAG, "Cancelled connection");
+                            }
+
+                            @Override
+                            public void onFailure(int reason) {
+                                Log.d(TAG, "Failed to cancel "+reason);
+                            }
+                        });
                     }
                 });
             }
@@ -180,5 +218,13 @@ public class WifiDirectService extends Service {
         }
 
         return START_NOT_STICKY;
+    }
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        deletePersistentGroups();
+        manager.stopPeerDiscovery(channel, null);
     }
 }
