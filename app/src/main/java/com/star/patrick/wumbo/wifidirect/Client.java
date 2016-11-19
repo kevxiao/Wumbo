@@ -4,7 +4,6 @@ package com.star.patrick.wumbo.wifidirect;
 import java.net.InetAddress;
 
 import com.star.patrick.wumbo.message.EncryptedMessage;
-import com.star.patrick.wumbo.message.Message;
 
 
 
@@ -17,7 +16,7 @@ public class Client implements Device {
 
     @Override
     public void onConnect() {
-        MessageSender.sendMessage(hostAddress, HandshakeDispatcherService.PORT, "HANDSHAKE", 5);
+        new MessageSender(hostAddress, HandshakeDispatcherService.PORT, "HANDSHAKE", 5);
     }
 
     @Override
@@ -25,6 +24,6 @@ public class Client implements Device {
 
     @Override
     public void sendMessage(EncryptedMessage message) {
-        MessageSender.sendMessage(hostAddress, MessageDispatcherService.PORT, message);
+        new MessageSender(hostAddress, MessageDispatcherService.PORT, message);
     }
 }

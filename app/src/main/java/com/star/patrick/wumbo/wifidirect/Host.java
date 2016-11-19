@@ -25,7 +25,7 @@ public class Host implements Device {
     public void sendMessage(EncryptedMessage message) {
         for (InetAddress address: clientAddresses) {
             Log.d("SE464", "Host sending to " + address.toString());
-            MessageSender.sendMessage(address, MessageDispatcherService.PORT, message);
+            new MessageSender(address, MessageDispatcherService.PORT, message);
         }
     }
 

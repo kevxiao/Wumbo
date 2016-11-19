@@ -3,7 +3,6 @@ package com.star.patrick.wumbo.wifidirect;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
@@ -11,8 +10,8 @@ import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
-import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.ActionListener;
+import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -28,7 +27,7 @@ import static com.star.patrick.wumbo.MainActivity.TAG;
 
 public class WifiDirectService extends Service {
     public static final String ADD_PEER_ACTION = "com.star.patrick.wumbo.wifidirect.ADD_PEER";
-    public static final String EXTRA_INET_ADDRESS = "clientinetaddress";
+    public static final String EXTRA_INET_ADDRESS = "clientInetAddress";
 
     public static final String SEND_MESSAGE_ACTION = "com.star.patrick.wumbo.wifidirect.SEND_MESSAGE";
     public static final String EXTRA_MESSAGE = "message";
@@ -37,24 +36,14 @@ public class WifiDirectService extends Service {
     private Channel channel;
     private Device device;
 
-    private boolean inGroup = false;
-
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d("SE464", "wifidirect service created");
 
-//        if (manager != null) {
-//            return;
-//        }
-
-//        WifiManager wifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
-//        wifiManager.setWifiEnabled(false);
-//        wifiManager.setWifiEnabled(true);
-
         manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
-
         channel = manager.initialize(this, getMainLooper(), null);
+
         discoverPeers();
     }
 
@@ -74,7 +63,10 @@ public class WifiDirectService extends Service {
         try {
             Class WifiDirectManagerClass = Class.forName("android.net.wifi.p2p.WifiP2pManager");
             Method deletePersistentGroup = WifiDirectManagerClass.getMethod(
-                    "deletePersistentGroup", WifiP2pManager.Channel.class, int.class, WifiP2pManager.ActionListener.class
+                "deletePersistentGroup",
+                WifiP2pManager.Channel.class,
+                int.class,
+                WifiP2pManager.ActionListener.class
             );
 
             for (int netId = 0; netId < 32; netId++) {
@@ -100,8 +92,6 @@ public class WifiDirectService extends Service {
             }
         });
 
-//        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-//        NetworkInfo networkInfo = connectivityManager.getNetworkInfo();
         requestConnectionInfo();
     }
 
@@ -127,8 +117,6 @@ public class WifiDirectService extends Service {
             WifiP2pConfig config = new WifiP2pConfig();
             Log.d(TAG, "Peers found: " + device.deviceAddress);
             config.deviceAddress = device.deviceAddress;
-
-
 
             if (device.status != WifiP2pDevice.CONNECTED && device.status != WifiP2pDevice.INVITED) {
                 manager.connect(channel, config, new ActionListener() {
