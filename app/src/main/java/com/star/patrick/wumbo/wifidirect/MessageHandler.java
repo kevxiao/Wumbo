@@ -16,7 +16,7 @@ public class MessageHandler implements Runnable {
     private MessageDispatcherService messageDispatcherService;
 
     public MessageHandler(Socket socket, MessageDispatcherService messageDispatcherService) {
-        Log.d("SE464", "Creat MessageHandler");
+        Log.d("SE464", "Create MessageHandler");
         this.socket = socket;
         this.messageDispatcherService = messageDispatcherService;
     }
@@ -42,7 +42,7 @@ public class MessageHandler implements Runnable {
             intent.putExtra(WifiDirectService.EXTRA_INET_ADDRESS, socket.getInetAddress());
             messageDispatcherService.startService(intent);
 
-            Log.d("SE464", "Messsage Received: " + msg.toString());
+            Log.d("SE464", "Message Received: " + msg.toString());
 
             Intent messageIntent = new Intent(ChannelManagerImpl.WUMBO_MESSAGE_INTENT_ACTION);
             messageIntent.putExtra(ChannelManagerImpl.WUMBO_MESSAGE_EXTRA, msg);
