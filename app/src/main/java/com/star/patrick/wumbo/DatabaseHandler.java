@@ -250,7 +250,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(USER_DISPLAY_NAME, displayName);
 
-        db.update(CHANNEL_TABLE, values, USER_DISPLAY_NAME + " = ? ", new String[]{id.toString()});
+        db.update(USER_TABLE, values, USER_UUID + " = ? ", new String[]{id.toString()});
         db.close();
     }
 

@@ -137,6 +137,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         } else {
             Log.d("SE464", "MainActivity: me existed");
             me = new User(me.getId(), senderName, userKeys != null ? userKeys.getPublic() : null);
+            db.updateSenderDisplayName(me.getId(), senderName);
         }
         mePrivateKey = userKeys != null ? userKeys.getPrivate() : null;
 
