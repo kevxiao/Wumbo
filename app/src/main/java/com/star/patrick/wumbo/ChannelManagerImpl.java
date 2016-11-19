@@ -22,6 +22,9 @@ public class ChannelManagerImpl extends Observable implements ChannelManager {
     private Map<UUID,String> channelNames = new LinkedHashMap<>();
     private Set<UUID> receivedMessageIds = new HashSet<>();
 
+    //Why the fuck is this shit here????
+    private DatabaseHandler db;
+
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -34,7 +37,7 @@ public class ChannelManagerImpl extends Observable implements ChannelManager {
         }
     };
 
-    public ChannelManagerImpl(MainActivity context) {
+    public ChannelManagerImpl(MainActivity context, Sender me) {
         this.mainContext = context;
 
         final IntentFilter filter = new IntentFilter();
@@ -56,6 +59,8 @@ public class ChannelManagerImpl extends Observable implements ChannelManager {
                 }
             }
         });
+
+        db = new DatabaseHandler(context, me, mainContext, this);
     }
 
     @Override
@@ -74,6 +79,15 @@ public class ChannelManagerImpl extends Observable implements ChannelManager {
     public void send(Message msg) {
         Log.d("SE464", "ChannelManager send");
         receivedMessageIds.add(msg.getId());
+
+        //add to db if it is a channel the user cares about, for some reason?
+        if (channels.containsKey(msg.getChannelId())) {
+            Log.d("SE464", "ChannelMngr: i should log a message now");
+            db.addMessage(msg);
+        } else {
+            Log.d("SE464", "ChannelMngr: why don't i contain this channel?");
+        }
+
         Intent sendMsgIntent = new Intent(mainContext, WifiDirectService.class);
         sendMsgIntent.setAction(WifiDirectService.SEND_MESSAGE_ACTION);
         sendMsgIntent.putExtra(WifiDirectService.EXTRA_MESSAGE, msg);

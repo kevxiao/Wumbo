@@ -45,6 +45,7 @@ public class MessageListImpl implements MessageList {
     @Override
     public void addMessage(Message msg) {
         messages.add(msg);
+
     }
 
     public static List<Message> getMockMessageList() {

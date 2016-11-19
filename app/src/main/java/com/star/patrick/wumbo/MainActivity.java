@@ -2,7 +2,6 @@ package com.star.patrick.wumbo;
 
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -79,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         me = new Sender(extras != null && extras.getString("name") != null && !extras.getString("name").isEmpty() ? extras.getString("name") : "Anonymous");
 
-        channelManager = new ChannelManagerImpl(this);
+        channelManager = new ChannelManagerImpl(this, me);
         networkManager = new NetworkManagerImpl();
         msgChannel = new ChannelImpl(UUID.fromString(getResources().getString(R.string.public_uuid)), getResources().getString(R.string.public_name), networkManager, this, me, channelManager);
         channelManager.addChannel(msgChannel);
@@ -118,7 +117,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         msgChannel.addObserver(this);
 
-        List<Message> messages = new ArrayList<>();//MessageListImpl.getMockMessageList();
+        DatabaseHandler db = new DatabaseHandler(this, me, this, channelManager);
+        List<Message> messages = db.getAllMessages();//new ArrayList<>();//MessageListImpl.getMockMessageList();x`x`x`
 
         chatAdapter = new ChatAdapter(MainActivity.this, messages, me.getId());
 
@@ -149,6 +149,23 @@ public class MainActivity extends AppCompatActivity implements Observer {
         }
         channelListView.setAdapter(new ArrayAdapter<>(this, R.layout.channel_list_item, channels));
         channelListView.setOnItemClickListener(new ChannelListItemClickListener());
+
+        //DatabaseHandler db = new DatabaseHandler(this.getApplicationContext(), me, this, channelManager);
+
+//        Message dbTestMsg = new Message("FUCK ME", me, new Timestamp(10), UUID.fromString(getResources().getString(R.string.public_uuid)));
+//        dbTestMsg.setReceiveTime(new Timestamp(10));
+//        db.addMessage(dbTestMsg);
+//        Message dbRetreivedMsg = db.getMessage(dbTestMsg.getId());
+//        if (null == dbRetreivedMsg) {
+//            Log.d("SE464", "retrieved is null");
+//        } else {
+//            Log.d("SE464", "id: "+dbRetreivedMsg.getId() + " text: "+dbRetreivedMsg.getContent().getMessageContent()+" receiveTime: "+dbRetreivedMsg.getReceiveTime());
+//        }
+//        if (dbRetreivedMsg.getReceiveTime().equals(dbTestMsg.getReceiveTime())) {
+//            Log.d("SE464", "This message seemed to be retreived right");
+//        } else {
+//            Log.d("SE464", "Uh oh, retreived times are different");
+//        }
     }
 
     @Override
