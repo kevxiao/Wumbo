@@ -249,4 +249,10 @@ public class MainActivity extends AppCompatActivity implements Observer {
             //msgChannel =
         }
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+    }
 }
