@@ -1,15 +1,11 @@
 package com.star.patrick.wumbo.message;
 
-import android.content.Context;
-
-import com.star.patrick.wumbo.Sender;
+import com.star.patrick.wumbo.User;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.sql.Timestamp;
 import java.util.UUID;
 
@@ -22,7 +18,7 @@ import javax.crypto.SecretKey;
 public class EncryptedMessage implements Serializable {
     private UUID id;
     private SealedObject content;
-    private Sender sender;
+    private User user;
     private Timestamp sendTime;
     private Timestamp receiveTime;
     private UUID channelId;
@@ -36,7 +32,7 @@ public class EncryptedMessage implements Serializable {
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | IOException | IllegalBlockSizeException | InvalidKeyException e) {
             e.printStackTrace();
         }
-        this.sender = message.getSender();
+        this.user = message.getUser();
         this.sendTime = message.getSendTime();
         this.channelId = message.getChannelId();
         this.id = message.getId();
@@ -56,8 +52,8 @@ public class EncryptedMessage implements Serializable {
         return msgContent;
     }
 
-    public Sender getSender() {
-        return sender;
+    public User getUser() {
+        return user;
     }
 
     public Timestamp getSendTime() {

@@ -4,6 +4,7 @@ package com.star.patrick.wumbo.wifidirect;
 import android.content.Intent;
 import android.util.Log;
 import com.star.patrick.wumbo.ChannelManagerImpl;
+import com.star.patrick.wumbo.MessageReceiver;
 import com.star.patrick.wumbo.message.EncryptedMessage;
 import com.star.patrick.wumbo.message.Message;
 
@@ -42,8 +43,8 @@ public class MessageHandler implements Runnable {
 
             Log.d("SE464", "Message Received: " + msg.toString());
 
-            Intent messageIntent = new Intent(ChannelManagerImpl.WUMBO_MESSAGE_INTENT_ACTION);
-            messageIntent.putExtra(ChannelManagerImpl.WUMBO_MESSAGE_EXTRA, msg);
+            Intent messageIntent = new Intent(MessageReceiver.WUMBO_MESSAGE_INTENT_ACTION);
+            messageIntent.putExtra(MessageReceiver.WUMBO_MESSAGE_EXTRA, msg);
             messageDispatcherService.sendBroadcast(messageIntent);
 
             Log.d("SE464", "MessageHandler sent broadcast");

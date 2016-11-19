@@ -3,10 +3,9 @@ package com.star.patrick.wumbo.message;
 import android.content.Context;
 import android.net.Uri;
 
-import com.star.patrick.wumbo.Sender;
+import com.star.patrick.wumbo.User;
 
 import java.io.Serializable;
-import java.security.PrivateKey;
 import java.sql.Timestamp;
 import java.util.UUID;
 
@@ -19,7 +18,7 @@ import javax.crypto.SecretKey;
 public class Message implements Serializable {
     private UUID id;
     private MessageContent content;
-    private Sender sender;
+    private User user;
     private Timestamp sendTime;
     private Timestamp receiveTime;
     private UUID channelId;
@@ -27,35 +26,35 @@ public class Message implements Serializable {
     public Message(EncryptedMessage message, SecretKey secretKey) {
         this.id = message.getId();
         this.content = message.getContent(secretKey);
-        this.sender = message.getSender();
+        this.user = message.getUser();
         this.sendTime = message.getSendTime();
         this.receiveTime = message.getReceiveTime();
         this.channelId = message.getChannelId();
     }
 
-    public Message(String text, Sender sender, Timestamp sendTime, UUID channelId) {
+    public Message(String text, User user, Timestamp sendTime, UUID channelId) {
         this.content = new Text(text);
-        this.sender = sender;
+        this.user = user;
         this.sendTime = sendTime;
         this.channelId = channelId;
         this.id = UUID.randomUUID();
     }
 
-    public Message(UUID id, String text, Sender sender, Timestamp sendTime, UUID channelId) {
-        this(text, sender, sendTime, channelId);
+    public Message(UUID id, String text, User user, Timestamp sendTime, UUID channelId) {
+        this(text, user, sendTime, channelId);
         this.id = id;
     }
 
-    public Message(Uri path, Context context, Sender sender, Timestamp sendTime, UUID channelId) {
-        this.sender = sender;
+    public Message(Uri path, Context context, User user, Timestamp sendTime, UUID channelId) {
+        this.user = user;
         this.sendTime = sendTime;
         this.channelId = channelId;
         this.id = UUID.randomUUID();
         this.content = new Image(path, context, id);
     }
 
-    public Message(UUID id, Uri path, Context context, Sender sender, Timestamp sendTime, UUID channelId) {
-        this(path, context, sender, sendTime, channelId);
+    public Message(UUID id, Uri path, Context context, User user, Timestamp sendTime, UUID channelId) {
+        this(path, context, user, sendTime, channelId);
         this.id = id;
     }
 
@@ -81,8 +80,8 @@ public class Message implements Serializable {
         return "Use get content instead";
     }
 
-    public Sender getSender() {
-        return sender;
+    public User getUser() {
+        return user;
     }
 
     public Timestamp getSendTime() {

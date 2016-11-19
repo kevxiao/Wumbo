@@ -5,11 +5,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.provider.Contacts;
 import android.util.Log;
 import android.util.Base64;
 
 import com.star.patrick.wumbo.message.Message;
+import com.star.patrick.wumbo.message.MessageList;
+import com.star.patrick.wumbo.message.MessageListImpl;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -52,19 +53,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String CHANNEL_NAME = "name";
     private static final String CHANNEL_KEY = "key";
 
-    // Sender Table Column names
+    // User Table Column names
     private static final String USER_UUID = "uuid";
     private static final String USER_DISPLAY_NAME = "display_name";
 
-    private Sender me;
     private MainActivity mainActivity;
-    private ChannelManager channelManager;
+    private MessageCourier messageCourier;
 
-    public DatabaseHandler(Context context, Sender me, MainActivity mainActivity, ChannelManager channelManager) {
+    public DatabaseHandler(Context context, MainActivity mainActivity, MessageCourier messageCourier) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        this.me = me;
         this.mainActivity = mainActivity;
-        this.channelManager = channelManager;
+        this.messageCourier = messageCourier;
+
     }
 
     // Creating Tables
@@ -121,12 +121,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Log.d("SE464", "Saving a message to the database");
         SQLiteDatabase db = this.getWritableDatabase();
 
-        addSender(msg.getSender());
+        addSender(msg.getUser());
 
         ContentValues values = new ContentValues();
         values.put(MESSAGE_UUID, msg.getId().toString());
         values.put(MESSAGE_CUUID, msg.getChannelId().toString());
-        values.put(MESSAGE_SUUID, msg.getSender().getId().toString());
+        values.put(MESSAGE_SUUID, msg.getUser().getId().toString());
         values.put(MESSAGE_STIME, msg.getSendTime().getTime());
         values.put(MESSAGE_RTIME, msg.getReceiveTime().getTime());
         values.put(MESSAGE_TYPE, msg.getContent().getType().ordinal());
@@ -150,7 +150,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
 
         Message msg = null;
-        Sender snd = getSender(UUID.fromString(cursor.getString(cursor.getColumnIndex("suuid"))));
+        User snd = getSender(UUID.fromString(cursor.getString(cursor.getColumnIndex("suuid"))));
         switch (cursor.getInt(cursor.getColumnIndex("type"))){
             case 0:
                 msg = new Message(UUID.fromString(cursor.getString(cursor.getColumnIndex("uuid"))),
@@ -178,7 +178,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         while (cursor!=null && cursor.moveToNext()){
             Message msg = null;
-            Sender snd = getSender(UUID.fromString(cursor.getString(cursor.getColumnIndex("suuid"))));
+            User snd = getSender(UUID.fromString(cursor.getString(cursor.getColumnIndex("suuid"))));
             switch (cursor.getInt(cursor.getColumnIndex("type"))){
                 case 0:
                     msg = new Message(UUID.fromString(cursor.getString(cursor.getColumnIndex("uuid"))),
@@ -203,7 +203,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return getAllMessagesSince(new Timestamp(1));
     }
 
-    public Sender getSender(UUID id) {
+    public User getSender(UUID id) {
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.rawQuery(
@@ -215,7 +215,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             return null;
         }
 
-        Sender user = new Sender(id, cursor.getString(cursor.getColumnIndex(USER_DISPLAY_NAME)));
+        User user = new User(id, cursor.getString(cursor.getColumnIndex(USER_DISPLAY_NAME)));
 
         cursor.close();
         db.close();
@@ -223,7 +223,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return user;
     }
 
-    public void addSender(Sender user) {
+    public void addSender(User user) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -259,11 +259,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Channel channel = new ChannelImpl(
                 id,
                 cursor.getString(cursor.getColumnIndex(CHANNEL_NAME)),
-                new NetworkManagerImpl(),
                 mainActivity,
-                me,
-                channelManager,
-                new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES")
+                messageCourier,
+                new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES"),
+                this.getAllMessages(UUID.fromString(cursor.getString(cursor.getColumnIndex(CHANNEL_UUID))))
         );
         cursor.close();
         db.close();
@@ -308,11 +307,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             Channel channel = new ChannelImpl(
                     UUID.fromString(cursor.getString(cursor.getColumnIndex(CHANNEL_UUID))),
                     cursor.getString(cursor.getColumnIndex(CHANNEL_NAME)),
-                    new NetworkManagerImpl(),
                     mainActivity,
-                    me,
-                    channelManager,
-                    new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES")
+                    messageCourier,
+                    new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES"),
+                    this.getAllMessages(UUID.fromString(cursor.getString(cursor.getColumnIndex(CHANNEL_UUID))))
             );
             channels.put(channel.getId(), channel);
         } while ( cursor.moveToNext() );
@@ -321,5 +319,34 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close();
 
         return channels;
+    }
+
+    public MessageList getAllMessages(UUID channelId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM messages WHERE cuuid = ? ORDER BY rtime ASC;", new String[]{String.valueOf(channelId.toString())});
+
+        MessageList msgs= new MessageListImpl();
+
+        while (cursor!=null && cursor.moveToNext()){
+            Message msg = null;
+            User snd = getSender(UUID.fromString(cursor.getString(cursor.getColumnIndex("suuid"))));
+            switch (cursor.getInt(cursor.getColumnIndex("type"))){
+                case 0:
+                    msg = new Message(UUID.fromString(cursor.getString(cursor.getColumnIndex("uuid"))),
+                            cursor.getString(cursor.getColumnIndex("content")),
+                            snd,
+                            new Timestamp(cursor.getLong(cursor.getColumnIndex("stime"))),
+                            UUID.fromString(cursor.getString(cursor.getColumnIndex("cuuid"))));
+                    msg.setReceiveTime(new Timestamp(cursor.getLong(cursor.getColumnIndex("rtime"))));
+                    msgs.addMessage(msg);
+                    break;
+            }
+        }
+
+        cursor.close();
+        db.close();
+
+        return msgs;
     }
 }

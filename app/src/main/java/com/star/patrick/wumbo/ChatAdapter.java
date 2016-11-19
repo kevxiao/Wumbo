@@ -4,14 +4,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.net.Uri;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewManager;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -20,7 +17,6 @@ import android.widget.TextView;
 
 import com.star.patrick.wumbo.message.Image;
 import com.star.patrick.wumbo.message.Message;
-import com.star.patrick.wumbo.message.MessageContent;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,6 +31,7 @@ public class ChatAdapter extends BaseAdapter {
         this.context = context;
         this.messages = messages;
         this.meId = meId;
+        Log.d("SE464", "ChatAdaptor: created Messages size is " + messages.size());
     }
 
     @Override
@@ -72,7 +69,7 @@ public class ChatAdapter extends BaseAdapter {
         sparams = (LinearLayout.LayoutParams) holder.sender.getLayoutParams();
         tparams = (LinearLayout.LayoutParams) holder.txtInfo.getLayoutParams();
         cparams = (LinearLayout.LayoutParams) holder.contentWithBg.getLayoutParams();
-        if(msg.getSender().getId() == meId) {
+        if(msg.getUser().getId() == meId) {
             lparams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
             sparams.gravity = Gravity.END;
             tparams.gravity = Gravity.END;
@@ -87,7 +84,7 @@ public class ChatAdapter extends BaseAdapter {
         holder.sender.setLayoutParams(sparams);
         holder.txtInfo.setLayoutParams(tparams);
         holder.contentWithBg.setLayoutParams(cparams);
-        holder.sender.setText(msg.getSender().getDisplayName());
+        holder.sender.setText(msg.getUser().getDisplayName());
         holder.txtInfo.setText(msg.getReceiveTime().toString());
 
         switch(msg.getContent().getType()){
@@ -119,7 +116,7 @@ public class ChatAdapter extends BaseAdapter {
         holder.imgMessage = (ImageView) v.findViewById(R.id.imgMessage);
         holder.contentWithBg = (LinearLayout) v.findViewById(R.id.contentWithBackground);
         holder.txtInfo = (TextView) v.findViewById(R.id.txtInfo);
-        holder.sender = (TextView) v.findViewById(R.id.sender);
+        holder.sender = (TextView) v.findViewById(R.id.user);
         return holder;
     }
 
@@ -128,7 +125,9 @@ public class ChatAdapter extends BaseAdapter {
     }
 
     public void addAll(List<Message> msgs) {
+        Log.d("SE464", "ChatAdaptor: before Messages size is " + msgs.size());
         messages.addAll(msgs);
+        Log.d("SE464", "ChatAdaptor: after Messages size is " + msgs.size());
     }
 
     private static class ViewHolder {

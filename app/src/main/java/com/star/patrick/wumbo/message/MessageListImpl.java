@@ -1,12 +1,11 @@
 package com.star.patrick.wumbo.message;
 
-import com.star.patrick.wumbo.Sender;
+import android.util.Log;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 public class MessageListImpl implements MessageList {
@@ -14,7 +13,7 @@ public class MessageListImpl implements MessageList {
 
     @Override
     public List<Message> getAllMessages() {
-        return messages;
+        return new ArrayList<>(messages);
     }
 
     @Override
@@ -44,7 +43,9 @@ public class MessageListImpl implements MessageList {
 
     @Override
     public void addMessage(Message msg) {
+        Log.d("SE464", "MessageList adding message");
         messages.add(msg);
+        Log.d("SE464", "MessageList has size: " + messages.size());
 
     }
 }

@@ -3,11 +3,7 @@ package com.star.patrick.wumbo;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.security.KeyPairGeneratorSpec;
-import android.security.keystore.KeyGenParameterSpec;
-import android.security.keystore.KeyProperties;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -30,32 +26,16 @@ import com.star.patrick.wumbo.wifidirect.HandshakeDispatcherService;
 import com.star.patrick.wumbo.wifidirect.MessageDispatcherService;
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
-import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.KeyFactory;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.UUID;
 
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.SecretKeySpec;
-import javax.security.auth.x500.X500Principal;
 
 public class MainActivity extends AppCompatActivity implements Observer {
 
@@ -67,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private ChatAdapter chatAdapter;
     private ListView listView;
     private Message lastMessage;
-    private Sender me;
+    private User me;
     private PrivateKey mePrivateKey;
     private List<ChannelListItem> channels;
 
@@ -80,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private Runnable onStartCallback;
     private ActionBar supportActionBar;
     private ActionBarDrawerToggle drawerToggle;
+    private MessageCourier messageCourier;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,17 +124,27 @@ public class MainActivity extends AppCompatActivity implements Observer {
         }
         */
 
-        me = new Sender(senderName, userKeys != null ? userKeys.getPublic() : null);
+        me = new User(senderName, userKeys != null ? userKeys.getPublic() : null);
         mePrivateKey = userKeys != null ? userKeys.getPrivate() : null;
 
-        channelManager = new ChannelManagerImpl(this, me);
-        networkManager = new NetworkManagerImpl();
+        messageCourier = new MessageCourierImpl(this);
+        channelManager = new ChannelManagerImpl(this, messageCourier);
+        DatabaseHandler db = new DatabaseHandler(this, this, messageCourier);
 
         byte[] encodedKey = Base64.decode(getResources().getString(R.string.public_secret_key), Base64.DEFAULT);
-        msgChannel = new ChannelImpl(UUID.fromString(getResources().getString(R.string.public_uuid)), getResources().getString(R.string.public_name), networkManager, this, me, channelManager, new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES"));
+        msgChannel = new ChannelImpl(
+                UUID.fromString(getResources().getString(R.string.public_uuid)),
+                getResources().getString(R.string.public_name),
+                this,
+                messageCourier,
+                new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES"),
+                db.getAllMessages(UUID.fromString(getResources().getString(R.string.public_uuid)))
+        );
+        msgChannel.addObserver(this);
         channelManager.addChannel(msgChannel);
-        msgChannelList = new ChannelListImpl();
-        msgChannelList.put(UUID.fromString(getResources().getString(R.string.public_uuid)), msgChannel);
+
+//        msgChannelList = new ChannelListImpl();
+//        msgChannelList.put(UUID.fromString(getResources().getString(R.string.public_uuid)), msgChannel);
 
         sendBtn = (ImageButton) findViewById(R.id.sendBtn);
         cameraBtn = (ImageButton) findViewById(R.id.cameraIcon);
@@ -163,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
             @Override
             public void onClick(View v) {
                 if(!editMsg.getText().toString().isEmpty()) {
-                    msgChannel.send(editMsg.getText().toString());
+                    msgChannel.send(me, editMsg.getText().toString());
                     editMsg.setText("");
                 }
             }
@@ -185,12 +176,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
             onStartCallback.run();
         }
 
-        msgChannel.addObserver(this);
-
-        DatabaseHandler db = new DatabaseHandler(this, me, this, channelManager);
-        List<Message> messages = db.getAllMessages();//new ArrayList<>();//MessageListImpl.getMockMessageList();x`x`x`
-
-        chatAdapter = new ChatAdapter(MainActivity.this, messages, me.getId());
+        chatAdapter = new ChatAdapter(MainActivity.this, msgChannel.getAllMessages(), me.getId());
 
         listView = (ListView) findViewById(R.id.myList);
         listView.setAdapter(chatAdapter);
@@ -264,6 +250,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
     @Override
     public void update(Observable observable, Object o) {
+        Log.d("SE464", "Updating messages");
         List<Message> newMessages;
 
         if (null == lastMessage) {
@@ -283,6 +270,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 }
             }
         }
+        Log.d("SE464", "MainActivity: New messages has size: " + newMessages.size());
         if (null != newMessages && newMessages.size() >= 1) {
             lastMessage = newMessages.get(newMessages.size()-1);
 
@@ -314,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 if(imageReturnedIntent != null){
                     Uri selectedImage = imageReturnedIntent.getData();
                     Log.d("SE464", "Selected image: "+selectedImage.getPath());
-                    msgChannel.send(selectedImage, this);
+                    msgChannel.send(me, selectedImage, this);
                     //imageview.setImageURI(selectedImage);
                 }
                 break;
