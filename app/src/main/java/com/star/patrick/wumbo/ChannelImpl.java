@@ -5,6 +5,8 @@ import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -15,7 +17,9 @@ import com.star.patrick.wumbo.message.Message;
 import com.star.patrick.wumbo.message.MessageContent;
 import com.star.patrick.wumbo.message.MessageList;
 import com.star.patrick.wumbo.message.MessageListImpl;
+import com.star.patrick.wumbo.message.TransferImage;
 
+import java.io.FileOutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.Timestamp;
@@ -95,23 +99,26 @@ public class ChannelImpl extends Observable implements Channel {
         if (!msgIds.contains(emsg.getId())) {
             Log.d("SE464", "Channel hasn't received before");
             Message msg = new Message(emsg, this.encKey);
-            NotificationCompat.Builder mBuilder =
-                    new NotificationCompat.Builder(mainContext)
-                            .setSmallIcon(R.drawable.ic_wumbo)
-                            .setContentTitle(this.name)
-                            .setContentText(msg.getContent().getType() == MessageContent.MessageType.TEXT ? (String) msg.getContent().getMessageContent() : "Open to see image.");
-            Intent resultIntent = new Intent(mainContext, MainActivity.class);
-            resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            TaskStackBuilder stackBuilder = TaskStackBuilder.create(mainContext);
-            stackBuilder.addParentStack(MainActivity.class);
-            stackBuilder.addNextIntent(resultIntent);
-            PendingIntent resultPendingIntent = PendingIntent.getActivity(mainContext.getApplicationContext(), (int) System.currentTimeMillis(), resultIntent, 0);
-            mBuilder.setAutoCancel(true);
-            mBuilder.setContentIntent(resultPendingIntent);
-            NotificationManager mNotificationManager =
-                    (NotificationManager) mainContext.getSystemService(Context.NOTIFICATION_SERVICE);
-            mNotificationManager.notify(0, mBuilder.build());
+            this.createNotification(msg);
 
+            /*
+            if(msg.getContent().getType() == MessageContent.MessageType.IMAGE) {
+                byte[] msgContent = (byte[]) msg.getContent().getMessageContent();
+                msg = new Message()
+                if (msgContent != null) {
+                    msg = new Message(c);
+                    Log.d("SE464", "Saving bitmap to " + filepath);
+                    FileOutputStream out = null;
+                    try{
+                        Bitmap bitmapImg = BitmapFactory.decodeByteArray(msgContent, 0, msgContent.length);
+                        out = new FileOutputStream(filepath);
+                        bitmapImg.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+            */
             msg.handleContentOnReceive(mainContext);
             add(msg);
         }
@@ -126,6 +133,25 @@ public class ChannelImpl extends Observable implements Channel {
         notifyObservers();
 
         //ADD MESSAGE TO THE DATABASE
+    }
+
+    private void createNotification(Message msg) {
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(mainContext)
+                        .setSmallIcon(R.drawable.ic_wumbo)
+                        .setContentTitle(this.name)
+                        .setContentText(msg.getContent().getType() == MessageContent.MessageType.TEXT ? (String) msg.getContent().getMessageContent() : "Open to see image.");
+        Intent resultIntent = new Intent(mainContext, MainActivity.class);
+        resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(mainContext);
+        stackBuilder.addParentStack(MainActivity.class);
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent = PendingIntent.getActivity(mainContext.getApplicationContext(), (int) System.currentTimeMillis(), resultIntent, 0);
+        mBuilder.setAutoCancel(true);
+        mBuilder.setContentIntent(resultPendingIntent);
+        NotificationManager mNotificationManager =
+                (NotificationManager) mainContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.notify(0, mBuilder.build());
     }
 
     @Override
