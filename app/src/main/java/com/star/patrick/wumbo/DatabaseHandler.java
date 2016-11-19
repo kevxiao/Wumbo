@@ -11,6 +11,7 @@ import com.star.patrick.wumbo.message.Message;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -50,8 +51,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String USER_UUID = "uuid";
     private static final String USER_DISPLAY_NAME = "display_name";
 
-    public DatabaseHandler(Context context) {
+    private Sender me;
+    private MainActivity mainActivity;
+    private ChannelManager channelManager;
+
+    public DatabaseHandler(Context context, Sender me, MainActivity mainActivity, ChannelManager channelManager) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        this.me = me;
+        this.mainActivity = mainActivity;
+        this.channelManager = channelManager;
     }
 
     // Creating Tables
@@ -183,30 +191,117 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     public Sender getSender(UUID id) {
-        return null;
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT * FROM " + USER_TABLE + " WHERE " + USER_UUID + " = ? ",
+                new String[]{id.toString()}
+        );
+
+        if (null != cursor) {
+            cursor.moveToFirst();
+        } else {
+            return null;
+        }
+
+        Sender user = new Sender(id, cursor.getString(cursor.getColumnIndex(USER_DISPLAY_NAME)));
+        
+        cursor.close();
+
+        return user;
     }
 
     public void addSender(Sender user) {
+        SQLiteDatabase db = this.getWritableDatabase();
 
+        ContentValues values = new ContentValues();
+        values.put(USER_UUID, user.getId().toString());
+        values.put(USER_DISPLAY_NAME, user.getDisplayName());
+
+        db.insert(USER_TABLE, null, values);
     }
 
     public void updateSenderDisplayName(UUID id, String displayName) {
+        SQLiteDatabase db = this.getWritableDatabase();
 
+        ContentValues values = new ContentValues();
+        values.put(USER_DISPLAY_NAME, displayName);
+
+        db.update(CHANNEL_TABLE, values, USER_DISPLAY_NAME + " = ? ", new String[]{id.toString()});
     }
 
     public Channel getChannel(UUID id) {
-        return null;
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT * FROM " + CHANNEL_TABLE + " WHERE " + CHANNEL_UUID + " = ? ",
+                new String[]{id.toString()}
+        );
+
+        if (null != cursor) {
+            cursor.moveToFirst();
+        } else {
+            return null;
+        }
+
+        Channel channel = new ChannelImpl(
+                id,
+                cursor.getString(cursor.getColumnIndex(CHANNEL_NAME)),
+                new NetworkManagerImpl(),
+                mainActivity,
+                me,
+                channelManager
+        );
+        cursor.close();
+
+        return channel;
     }
 
     public void addChannel(Channel channel) {
+        SQLiteDatabase db = this.getWritableDatabase();
 
+        ContentValues values = new ContentValues();
+        values.put(CHANNEL_UUID, channel.getId().toString());
+        values.put(CHANNEL_NAME, channel.getName());
+
+        db.insert(CHANNEL_TABLE, null, values);
     }
 
     public void removeChannel(UUID id) {
+        SQLiteDatabase db = this.getWritableDatabase();
 
+        db.delete(CHANNEL_TABLE, CHANNEL_UUID + " = ? ", new String[]{id.toString()});
     }
 
-    public Map<UUID, Channel> getChannesl() {
-        return null;
+    public Map<UUID, Channel> getChannels() {
+        Map<UUID, Channel> channels = new LinkedHashMap<>();
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT * FROM " + CHANNEL_TABLE + " ORDER BY " + CHANNEL_NAME,
+                new String[]{}
+        );
+
+        if (null != cursor) {
+            cursor.moveToFirst();
+        } else {
+            return channels;
+        }
+
+        do {
+            Channel channel = new ChannelImpl(
+                    UUID.fromString(cursor.getString(cursor.getColumnIndex(CHANNEL_UUID))),
+                    cursor.getString(cursor.getColumnIndex(CHANNEL_NAME)),
+                    new NetworkManagerImpl(),
+                    mainActivity,
+                    me,
+                    channelManager
+            );
+            channels.put(channel.getId(), channel);
+        } while ( !cursor.moveToNext() );
+
+        cursor.close();
+        return channels;
     }
 }
