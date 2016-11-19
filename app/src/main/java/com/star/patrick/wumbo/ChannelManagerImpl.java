@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
+import com.star.patrick.wumbo.message.EncryptedMessage;
 import com.star.patrick.wumbo.message.Message;
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
@@ -28,7 +29,7 @@ public class ChannelManagerImpl extends Observable implements ChannelManager {
             Log.d("SE464", "Channel received a message");
             String action = intent.getAction();
             if (WUMBO_MESSAGE_INTENT_ACTION.equals(action)) {
-                Message msg = (Message) intent.getSerializableExtra(WUMBO_MESSAGE_EXTRA);
+                EncryptedMessage msg = (EncryptedMessage) intent.getSerializableExtra(WUMBO_MESSAGE_EXTRA);
                 receive(msg);
             }
         }
@@ -59,7 +60,7 @@ public class ChannelManagerImpl extends Observable implements ChannelManager {
     }
 
     @Override
-    public void receive(Message msg) {
+    public void receive(EncryptedMessage msg) {
         Log.d("SE464", "ChannelManager receive");
         if (!receivedMessageIds.contains(msg.getId())) {
             Log.d("SE464", "ChannelManager first time receiving");
@@ -71,7 +72,7 @@ public class ChannelManagerImpl extends Observable implements ChannelManager {
     }
 
     @Override
-    public void send(Message msg) {
+    public void send(EncryptedMessage msg) {
         Log.d("SE464", "ChannelManager send");
         receivedMessageIds.add(msg.getId());
         Intent sendMsgIntent = new Intent(mainContext, WifiDirectService.class);

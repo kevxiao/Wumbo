@@ -4,13 +4,18 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.security.KeyPairGeneratorSpec;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,12 +31,32 @@ import com.star.patrick.wumbo.wifidirect.HandshakeDispatcherService;
 import com.star.patrick.wumbo.wifidirect.MessageDispatcherService;
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
+import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.UUID;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.SecretKeySpec;
+import javax.security.auth.x500.X500Principal;
 
 public class MainActivity extends AppCompatActivity implements Observer {
 
@@ -44,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private ListView listView;
     private Message lastMessage;
     private Sender me;
+    private PrivateKey mePrivateKey;
     private List<ChannelListItem> channels;
 
     private ImageButton sendBtn;
@@ -77,11 +103,53 @@ public class MainActivity extends AppCompatActivity implements Observer {
         );
         Bundle extras = getIntent().getExtras();
 
-        me = new Sender(extras != null && extras.getString("name") != null && !extras.getString("name").isEmpty() ? extras.getString("name") : "Anonymous");
+        KeyPair userKeys = null;
+        String senderName = (extras != null && extras.getString("name") != null && !extras.getString("name").isEmpty()) ? extras.getString("name") : "Anonymous";
+
+        try {
+            KeyPairGenerator kpg;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                kpg = KeyPairGenerator.getInstance(
+                        KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
+                try {
+                    kpg.initialize(new KeyGenParameterSpec.Builder(
+                            senderName,
+                            KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                            .setDigests(KeyProperties.DIGEST_SHA256,
+                                    KeyProperties.DIGEST_SHA512)
+                            .build());
+                } catch (InvalidAlgorithmParameterException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                kpg = KeyPairGenerator.getInstance("RSA", "AndroidKeyStore");
+                try {
+                    Calendar endDate = Calendar.getInstance();
+                    endDate.add(Calendar.YEAR, 1000);
+                    kpg.initialize(new KeyPairGeneratorSpec.Builder(this)
+                            .setAlias(senderName)
+                            .setSubject(new X500Principal("CN=Wumbo, O=Android, C=US"))
+                            .setSerialNumber(BigInteger.ONE)
+                            .setStartDate(Calendar.getInstance().getTime())
+                            .setEndDate(endDate.getTime())
+                            .build());
+                } catch (InvalidAlgorithmParameterException e) {
+                    e.printStackTrace();
+                }
+            }
+            userKeys = kpg.generateKeyPair();
+        } catch (NoSuchProviderException | NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        me = new Sender(senderName, userKeys != null ? userKeys.getPublic() : null);
+        mePrivateKey = userKeys != null ? userKeys.getPrivate() : null;
 
         channelManager = new ChannelManagerImpl(this);
         networkManager = new NetworkManagerImpl();
-        msgChannel = new ChannelImpl(UUID.fromString(getResources().getString(R.string.public_uuid)), getResources().getString(R.string.public_name), networkManager, this, me, channelManager);
+
+        byte[] encodedKey = Base64.decode(getResources().getString(R.string.public_secret_key), Base64.DEFAULT);
+        msgChannel = new ChannelImpl(UUID.fromString(getResources().getString(R.string.public_uuid)), getResources().getString(R.string.public_name), networkManager, this, me, channelManager, new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES"));
         channelManager.addChannel(msgChannel);
         msgChannelList = new ChannelListImpl();
         msgChannelList.put(UUID.fromString(getResources().getString(R.string.public_uuid)), msgChannel);

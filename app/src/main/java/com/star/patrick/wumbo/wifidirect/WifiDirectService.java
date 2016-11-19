@@ -16,6 +16,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.star.patrick.wumbo.message.EncryptedMessage;
 import com.star.patrick.wumbo.message.Message;
 
 import java.lang.reflect.Method;
@@ -172,10 +173,7 @@ public class WifiDirectService extends Service {
                     Log.d(TAG, "Device is null!");
                 }
                 else {
-                    Message message = (Message) intent.getSerializableExtra(EXTRA_MESSAGE);
-                    if(message.getContent().getMessageContent() == null) {
-                        Log.d(TAG, "Message content is null!");
-                    }
+                    EncryptedMessage message = (EncryptedMessage) intent.getSerializableExtra(EXTRA_MESSAGE);
                     device.sendMessage(message);
                 }
             } break;

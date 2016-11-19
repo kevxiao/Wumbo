@@ -6,8 +6,11 @@ import android.net.Uri;
 import com.star.patrick.wumbo.Sender;
 
 import java.io.Serializable;
+import java.security.PrivateKey;
 import java.sql.Timestamp;
 import java.util.UUID;
+
+import javax.crypto.SecretKey;
 
 /**
  * Created by Kevin Xiao on 2016-10-15.
@@ -20,6 +23,15 @@ public class Message implements Serializable {
     private Timestamp sendTime;
     private Timestamp receiveTime;
     private UUID channelId;
+
+    public Message(EncryptedMessage message, SecretKey secretKey) {
+        this.id = message.getId();
+        this.content = message.getContent(secretKey);
+        this.sender = message.getSender();
+        this.sendTime = message.getSendTime();
+        this.receiveTime = message.getReceiveTime();
+        this.channelId = message.getChannelId();
+    }
 
     public Message(String text, Sender sender, Timestamp sendTime, UUID channelId) {
         this.content = new Text(text);

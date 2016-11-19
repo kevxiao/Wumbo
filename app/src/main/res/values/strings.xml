@@ -5,6 +5,7 @@
     <string name="message_hint">Write Message Here</string>
     <string name="public_name">Public</string>
     <string name="public_uuid">1a27c5da-0d6e-4f66-9224-67ae564986ec</string>
+    <string name="public_secret_key">COPUZ4eSwN2IzjH5EtNlhA==</string>
     <string name="intro_title">Display Name</string>
     <string name="prompt_name">Select your display name!</string>
     <string name="default_name">Anonymous</string>

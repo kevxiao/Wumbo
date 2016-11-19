@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.Contacts;
+import android.util.Base64;
 
 import com.star.patrick.wumbo.message.Message;
 
@@ -15,6 +16,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Created by jesse on 18/11/16.
@@ -46,6 +49,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // Channel Table Column names
     private static final String CHANNEL_UUID = "uuid";
     private static final String CHANNEL_NAME = "name";
+    private static final String CHANNEL_KEY = "key";
 
     // Sender Table Column names
     private static final String USER_UUID = "uuid";
@@ -84,6 +88,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                     CHANNEL_UUID + " TEXT PRIMARY KEY " +
                     ", " +
                     CHANNEL_NAME + " TEXT " +
+                    ", " +
+                    CHANNEL_KEY + " TEXT " +
                 ") ";
         db.execSQL(CREATE_CHANNEL_TABLE);
 
@@ -120,7 +126,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(MESSAGE_SUUID, msg.getSender().getId().toString());
         values.put(MESSAGE_STIME, msg.getSendTime().getTime());
         values.put(MESSAGE_RTIME, msg.getReceiveTime().getTime());
-
         values.put(MESSAGE_TYPE, msg.getContent().getType().ordinal());
         switch (msg.getContent().getType()) {
             case TEXT:
@@ -248,13 +253,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             return null;
         }
 
+        byte[] encodedKey = Base64.decode(mainActivity.getResources().getString(cursor.getColumnIndex(CHANNEL_KEY)), Base64.DEFAULT);
         Channel channel = new ChannelImpl(
                 id,
                 cursor.getString(cursor.getColumnIndex(CHANNEL_NAME)),
                 new NetworkManagerImpl(),
                 mainActivity,
                 me,
-                channelManager
+                channelManager,
+                new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES")
         );
         cursor.close();
         db.close();
@@ -297,16 +304,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
 
         do {
+            byte[] encodedKey = Base64.decode(mainActivity.getResources().getString(cursor.getColumnIndex(CHANNEL_KEY)), Base64.DEFAULT);
             Channel channel = new ChannelImpl(
                     UUID.fromString(cursor.getString(cursor.getColumnIndex(CHANNEL_UUID))),
                     cursor.getString(cursor.getColumnIndex(CHANNEL_NAME)),
                     new NetworkManagerImpl(),
                     mainActivity,
                     me,
-                    channelManager
+                    channelManager,
+                    new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES")
             );
             channels.put(channel.getId(), channel);
-        } while ( !cursor.moveToNext() );
+        } while ( cursor.moveToNext() );
 
         cursor.close();
         db.close();

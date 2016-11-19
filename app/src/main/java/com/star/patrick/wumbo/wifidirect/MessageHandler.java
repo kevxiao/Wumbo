@@ -4,6 +4,7 @@ package com.star.patrick.wumbo.wifidirect;
 import android.content.Intent;
 import android.util.Log;
 import com.star.patrick.wumbo.ChannelManagerImpl;
+import com.star.patrick.wumbo.message.EncryptedMessage;
 import com.star.patrick.wumbo.message.Message;
 
 import java.io.IOException;
@@ -30,10 +31,7 @@ public class MessageHandler implements Runnable {
 
             inputStream = socket.getInputStream();
             objectInputStream = new ObjectInputStream(inputStream);
-            Message msg = (Message) objectInputStream.readObject();
-            if(msg.getContent().getMessageContent() == null) {
-                Log.d("SE464", "Received message content is null");
-            }
+            EncryptedMessage msg = (EncryptedMessage) objectInputStream.readObject();
 
             Log.d("Client's InetAddress", "" + socket.getInetAddress());
             //TODO Change the intent's class to the right one
@@ -42,7 +40,7 @@ public class MessageHandler implements Runnable {
             intent.putExtra(WifiDirectService.EXTRA_INET_ADDRESS, socket.getInetAddress());
             messageDispatcherService.startService(intent);
 
-            Log.d("SE464", "Messsage Received: " + msg.toString());
+            Log.d("SE464", "Message Received: " + msg.toString());
 
             Intent messageIntent = new Intent(ChannelManagerImpl.WUMBO_MESSAGE_INTENT_ACTION);
             messageIntent.putExtra(ChannelManagerImpl.WUMBO_MESSAGE_EXTRA, msg);

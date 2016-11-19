@@ -1,19 +1,18 @@
 package com.star.patrick.wumbo;
 
 import java.io.Serializable;
+import java.security.PublicKey;
 import java.util.UUID;
-
-/**
- * Created by giliam on 10/15/2016.
- */
 
 public class Sender implements Serializable {
     private String displayName;
     private UUID id;
+    private PublicKey publicKey;
 
-    public Sender(String displayName) {
+    public Sender(String displayName, PublicKey p) {
         this.id = UUID.randomUUID();
         this.displayName = displayName;
+        this.publicKey = p;
     }
 
     public Sender(UUID id, String displayName) {
@@ -31,5 +30,9 @@ public class Sender implements Serializable {
 
     public UUID getId() {
         return id;
+    }
+
+    public PublicKey getPublicKey() {
+        return publicKey;
     }
 }

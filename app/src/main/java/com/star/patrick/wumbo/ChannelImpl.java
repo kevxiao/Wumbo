@@ -7,20 +7,28 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
+import android.util.Base64;
 import android.util.Log;
 
+import com.star.patrick.wumbo.message.EncryptedMessage;
 import com.star.patrick.wumbo.message.Image;
 import com.star.patrick.wumbo.message.Message;
 import com.star.patrick.wumbo.message.MessageContent;
 import com.star.patrick.wumbo.message.MessageList;
 import com.star.patrick.wumbo.message.MessageListImpl;
 
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Observable;
 import java.util.UUID;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 
 public class ChannelImpl extends Observable implements Channel {
 
@@ -31,20 +39,30 @@ public class ChannelImpl extends Observable implements Channel {
     private NetworkManager networkMgr;
     private MainActivity mainContext;
     private ChannelManager channelManager;
+    private SecretKey encKey;
 
     public ChannelImpl(String name, NetworkManager networkMgr, MainActivity context, Sender me, ChannelManager channelManager) {
+        this(UUID.randomUUID(), name, networkMgr, context, me, channelManager, null);
+        try {
+            KeyGenerator kgen = KeyGenerator.getInstance("AES");
+            SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
+            sr.setSeed(Calendar.getInstance().getTimeInMillis());
+            kgen.init(128, sr);
+            encKey = kgen.generateKey();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public ChannelImpl(UUID id, String name, NetworkManager networkMgr, MainActivity context, Sender me, ChannelManager channelManager, SecretKey key) {
         this.name = name;
         this.msgs = new MessageListImpl();
         this.networkMgr = networkMgr;
-        this.id = UUID.randomUUID();
+        this.id = id;
         this.mainContext = context;
         this.me = me;
         this.channelManager = channelManager;
-    }
-
-    public ChannelImpl(UUID id, String name, NetworkManager networkMgr, MainActivity context, Sender me, ChannelManager channelManager) {
-        this(name, networkMgr, context, me, channelManager);
-        this.id = id;
+        this.encKey = key;
     }
 
     public void send(String msgText) {
@@ -63,12 +81,13 @@ public class ChannelImpl extends Observable implements Channel {
     public void send(Message msg) {
         Log.d("SE464", "Channel send message");
         add(msg);
-        channelManager.send(msg);
+        EncryptedMessage emsg = new EncryptedMessage(msg, this.encKey);
+        channelManager.send(emsg);
     }
 
-    public void receive(Message msg) {
+    public void receive(EncryptedMessage emsg) {
         Log.d("SE464", "Channel receive");
-
+        Message msg = new Message(emsg, this.encKey);
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(mainContext)
                         .setSmallIcon(R.drawable.ic_wumbo)

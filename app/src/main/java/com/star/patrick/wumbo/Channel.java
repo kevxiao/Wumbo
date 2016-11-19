@@ -3,6 +3,7 @@ package com.star.patrick.wumbo;
 import android.content.Context;
 import android.net.Uri;
 
+import com.star.patrick.wumbo.message.EncryptedMessage;
 import com.star.patrick.wumbo.message.Message;
 
 import java.sql.Timestamp;
@@ -18,5 +19,5 @@ public interface Channel {
     List<Message> getAllMessagesSince(Timestamp ts);
     UUID getId();
     String getName();
-    void receive(Message msg);
+    void receive(EncryptedMessage msg);
 }

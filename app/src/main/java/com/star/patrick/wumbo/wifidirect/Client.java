@@ -3,6 +3,7 @@ package com.star.patrick.wumbo.wifidirect;
 
 import java.net.InetAddress;
 
+import com.star.patrick.wumbo.message.EncryptedMessage;
 import com.star.patrick.wumbo.message.Message;
 
 
@@ -23,7 +24,7 @@ public class Client implements Device {
     public void addClient(InetAddress inetAddress) {}
 
     @Override
-    public void sendMessage(Message message) {
+    public void sendMessage(EncryptedMessage message) {
         MessageSender.sendMessage(hostAddress, MessageDispatcherService.PORT, message);
     }
 }
