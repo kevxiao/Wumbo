@@ -17,7 +17,6 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.star.patrick.wumbo.message.EncryptedMessage;
-import com.star.patrick.wumbo.message.Message;
 
 import java.lang.reflect.Method;
 import java.net.InetAddress;
