@@ -14,12 +14,26 @@ import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Base64;
 import android.util.Log;
 
+import com.star.patrick.wumbo.R;
+import com.star.patrick.wumbo.User;
 import com.star.patrick.wumbo.message.EncryptedMessage;
+import com.star.patrick.wumbo.message.Message;
 
 import java.lang.reflect.Method;
 import java.net.InetAddress;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 import static com.star.patrick.wumbo.MainActivity.TAG;
 
@@ -44,6 +58,15 @@ public class WifiDirectService extends Service {
         channel = manager.initialize(this, getMainLooper(), null);
 
         discoverPeers();
+//        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+//        scheduler.scheduleAtFixedRate(new Runnable() {
+//            @Override
+//            public void run() {
+//                discoverPeers();
+//            }
+//        }, 0, 30, TimeUnit.SECONDS);
+
+        requestConnectionInfo();
     }
 
     @Nullable
@@ -59,21 +82,21 @@ public class WifiDirectService extends Service {
         manager.removeGroup(channel, null);
 //        manager.stopPeerDiscovery(channel, null);
 
-        try {
-            Class WifiDirectManagerClass = Class.forName("android.net.wifi.p2p.WifiP2pManager");
-            Method deletePersistentGroup = WifiDirectManagerClass.getMethod(
-                "deletePersistentGroup",
-                WifiP2pManager.Channel.class,
-                int.class,
-                WifiP2pManager.ActionListener.class
-            );
-
-            for (int netId = 0; netId < 32; netId++) {
-                deletePersistentGroup.invoke(manager, channel, netId, null);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            Class WifiDirectManagerClass = Class.forName("android.net.wifi.p2p.WifiP2pManager");
+//            Method deletePersistentGroup = WifiDirectManagerClass.getMethod(
+//                "deletePersistentGroup",
+//                WifiP2pManager.Channel.class,
+//                int.class,
+//                WifiP2pManager.ActionListener.class
+//            );
+//
+//            for (int netId = 0; netId < 32; netId++) {
+//                deletePersistentGroup.invoke(manager, channel, netId, null);
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
     private void discoverPeers() {
@@ -90,8 +113,6 @@ public class WifiDirectService extends Service {
                 Log.d(TAG, "Peer discovery initiation failed");
             }
         });
-
-        requestConnectionInfo();
     }
 
     private void requestConnectionInfo() {
@@ -102,7 +123,17 @@ public class WifiDirectService extends Service {
                     onGroupFormed(info.isGroupOwner, info.groupOwnerAddress);
                 }
                 else {
-                    requestConnectionInfo();
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Thread.sleep(5000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            requestConnectionInfo();
+                        }
+                    });
                 }
             }
         });
@@ -146,6 +177,21 @@ public class WifiDirectService extends Service {
 
     private void onGroupFormed(boolean isHost, InetAddress hostAddress) {
         Log.d("SE464", "group formed " + hostAddress + ", Am I host? " + isHost);
+
+        Message message = new Message(
+            "Connected",
+            new User("System", null),
+            new Timestamp(
+                Calendar.getInstance().getTime().getTime()
+            ),
+            UUID.fromString(getResources().getString(R.string.public_uuid))
+        );
+
+        byte[] encodedKey = Base64.decode(getResources().getString(R.string.public_secret_key), Base64.DEFAULT);
+        SecretKey key = new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES");
+
+        EncryptedMessage encryptedMessage = new EncryptedMessage(message, key);
+        FrontEndCommunicator.receivedMessage(this, encryptedMessage);
 
         if (isHost) {
             if (!(device instanceof Host)) {
