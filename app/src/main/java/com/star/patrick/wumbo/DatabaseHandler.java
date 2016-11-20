@@ -1,12 +1,15 @@
 package com.star.patrick.wumbo;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.net.Uri;
 import android.util.Log;
 import android.util.Base64;
 
+import com.star.patrick.wumbo.message.Image;
 import com.star.patrick.wumbo.message.Message;
 import com.star.patrick.wumbo.message.MessageList;
 import com.star.patrick.wumbo.message.MessageListImpl;
@@ -61,12 +64,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // Me Table Column names
     private static final String ME_UUID = "uuid";
 
-    private MainActivity mainActivity;
+    private Context context;
     private MessageCourier messageCourier;
 
-    public DatabaseHandler(MainActivity mainActivity, MessageCourier messageCourier) {
-        super(mainActivity, DATABASE_NAME, null, DATABASE_VERSION);
-        this.mainActivity = mainActivity;
+    public DatabaseHandler(Context context, MessageCourier messageCourier) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        this.context = context;
         this.messageCourier = messageCourier;
     }
 
@@ -131,9 +134,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // Adding new contact
     public void addMessage(Message msg) {
         Log.d("SE464", "Saving a message to the database");
-        SQLiteDatabase db = this.getWritableDatabase();
-
         setUser(msg.getUser());
+
+        SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(MESSAGE_UUID, msg.getId().toString());
@@ -146,6 +149,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             case TEXT:
                 values.put(MESSAGE_CONTENT, (String)msg.getContent().getMessageContent());
                 break;
+            case IMAGE:
+                values.put(MESSAGE_CONTENT, (String)msg.getContent().getMessageContent());
         }
 
         db.insert(TABLE_MESSAGE, null, values);
@@ -167,6 +172,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             case 0:
                 msg = new Message(UUID.fromString(cursor.getString(cursor.getColumnIndex("uuid"))),
                         new Text(cursor.getString(cursor.getColumnIndex("content"))),
+                        snd,
+                        new Timestamp(cursor.getLong(cursor.getColumnIndex("stime"))),
+                        UUID.fromString(cursor.getString(cursor.getColumnIndex("cuuid"))),
+                        new Timestamp(cursor.getLong(cursor.getColumnIndex("rtime")))
+                );
+                break;
+            case 1:
+                msg = new Message(UUID.fromString(cursor.getString(cursor.getColumnIndex("uuid"))),
+                        new Image(Uri.parse(cursor.getString(cursor.getColumnIndex("content")))),
                         snd,
                         new Timestamp(cursor.getLong(cursor.getColumnIndex("stime"))),
                         UUID.fromString(cursor.getString(cursor.getColumnIndex("cuuid"))),
@@ -199,10 +213,20 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                             snd,
                             new Timestamp(cursor.getLong(cursor.getColumnIndex("stime"))),
                             UUID.fromString(cursor.getString(cursor.getColumnIndex("cuuid"))),
-                            new Timestamp(cursor.getLong(cursor.getColumnIndex("rtime"))));
-                    msgs.add(msg);
+                            new Timestamp(cursor.getLong(cursor.getColumnIndex("rtime")))
+                    );
+                    break;
+                case 1:
+                    msg = new Message(UUID.fromString(cursor.getString(cursor.getColumnIndex("uuid"))),
+                            new Image(Uri.parse(cursor.getString(cursor.getColumnIndex("content")))),
+                            snd,
+                            new Timestamp(cursor.getLong(cursor.getColumnIndex("stime"))),
+                            UUID.fromString(cursor.getString(cursor.getColumnIndex("cuuid"))),
+                            new Timestamp(cursor.getLong(cursor.getColumnIndex("rtime")))
+                    );
                     break;
             }
+            msgs.add(msg);
         }
 
         db.close();
@@ -237,6 +261,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     public void setUser(User user) {
+        if (getUser(user.getId()) != null)
+            return;
+
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -272,7 +299,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Channel channel = new ChannelImpl(
                 id,
                 cursor.getString(cursor.getColumnIndex(CHANNEL_NAME)),
-                mainActivity,
+                context,
                 messageCourier,
                 new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES"),
                 this.getAllMessages(UUID.fromString(cursor.getString(cursor.getColumnIndex(CHANNEL_UUID))))
@@ -321,7 +348,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             Channel channel = new ChannelImpl(
                     UUID.fromString(cursor.getString(cursor.getColumnIndex(CHANNEL_UUID))),
                     cursor.getString(cursor.getColumnIndex(CHANNEL_NAME)),
-                    mainActivity,
+                    context,
                     messageCourier,
                     new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES"),
                     this.getAllMessages(UUID.fromString(cursor.getString(cursor.getColumnIndex(CHANNEL_UUID))))

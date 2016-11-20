@@ -49,7 +49,7 @@ public class ChannelImpl extends Observable implements Channel {
     private String name;
     private UUID id;
     private MessageList msgs;
-    private MainActivity mainContext;
+    private Context mainContext;
     private SecretKey encKey;
     private MessageCourier messageCourier;
     private Set<UUID> msgIds = new HashSet<>();
@@ -67,11 +67,11 @@ public class ChannelImpl extends Observable implements Channel {
         }
     }
 
-    public ChannelImpl(UUID id, String name, MainActivity context, MessageCourier messageCourier, SecretKey key) {
+    public ChannelImpl(UUID id, String name, Context context, MessageCourier messageCourier, SecretKey key) {
         this(id, name, context, messageCourier, key, new DatabaseHandler(context, messageCourier).getAllMessages(id));
     }
 
-    public ChannelImpl(UUID id, String name, MainActivity context, MessageCourier messageCourier, SecretKey key, MessageList msgs) {
+    public ChannelImpl(UUID id, String name, Context context, MessageCourier messageCourier, SecretKey key, MessageList msgs) {
         this.name = name;
         this.msgs = msgs;
         this.id = id;
