@@ -54,7 +54,7 @@ public class ChannelImpl extends Observable implements Channel {
     private MessageCourier messageCourier;
     private Set<UUID> msgIds = new HashSet<>();
 
-    public ChannelImpl(String name, MainActivity context, MessageCourier messageCourier) {
+    public ChannelImpl(String name, Context context, MessageCourier messageCourier) {
         this(UUID.randomUUID(), name, context, messageCourier, null);
         try {
             KeyGenerator kgen = KeyGenerator.getInstance("AES");
