@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public interface Channel {
     void send(User sender, String msgText);
-    void send(User sender, Uri imagePath, Context context);
+    void send(User sender, Uri imagePath);
     void receive(EncryptedMessage msg);
     void addObserver(Observer obs);
     void deleteObserver(Observer obs);

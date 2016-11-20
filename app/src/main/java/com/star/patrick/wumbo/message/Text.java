@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 public class Text implements MessageContent, Serializable{
     private MessageType type = MessageType.TEXT;
-    String content;
+    private String content;
 
     public Text(String text){
         content = text;
