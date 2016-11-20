@@ -6,7 +6,7 @@ import java.util.UUID;
 import com.star.patrick.wumbo.message.EncryptedMessage;
 import com.star.patrick.wumbo.message.Message;
 
-public interface ChannelManager {
+public interface ChannelManager extends MessageReceiver {
     void receive(EncryptedMessage msg);
     void addChannel(Channel channel);
     void removeChannel(Channel channel);

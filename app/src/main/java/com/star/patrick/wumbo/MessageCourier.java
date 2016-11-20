@@ -6,6 +6,6 @@ import com.star.patrick.wumbo.message.EncryptedMessage;
  * Created by giliam on 11/19/2016.
  */
 
-public interface MessageCourier {
+public interface MessageCourier extends MessageReceiver {
     void send(EncryptedMessage msg);
 }
