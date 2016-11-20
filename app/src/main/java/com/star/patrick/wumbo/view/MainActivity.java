@@ -20,6 +20,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.star.patrick.wumbo.Encryption;
@@ -81,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
     private ImageButton sendBtn;
     private ImageButton cameraBtn;
-    private ImageButton createChannelBtn;
+    private LinearLayout createChannelBtn;
     private EditText editMsg;
     private DrawerLayout drawerLayout;
     private ListView channelListView;
@@ -158,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         sendBtn = (ImageButton) findViewById(R.id.sendBtn);
         cameraBtn = (ImageButton) findViewById(R.id.cameraIcon);
         editMsg = (EditText) findViewById(R.id.editMsg);
-        createChannelBtn = (ImageButton) findViewById(R.id.createChannelIcon);
+        createChannelBtn = (LinearLayout) findViewById(R.id.add_channel_row);
 
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
