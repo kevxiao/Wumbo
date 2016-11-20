@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.star.patrick.wumbo.IntroActivity">
+    tools:context="com.star.patrick.wumbo.view.IntroActivity">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
@@ -18,7 +18,7 @@
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
         android:background="@color/colorPrimaryLight"
-        tools:context="com.star.patrick.wumbo.IntroActivity">
+        tools:context="com.star.patrick.wumbo.view.IntroActivity">
 
         <RelativeLayout
             android:id="@+id/intro_form"

@@ -1,12 +1,14 @@
-package com.star.patrick.wumbo;
+package com.star.patrick.wumbo.model;
 
 import android.content.Context;
 import android.util.Log;
 
-import com.star.patrick.wumbo.message.ChannelInvite;
-import com.star.patrick.wumbo.message.EncryptedMessage;
-import com.star.patrick.wumbo.message.Message;
-import com.star.patrick.wumbo.message.MessageContent;
+import com.star.patrick.wumbo.DatabaseHandler;
+import com.star.patrick.wumbo.MessageCourier;
+import com.star.patrick.wumbo.model.message.ChannelInvite;
+import com.star.patrick.wumbo.model.message.EncryptedMessage;
+import com.star.patrick.wumbo.model.message.Message;
+import com.star.patrick.wumbo.model.message.MessageContent;
 
 import java.sql.Timestamp;
 import java.util.Calendar;

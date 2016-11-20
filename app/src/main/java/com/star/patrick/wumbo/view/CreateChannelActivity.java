@@ -1,4 +1,4 @@
-package com.star.patrick.wumbo;
+package com.star.patrick.wumbo.view;
 
 
 public class CreateChannelActivity {

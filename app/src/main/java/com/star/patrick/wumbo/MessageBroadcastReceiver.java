@@ -6,7 +6,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
-import com.star.patrick.wumbo.message.EncryptedMessage;
+import com.star.patrick.wumbo.model.message.EncryptedMessage;
+import com.star.patrick.wumbo.view.MainActivity;
 
 import java.util.ArrayList;
 import java.util.List;

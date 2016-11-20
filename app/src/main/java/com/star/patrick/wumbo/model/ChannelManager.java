@@ -1,12 +1,12 @@
-package com.star.patrick.wumbo;
+package com.star.patrick.wumbo.model;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Observer;
 import java.util.UUID;
 
-import com.star.patrick.wumbo.message.EncryptedMessage;
-import com.star.patrick.wumbo.message.Message;
+import com.star.patrick.wumbo.MessageReceiver;
+import com.star.patrick.wumbo.model.message.EncryptedMessage;
 
 public interface ChannelManager extends MessageReceiver {
     void receive(EncryptedMessage msg);

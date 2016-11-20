@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.star.patrick.wumbo.MessageBroadcastReceiver;
-import com.star.patrick.wumbo.message.EncryptedMessage;
+import com.star.patrick.wumbo.model.message.EncryptedMessage;
 
 public class FrontEndCommunicator {
     public static void receivedMessage(Context context, EncryptedMessage message) {

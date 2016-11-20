@@ -1,6 +1,4 @@
-package com.star.patrick.wumbo.message;
-
-import java.io.Serializable;
+package com.star.patrick.wumbo.model.message;
 
 /**
  * Created by jesse on 16/11/16.

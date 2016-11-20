@@ -1,4 +1,4 @@
-package com.star.patrick.wumbo;
+package com.star.patrick.wumbo.model;
 
 import android.util.Base64;
 

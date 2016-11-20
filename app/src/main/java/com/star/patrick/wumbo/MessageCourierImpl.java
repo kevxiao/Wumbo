@@ -3,7 +3,8 @@ package com.star.patrick.wumbo;
 import android.content.Intent;
 import android.util.Log;
 
-import com.star.patrick.wumbo.message.EncryptedMessage;
+import com.star.patrick.wumbo.model.message.EncryptedMessage;
+import com.star.patrick.wumbo.view.MainActivity;
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
 import java.util.HashSet;

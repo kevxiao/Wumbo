@@ -1,17 +1,9 @@
-package com.star.patrick.wumbo;
+package com.star.patrick.wumbo.view;
 
-import android.app.Activity;
-import android.content.ClipData;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.security.KeyPairGeneratorSpec;
-import android.security.keystore.KeyGenParameterSpec;
-import android.security.keystore.KeyProperties;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -29,20 +21,28 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
-import com.star.patrick.wumbo.message.Message;
+import com.star.patrick.wumbo.model.Channel;
+import com.star.patrick.wumbo.model.ChannelImpl;
+import com.star.patrick.wumbo.model.ChannelList;
+import com.star.patrick.wumbo.model.ChannelManager;
+import com.star.patrick.wumbo.model.ChannelManagerImpl;
+import com.star.patrick.wumbo.model.ContactsTracker;
+import com.star.patrick.wumbo.model.ContactsTrackerImpl;
+import com.star.patrick.wumbo.DatabaseHandler;
+import com.star.patrick.wumbo.MessageBroadcastReceiver;
+import com.star.patrick.wumbo.MessageCourier;
+import com.star.patrick.wumbo.MessageCourierImpl;
+import com.star.patrick.wumbo.R;
+import com.star.patrick.wumbo.model.User;
+import com.star.patrick.wumbo.model.message.Message;
 import com.star.patrick.wumbo.wifidirect.HandshakeDispatcherService;
 import com.star.patrick.wumbo.wifidirect.MessageDispatcherService;
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
-import java.math.BigInteger;
-import java.security.GeneralSecurityException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -58,7 +58,6 @@ import java.util.Observer;
 import java.util.UUID;
 
 import javax.crypto.spec.SecretKeySpec;
-import javax.security.auth.x500.X500Principal;
 
 public class MainActivity extends AppCompatActivity implements Observer {
 
@@ -66,7 +65,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private ContactsTracker contacts;
     private Channel msgChannel;
     private ChannelList msgChannelList;
-    private NetworkManager networkManager;
     public static final String TAG = "SE464";
     private ChatAdapter chatAdapter;
     private ListView listView;

@@ -9,11 +9,15 @@ import android.net.Uri;
 import android.util.Log;
 import android.util.Base64;
 
-import com.star.patrick.wumbo.message.Image;
-import com.star.patrick.wumbo.message.Message;
-import com.star.patrick.wumbo.message.MessageList;
-import com.star.patrick.wumbo.message.MessageListImpl;
-import com.star.patrick.wumbo.message.Text;
+import com.star.patrick.wumbo.model.message.Image;
+import com.star.patrick.wumbo.model.message.Message;
+import com.star.patrick.wumbo.model.message.MessageList;
+import com.star.patrick.wumbo.model.message.MessageListImpl;
+import com.star.patrick.wumbo.model.message.Text;
+import com.star.patrick.wumbo.model.Channel;
+import com.star.patrick.wumbo.model.ChannelImpl;
+import com.star.patrick.wumbo.model.User;
+import com.star.patrick.wumbo.view.MainActivity;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;

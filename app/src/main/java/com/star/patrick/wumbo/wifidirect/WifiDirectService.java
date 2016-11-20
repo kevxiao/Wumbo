@@ -18,25 +18,20 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.star.patrick.wumbo.R;
-import com.star.patrick.wumbo.User;
-import com.star.patrick.wumbo.message.EncryptedMessage;
-import com.star.patrick.wumbo.message.Message;
-import com.star.patrick.wumbo.message.Text;
+import com.star.patrick.wumbo.model.User;
+import com.star.patrick.wumbo.model.message.EncryptedMessage;
+import com.star.patrick.wumbo.model.message.Message;
+import com.star.patrick.wumbo.model.message.Text;
 
-import java.lang.reflect.Method;
 import java.net.InetAddress;
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-import static com.star.patrick.wumbo.MainActivity.TAG;
+import static com.star.patrick.wumbo.view.MainActivity.TAG;
 
 
 public class WifiDirectService extends Service {

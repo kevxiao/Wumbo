@@ -9,7 +9,7 @@
     android:paddingRight="@dimen/chat_margin"
     android:paddingTop="@dimen/chat_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.star.patrick.wumbo.MainActivity"
+    tools:context="com.star.patrick.wumbo.view.MainActivity"
     tools:showIn="@layout/activity_main">
 
     <ListView android:id="@+id/myList"

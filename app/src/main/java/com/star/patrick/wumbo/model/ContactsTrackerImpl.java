@@ -1,18 +1,16 @@
-package com.star.patrick.wumbo;
+package com.star.patrick.wumbo.model;
 
 import android.content.Context;
 
-import com.star.patrick.wumbo.message.EncryptedMessage;
+import com.star.patrick.wumbo.DatabaseHandler;
+import com.star.patrick.wumbo.model.message.EncryptedMessage;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
-import java.util.Observer;
-import java.util.Set;
 import java.util.UUID;
 
 /**

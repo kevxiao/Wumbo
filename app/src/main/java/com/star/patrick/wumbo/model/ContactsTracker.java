@@ -1,6 +1,7 @@
-package com.star.patrick.wumbo;
+package com.star.patrick.wumbo.model;
 
-import java.util.List;
+import com.star.patrick.wumbo.MessageReceiver;
+
 import java.util.Map;
 import java.util.Observer;
 import java.util.UUID;
