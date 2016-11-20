@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+import static com.star.patrick.wumbo.MainActivity.TAG;
+
 public class ChatAdapter extends BaseAdapter {
 
     private final List<Message> messages;
@@ -99,7 +101,7 @@ public class ChatAdapter extends BaseAdapter {
                 holder.imgMessage.setImageResource(0);
                 break;
             case IMAGE:
-                Log.d("SE464", (String) msg.getContent().getMessageContent());
+                Log.d(TAG, (String) msg.getContent().getMessageContent());
                 Bitmap original = BitmapFactory.decodeFile((String) msg.getContent().getMessageContent());
                 if (original != null) {
                     int size = (int) (original.getHeight() * (512.0 / original.getWidth()));

@@ -9,14 +9,16 @@ import com.star.patrick.wumbo.message.EncryptedMessage;
 
 public class Client implements Device {
     private InetAddress hostAddress;
+    private Runnable onSendFailure;
 
-    public Client(InetAddress hostAddress) {
+    public Client(InetAddress hostAddress, Runnable onSendFailure) {
         this.hostAddress = hostAddress;
+        this.onSendFailure = onSendFailure;
     }
 
     @Override
     public void onConnect() {
-        new MessageSender(hostAddress, HandshakeDispatcherService.PORT, "HANDSHAKE", 5);
+        new MessageSender(hostAddress, HandshakeDispatcherService.PORT, "HANDSHAKE", onSendFailure, 5);
     }
 
     @Override
@@ -24,6 +26,6 @@ public class Client implements Device {
 
     @Override
     public void sendMessage(EncryptedMessage message) {
-        new MessageSender(hostAddress, MessageDispatcherService.PORT, message);
+        new MessageSender(hostAddress, MessageDispatcherService.PORT, message, onSendFailure);
     }
 }

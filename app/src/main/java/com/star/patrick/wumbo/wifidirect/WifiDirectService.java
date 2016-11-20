@@ -50,6 +50,14 @@ public class WifiDirectService extends Service {
     private Channel channel;
     private Device device;
 
+    private int requestConnectionInfoCount = 0;
+    private Runnable onSendFailure = new Runnable() {
+        @Override
+        public void run() {
+            requestConnectionInfo();
+        }
+    };
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -117,9 +125,15 @@ public class WifiDirectService extends Service {
     }
 
     private void requestConnectionInfo() {
+        requestConnectionInfoCount++;
         manager.requestConnectionInfo(channel, new WifiP2pManager.ConnectionInfoListener() {
             @Override
             public void onConnectionInfoAvailable(WifiP2pInfo info) {
+                requestConnectionInfoCount--;
+                if (requestConnectionInfoCount > 0) {
+                    return;
+                }
+
                 if (info.groupFormed) {
                     onGroupFormed(info.isGroupOwner, info.groupOwnerAddress);
                 }
@@ -134,7 +148,7 @@ public class WifiDirectService extends Service {
                             }
                             requestConnectionInfo();
                         }
-                    });
+                    }).start();
                 }
             }
         });
@@ -196,11 +210,11 @@ public class WifiDirectService extends Service {
 
         if (isHost) {
             if (!(device instanceof Host)) {
-                device = new Host();
+                device = new Host(onSendFailure);
             }
         }
         else {
-            device = new Client(hostAddress);
+            device = new Client(hostAddress, onSendFailure);
         }
 
         device.onConnect();
@@ -235,7 +249,7 @@ public class WifiDirectService extends Service {
             case ADD_PEER_ACTION: {
                 InetAddress inetAddress = (InetAddress) intent.getSerializableExtra(EXTRA_INET_ADDRESS);
                 if (!(device instanceof Host)) {
-                   device = new Host();
+                   device = new Host(onSendFailure);
                 }
                 device.addClient(inetAddress);
             } break;
