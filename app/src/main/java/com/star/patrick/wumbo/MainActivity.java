@@ -237,23 +237,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         }
         channelListView.setAdapter(new ArrayAdapter<>(this, R.layout.channel_list_item, channels));
         channelListView.setOnItemClickListener(new ChannelListItemClickListener());
-
-        //DatabaseHandler db = new DatabaseHandler(this.getApplicationContext(), me, this, channelManager);
-
-//        Message dbTestMsg = new Message("FUCK ME", me, new Timestamp(10), UUID.fromString(getResources().getString(R.string.public_uuid)));
-//        dbTestMsg.setReceiveTime(new Timestamp(10));
-//        db.addMessage(dbTestMsg);
-//        Message dbRetreivedMsg = db.getMessage(dbTestMsg.getId());
-//        if (null == dbRetreivedMsg) {
-//            Log.d("SE464", "retrieved is null");
-//        } else {
-//            Log.d("SE464", "id: "+dbRetreivedMsg.getId() + " text: "+dbRetreivedMsg.getContent().getMessageContent()+" receiveTime: "+dbRetreivedMsg.getReceiveTime());
-//        }
-//        if (dbRetreivedMsg.getReceiveTime().equals(dbTestMsg.getReceiveTime())) {
-//            Log.d("SE464", "This message seemed to be retreived right");
-//        } else {
-//            Log.d("SE464", "Uh oh, retreived times are different");
-//        }
+        
         update(null, null);
     }
 
