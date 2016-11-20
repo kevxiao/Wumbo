@@ -312,6 +312,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     public void addChannel(Channel channel) {
+        if (getChannel(channel.getId()) != null)
+            return;
+
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
