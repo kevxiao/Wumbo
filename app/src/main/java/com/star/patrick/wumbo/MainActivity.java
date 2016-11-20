@@ -237,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         }
         channelListView.setAdapter(new ArrayAdapter<>(this, R.layout.channel_list_item, channels));
         channelListView.setOnItemClickListener(new ChannelListItemClickListener());
-        
+
         update(null, null);
     }
 
