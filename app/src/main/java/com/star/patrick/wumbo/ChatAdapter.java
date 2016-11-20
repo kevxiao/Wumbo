@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -18,6 +20,9 @@ import android.widget.TextView;
 import com.star.patrick.wumbo.message.Image;
 import com.star.patrick.wumbo.message.Message;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -94,10 +99,8 @@ public class ChatAdapter extends BaseAdapter {
                 holder.imgMessage.setImageResource(0);
                 break;
             case IMAGE:
-                ((Image)msg.getContent()).createImageFromFilepath(context);
-                byte[] imgArray = (byte[])msg.getContent().getMessageContent();
-                Bitmap original = BitmapFactory.decodeByteArray(imgArray, 0, imgArray.length);
-                if(original != null) {
+                Bitmap original = BitmapFactory.decodeFile((String) msg.getContent().getMessageContent());
+                if (original != null) {
                     int size = (int) (original.getHeight() * (512.0 / original.getWidth()));
                     Bitmap scaled = Bitmap.createScaledBitmap(original, 512, size, true);
                     holder.imgMessage.setImageBitmap(scaled);

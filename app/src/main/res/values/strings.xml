@@ -11,6 +11,7 @@
     <string name="default_name">Anonymous</string>
     <string name="prompt_continue">Continue</string>
     <string name="title_activity_main2">Main2Activity</string>
+    <string name="image_message_error">Cannot load image</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
