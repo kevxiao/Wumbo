@@ -57,11 +57,11 @@ public class MessageReceiver {
     }
 
     private void receive(EncryptedMessage msg) {
-        //forward all received messages
-        messageCourier.send(msg);
-
         //let channel manager decide if there are channels that need to receive this
         channelManager.receive(msg);
+
+        //forward all received messages
+        messageCourier.send(msg);
     }
 
 }

@@ -24,19 +24,14 @@ public class Message implements Serializable {
     private UUID channelId;
 
     public Message(EncryptedMessage message, SecretKey secretKey) {
+        this(message.getUser(), message.getSendTime(), message.getChannelId());
         this.id = message.getId();
         this.content = message.getContent(secretKey);
-        this.user = message.getUser();
-        this.sendTime = message.getSendTime();
-        this.receiveTime = message.getReceiveTime();
-        this.channelId = message.getChannelId();
     }
 
     public Message(String text, User user, Timestamp sendTime, UUID channelId) {
+        this(user, sendTime, channelId);
         this.content = new Text(text);
-        this.user = user;
-        this.sendTime = sendTime;
-        this.channelId = channelId;
         this.id = UUID.randomUUID();
     }
 
@@ -45,17 +40,27 @@ public class Message implements Serializable {
         this.id = id;
     }
 
-    public Message(Uri path, Context context, User user, Timestamp sendTime, UUID channelId) {
+    public Message(Uri path, User user, Timestamp sendTime, UUID channelId) {
+        this(user, sendTime, channelId);
+        this.content = new Image(path);
+        this.id = UUID.randomUUID();
+    }
+
+    public Message(UUID id, Uri path, User user, Timestamp sendTime, UUID channelId) {
+        this(path, user, sendTime, channelId);
+        this.id = id;
+    }
+
+    public Message(UUID id, byte[] image, User user, Timestamp sendTime, UUID channelId) {
+        this(user, sendTime, channelId);
+        this.id = id;
+        this.content = new TransferImage(image);
+    }
+
+    private Message(User user, Timestamp sendTime, UUID channelId) {
         this.user = user;
         this.sendTime = sendTime;
         this.channelId = channelId;
-        this.id = UUID.randomUUID();
-        this.content = new Image(path, context, id);
-    }
-
-    public Message(UUID id, Uri path, Context context, User user, Timestamp sendTime, UUID channelId) {
-        this(path, context, user, sendTime, channelId);
-        this.id = id;
     }
 
     public UUID getId() {
@@ -64,16 +69,6 @@ public class Message implements Serializable {
 
     public MessageContent getContent() {
         return content;
-    }
-
-    public void handleContentOnReceive(Context c){
-        switch(this.content.getType()){
-            case IMAGE:
-                Image temp = (Image)(this.content);
-                temp.saveBitmap(c);
-                temp.deleteBitmap();
-        }
-
     }
 
     public String getText() {

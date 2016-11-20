@@ -1,6 +1,7 @@
 package com.star.patrick.wumbo;
 
 import android.content.Intent;
+import android.util.Log;
 
 import com.star.patrick.wumbo.message.EncryptedMessage;
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
@@ -20,6 +21,7 @@ public class MessageCourierImpl implements MessageCourier {
     @Override
     public void send(EncryptedMessage msg) {
         if (!sentMessages.contains(msg.getId())) {
+            Log.d("SE464", "Haven't sent this message before: " + msg.getId());
             sentMessages.add(msg.getId());
             Intent sendMsgIntent = new Intent(mainContext, WifiDirectService.class);
             sendMsgIntent.setAction(WifiDirectService.SEND_MESSAGE_ACTION);
