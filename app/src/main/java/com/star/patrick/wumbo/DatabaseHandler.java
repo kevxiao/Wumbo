@@ -36,7 +36,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     // All Static variables
     // Database Version
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     // Database Name
     private static final String DATABASE_NAME = "Wumbo";
@@ -125,6 +125,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                     "FOREIGN KEY(" + ME_UUID + ") REFERENCES " + USER_TABLE + "(" + USER_UUID + ") " +
                 ") ";
         db.execSQL(CREATE_ME_TABLE);
+
+        String MESSAGE_LIMIT_TRIGGER =
+                "CREATE TRIGGER delete_till_500 INSERT ON messages WHEN (select count(*) from messages)>700\n"+
+                "BEGIN\n"+
+                        "DELETE FROM messages WHERE messages.uuid IN (SELECT messages.uuid FROM messages ORDER BY messages.rtime limit (select count(*) -500 from messages ));"+
+                        "VACUUM;"+
+                "END;";
+
     }
 
     // Upgrading database
