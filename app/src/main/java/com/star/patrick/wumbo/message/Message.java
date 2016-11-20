@@ -24,44 +24,57 @@ public class Message implements Serializable {
     private UUID channelId;
 
     public Message(EncryptedMessage message, SecretKey secretKey) {
-        this(message.getUser(), message.getSendTime(), message.getChannelId());
+        this(message.getContent(secretKey), message.getUser(), message.getSendTime(), message.getChannelId());
         this.id = message.getId();
-        this.content = message.getContent(secretKey);
     }
 
-    public Message(String text, User user, Timestamp sendTime, UUID channelId) {
-        this(user, sendTime, channelId);
-        this.content = new Text(text);
+    public Message(MessageContent content, User user, Timestamp sendTime, UUID channelId) {
         this.id = UUID.randomUUID();
-    }
-
-    public Message(UUID id, String text, User user, Timestamp sendTime, UUID channelId) {
-        this(text, user, sendTime, channelId);
-        this.id = id;
-    }
-
-    public Message(Uri path, User user, Timestamp sendTime, UUID channelId) {
-        this(user, sendTime, channelId);
-        this.content = new Image(path);
-        this.id = UUID.randomUUID();
-    }
-
-    public Message(UUID id, Uri path, User user, Timestamp sendTime, UUID channelId) {
-        this(path, user, sendTime, channelId);
-        this.id = id;
-    }
-
-    public Message(UUID id, byte[] image, User user, Timestamp sendTime, UUID channelId) {
-        this(user, sendTime, channelId);
-        this.id = id;
-        this.content = new TransferImage(image);
-    }
-
-    private Message(User user, Timestamp sendTime, UUID channelId) {
+        this.content = content;
         this.user = user;
         this.sendTime = sendTime;
         this.channelId = channelId;
     }
+
+    public Message(UUID id, MessageContent content, User user, Timestamp sendTime, UUID channelId, Timestamp receiveTime) {
+        this(content, user, sendTime, channelId);
+        this.id = id;
+        this.receiveTime = receiveTime;
+    }
+
+    public Message(UUID id, MessageContent content, User user, Timestamp sendTime, UUID channelId) {
+        this(content, user, sendTime, channelId);
+        this.id = id;
+    }
+
+    //don't keep
+//    public Message(String text, User user, Timestamp sendTime, UUID channelId) {
+//        this(user, sendTime, channelId);
+//        this.content = new Text(text);
+//        this.id = UUID.randomUUID();
+//    }
+//
+//    public Message(UUID id, String text, User user, Timestamp sendTime, UUID channelId) {
+//        this(text, user, sendTime, channelId);
+//        this.id = id;
+//    }
+//
+//    public Message(Uri path, User user, Timestamp sendTime, UUID channelId) {
+//        this(user, sendTime, channelId);
+//        this.content = new Image(path);
+//        this.id = UUID.randomUUID();
+//    }
+//
+//    public Message(UUID id, Uri path, User user, Timestamp sendTime, UUID channelId) {
+//        this(path, user, sendTime, channelId);
+//        this.id = id;
+//    }
+//
+//    public Message(UUID id, byte[] image, User user, Timestamp sendTime, UUID channelId) {
+//        this(user, sendTime, channelId);
+//        this.id = id;
+//        this.content = new TransferImage(image);
+//    }
 
     public UUID getId() {
         return id;

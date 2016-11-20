@@ -29,7 +29,7 @@ public class Image implements MessageContent, Serializable {
     private MessageType type = MessageType.IMAGE;
     private String filepath;
 
-    Image(Uri uri) {
+    public Image(Uri uri) {
         filepath = uri.toString();
     }
 

@@ -10,6 +10,7 @@ import android.util.Base64;
 import com.star.patrick.wumbo.message.Message;
 import com.star.patrick.wumbo.message.MessageList;
 import com.star.patrick.wumbo.message.MessageListImpl;
+import com.star.patrick.wumbo.message.Text;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -165,11 +166,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         switch (cursor.getInt(cursor.getColumnIndex("type"))){
             case 0:
                 msg = new Message(UUID.fromString(cursor.getString(cursor.getColumnIndex("uuid"))),
-                        cursor.getString(cursor.getColumnIndex("content")),
+                        new Text(cursor.getString(cursor.getColumnIndex("content"))),
                         snd,
                         new Timestamp(cursor.getLong(cursor.getColumnIndex("stime"))),
-                        UUID.fromString(cursor.getString(cursor.getColumnIndex("cuuid"))));
-                msg.setReceiveTime(new Timestamp(cursor.getLong(cursor.getColumnIndex("rtime"))));
+                        UUID.fromString(cursor.getString(cursor.getColumnIndex("cuuid"))),
+                        new Timestamp(cursor.getLong(cursor.getColumnIndex("rtime")))
+                );
                 break;
         }
 
@@ -193,11 +195,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             switch (cursor.getInt(cursor.getColumnIndex("type"))){
                 case 0:
                     msg = new Message(UUID.fromString(cursor.getString(cursor.getColumnIndex("uuid"))),
-                            cursor.getString(cursor.getColumnIndex("content")),
+                            new Text(cursor.getString(cursor.getColumnIndex("content"))),
                             snd,
                             new Timestamp(cursor.getLong(cursor.getColumnIndex("stime"))),
-                            UUID.fromString(cursor.getString(cursor.getColumnIndex("cuuid"))));
-                    msg.setReceiveTime(new Timestamp(cursor.getLong(cursor.getColumnIndex("rtime"))));
+                            UUID.fromString(cursor.getString(cursor.getColumnIndex("cuuid"))),
+                            new Timestamp(cursor.getLong(cursor.getColumnIndex("rtime"))));
                     msgs.add(msg);
                     break;
             }
@@ -346,11 +348,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             switch (cursor.getInt(cursor.getColumnIndex("type"))){
                 case 0:
                     msg = new Message(UUID.fromString(cursor.getString(cursor.getColumnIndex("uuid"))),
-                            cursor.getString(cursor.getColumnIndex("content")),
+                            new Text(cursor.getString(cursor.getColumnIndex("content"))),
                             snd,
                             new Timestamp(cursor.getLong(cursor.getColumnIndex("stime"))),
-                            UUID.fromString(cursor.getString(cursor.getColumnIndex("cuuid"))));
-                    msg.setReceiveTime(new Timestamp(cursor.getLong(cursor.getColumnIndex("rtime"))));
+                            UUID.fromString(cursor.getString(cursor.getColumnIndex("cuuid"))),
+                            new Timestamp(cursor.getLong(cursor.getColumnIndex("rtime"))));
                     msgs.addMessage(msg);
                     break;
             }

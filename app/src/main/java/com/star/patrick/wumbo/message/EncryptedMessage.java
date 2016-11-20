@@ -22,6 +22,7 @@ public class EncryptedMessage implements Serializable {
     private Timestamp sendTime;
     private Timestamp receiveTime;
     private UUID channelId;
+    private MessageContent.MessageType type;
 
     public EncryptedMessage(Message message, SecretKey secretKey) {
         this.content = null;
@@ -36,6 +37,7 @@ public class EncryptedMessage implements Serializable {
         this.sendTime = message.getSendTime();
         this.channelId = message.getChannelId();
         this.id = message.getId();
+        this.type = message.getContent().getType();
     }
 
     public UUID getId() {
@@ -70,5 +72,9 @@ public class EncryptedMessage implements Serializable {
 
     public void setReceiveTime(Timestamp receiveTime) {
         this.receiveTime = receiveTime;
+    }
+
+    public MessageContent.MessageType getContentType() {
+        return type;
     }
 }
