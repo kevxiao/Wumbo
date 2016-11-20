@@ -91,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private ActionBarDrawerToggle drawerToggle;
     private MessageCourier messageCourier;
     private MessageBroadcastReceiver messageBroadcastReceiver;
+    private ArrayAdapter<ChannelListItem> channelListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,7 +149,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 messageCourier,
                 Encryption.getSecretKeyFromEncoding(getResources().getString(R.string.public_secret_key))
         );
-        msgChannel.addObserver(this);
         channelManager.addChannel(msgChannel);
 
 //        msgChannelList = new ChannelListImpl();
@@ -219,14 +219,22 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         channelListView = (ListView) findViewById(R.id.channel_list);
 
-        channels = new ArrayList<>();
-        for (Map.Entry<UUID,String> c : channelManager.getChannels().entrySet()) {
-            channels.add(new ChannelListItem(c.getValue(), c.getKey()));
-        }
-        channelListView.setAdapter(new ArrayAdapter<>(this, R.layout.channel_list_item, channels));
+        channels = createChannelItemList(channelManager.getChannels());
+        channelListAdapter = new ArrayAdapter<>(this, R.layout.channel_list_item, channels);
+        channelListView.setAdapter(channelListAdapter);
         channelListView.setOnItemClickListener(new ChannelListItemClickListener());
 
         update(null, null);
+        channelManager.addObserver(this);
+        msgChannel.addObserver(this);
+    }
+
+    private static List<ChannelListItem> createChannelItemList(Map<UUID,String> channels) {
+        List<ChannelListItem> channelListItems = new ArrayList<>();
+        for (Map.Entry<UUID,String> c : channels.entrySet()) {
+            channelListItems.add(new ChannelListItem(c.getValue(), c.getKey()));
+        }
+        return channelListItems;
     }
 
     @Override
@@ -284,6 +292,10 @@ public class MainActivity extends AppCompatActivity implements Observer {
             chatAdapter.addAll(newMessages);
             chatAdapter.notifyDataSetChanged();
         }
+
+        //update the channel list, lazily, it just reloads the whole thing.
+        channelListAdapter.clear();
+        channelListAdapter.addAll(createChannelItemList(channelManager.getChannels()));
     }
 
     private Runnable onStopCallback;
