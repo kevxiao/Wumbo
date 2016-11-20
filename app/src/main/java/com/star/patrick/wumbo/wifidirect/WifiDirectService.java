@@ -17,11 +17,13 @@ import android.support.annotation.Nullable;
 import android.util.Base64;
 import android.util.Log;
 
+import com.star.patrick.wumbo.Encryption;
 import com.star.patrick.wumbo.R;
 import com.star.patrick.wumbo.model.User;
 import com.star.patrick.wumbo.model.message.EncryptedMessage;
 import com.star.patrick.wumbo.model.message.Message;
 import com.star.patrick.wumbo.model.message.Text;
+import com.star.patrick.wumbo.view.MainActivity;
 
 import java.net.InetAddress;
 import java.sql.Timestamp;
@@ -68,7 +70,7 @@ public class WifiDirectService extends Service {
 //            public void run() {
 //                discoverPeers();
 //            }
-//        }, 0, 30, TimeUnit.SECONDS);
+//        }, 30, 30, TimeUnit.SECONDS);
 
         requestConnectionInfo();
     }
@@ -197,8 +199,7 @@ public class WifiDirectService extends Service {
             UUID.fromString(getResources().getString(R.string.public_uuid))
         );
 
-        byte[] encodedKey = Base64.decode(getResources().getString(R.string.public_secret_key), Base64.DEFAULT);
-        SecretKey key = new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES");
+        SecretKey key = Encryption.getSecretKeyFromEncoding(getResources().getString(R.string.public_secret_key));
 
         EncryptedMessage encryptedMessage = new EncryptedMessage(message, key);
         FrontEndCommunicator.receivedMessage(this, encryptedMessage);

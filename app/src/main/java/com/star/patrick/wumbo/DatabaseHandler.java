@@ -143,7 +143,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // Adding new contact
     public void addMessage(Message msg) {
         Log.d("SE464", "Saving a message to the database");
-        setUser(msg.getUser());
+        addUser(msg.getUser());
 
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -273,19 +273,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return user;
     }
 
-    public void setUser(User user) {
-        if (getUser(user.getId()) != null)
-            return;
-
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(USER_UUID, user.getId().toString());
-        values.put(USER_DISPLAY_NAME, user.getDisplayName());
-        values.put(USER_PUBLIC_KEY, MainActivity.getEncodedPublicKey(user.getPublicKey()));
-
-        db.insert(USER_TABLE, null, values);
-    }
 
     public void updateSenderDisplayName(UUID id, String displayName) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -309,13 +296,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             return null;
         }
 
-        byte[] encodedKey = Base64.decode(cursor.getString(cursor.getColumnIndex(CHANNEL_KEY)), Base64.DEFAULT);
         Channel channel = new ChannelImpl(
                 id,
                 cursor.getString(cursor.getColumnIndex(CHANNEL_NAME)),
                 context,
                 messageCourier,
-                new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES"),
+                Encryption.getSecretKeyFromEncoding(cursor.getString(cursor.getColumnIndex(CHANNEL_KEY))),
                 this.getAllMessages(UUID.fromString(cursor.getString(cursor.getColumnIndex(CHANNEL_UUID))))
         );
         cursor.close();
@@ -325,6 +311,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     public void addChannel(Channel channel) {
+        if (getChannel(channel.getId()) != null)
+            return;
+
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -358,13 +347,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
 
         do {
-            byte[] encodedKey = Base64.decode(cursor.getString(cursor.getColumnIndex(CHANNEL_KEY)), Base64.DEFAULT);
             Channel channel = new ChannelImpl(
                     UUID.fromString(cursor.getString(cursor.getColumnIndex(CHANNEL_UUID))),
                     cursor.getString(cursor.getColumnIndex(CHANNEL_NAME)),
                     context,
                     messageCourier,
-                    new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES"),
+                    Encryption.getSecretKeyFromEncoding(cursor.getString(cursor.getColumnIndex(CHANNEL_KEY))),
                     this.getAllMessages(UUID.fromString(cursor.getString(cursor.getColumnIndex(CHANNEL_UUID))))
             );
             channels.put(channel.getId(), channel);
@@ -447,13 +435,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     public void addUser(User user) {
+        if (getUser(user.getId()) != null) {
+            updateSenderDisplayName(user.getId(), user.getDisplayName());
+            return;
+        }
+
         SQLiteDatabase db = this.getWritableDatabase();
 
         Log.d("SE464", "DatabaseHandler: (uuid,display_name) = " + user.getId().toString() + "," + user.getDisplayName());
         ContentValues values = new ContentValues();
         values.put(USER_UUID, user.getId().toString());
         values.put(USER_DISPLAY_NAME, user.getDisplayName());
-        values.put(USER_PUBLIC_KEY, MainActivity.getEncodedPublicKey(user.getPublicKey()));
+        values.put(USER_PUBLIC_KEY, Encryption.getEncodedPublicKey(user.getPublicKey()));
         Log.d("SE464", "DatabaseHandler: (uuid,display_name) = " + values.getAsString(USER_UUID) + "," + values.getAsString(USER_DISPLAY_NAME));
 
         db.insert(USER_TABLE, null, values);

@@ -25,7 +25,7 @@ public class HandshakeHandler implements Runnable {
     @Override
     public void run(){
         // workaround for auto-closing without local declaration
-        try (Socket _ = socket) {
+        try (Socket __ = socket) {
             InetAddress clientAddress = socket.getInetAddress();
 
             Log.d("Client's InetAddress", "" + clientAddress);

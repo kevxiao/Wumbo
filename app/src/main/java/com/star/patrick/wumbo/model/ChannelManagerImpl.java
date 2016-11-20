@@ -1,15 +1,19 @@
 package com.star.patrick.wumbo.model;
 
 import android.content.Context;
+import android.util.Base64;
 import android.util.Log;
 
 import com.star.patrick.wumbo.DatabaseHandler;
+import com.star.patrick.wumbo.Encryption;
 import com.star.patrick.wumbo.MessageCourier;
 import com.star.patrick.wumbo.model.message.ChannelInvite;
 import com.star.patrick.wumbo.model.message.EncryptedMessage;
 import com.star.patrick.wumbo.model.message.Message;
 import com.star.patrick.wumbo.model.message.MessageContent;
+import com.star.patrick.wumbo.view.MainActivity;
 
+import java.security.PrivateKey;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
@@ -18,16 +22,21 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.UUID;
 
+import javax.crypto.spec.SecretKeySpec;
+
 public class ChannelManagerImpl extends Observable implements ChannelManager {
     private final MessageCourier messageCourier;
     private Context context;
     private Map<UUID,Channel> channels = new LinkedHashMap<>();
     private Map<UUID,String> channelNames = new LinkedHashMap<>();
+    private UUID meId;
+    private PrivateKey mePrivateKey;
 
-
-    public ChannelManagerImpl(Context context, MessageCourier messageCourier) {
+    public ChannelManagerImpl(Context context, MessageCourier messageCourier, UUID meId, PrivateKey mePrivateKey) {
         this.context = context;
         this.messageCourier = messageCourier;
+        this.meId = meId;
+        this.mePrivateKey = mePrivateKey;
 
         DatabaseHandler db = new DatabaseHandler(context, messageCourier);
         channels = db.getChannels();
@@ -40,7 +49,9 @@ public class ChannelManagerImpl extends Observable implements ChannelManager {
     public void receive(EncryptedMessage msg) {
         Log.d("SE 464", "Channel manager is receiving");
 
-        if (msg.getContentType().equals(MessageContent.MessageType.CHANNEL_INVITE)) {
+        if (
+                msg.getContentType().equals(MessageContent.MessageType.CHANNEL_INVITE)
+                && msg.getUser().getId().equals(meId)) {
             createChannel(msg);
         } else if (channels.containsKey(msg.getChannelId())) {
             channels.get(msg.getChannelId()).receive(msg);
@@ -48,25 +59,19 @@ public class ChannelManagerImpl extends Observable implements ChannelManager {
     }
 
     private Channel createChannel(EncryptedMessage emsg) {
-        Message msg = null;
-        //KEVIN YOU FIGURE THIS SHIT OUT
-        try {
-            msg = new Message(emsg, null);
-        } catch(Exception e) {
-            return null;
-        }
+        Message msg = new Message(emsg, mePrivateKey);
 
         ChannelInvite.Info channelInfo = (ChannelInvite.Info) msg.getContent();
 
-//        Channel channel = new ChannelImpl(
-//                channelInfo.getId(),
-//                channelInfo.getName(),
-//                context,
-//                messageCourier,
-//                channelInfo.getKey()
-//        );
-//        addChannel(channel);
-        return null;
+        Channel channel = new ChannelImpl(
+                channelInfo.getId(),
+                channelInfo.getName(),
+                context,
+                messageCourier,
+                Encryption.getSecretKeyFromEncoding(channelInfo.getKey())
+        );
+        addChannel(channel);
+        return channel;
     }
 
     @Override
@@ -109,14 +114,13 @@ public class ChannelManagerImpl extends Observable implements ChannelManager {
                             channel.getId(),
                             channel.getName(),
                             channel.getKey(),
-                            user
+                            inviter
                     ),
-                    inviter,
+                    user,
                     new Timestamp(Calendar.getInstance().getTime().getTime()),
                     UUID.randomUUID()
             );
-            //KEVIN FIX THIS SHIT
-            //messageCourier.send(new EncryptedMessage(msg, ???));
+            messageCourier.send(new EncryptedMessage(msg, Encryption.getSecretKeyFromEncoding(channel.getKey())));
         }
     }
 }

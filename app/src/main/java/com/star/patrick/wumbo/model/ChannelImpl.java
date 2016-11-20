@@ -16,6 +16,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.star.patrick.wumbo.DatabaseHandler;
+import com.star.patrick.wumbo.Encryption;
 import com.star.patrick.wumbo.MessageCourier;
 import com.star.patrick.wumbo.R;
 import com.star.patrick.wumbo.model.message.EncryptedMessage;
@@ -272,6 +273,6 @@ public class ChannelImpl extends Observable implements Channel {
 
     @Override
     public String getKey() {
-        return Base64.encodeToString(encKey.getEncoded(), Base64.DEFAULT);
+        return Encryption.getEncodedSecretKey(encKey);
     }
 }

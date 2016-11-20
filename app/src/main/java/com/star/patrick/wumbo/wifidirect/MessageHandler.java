@@ -25,7 +25,7 @@ public class MessageHandler implements Runnable {
     public void run() {
         Log.d("SE464", "MessageHandler thread run");
         try (
-            Socket _ = socket;  // workaround for auto-closing without local declaration
+            Socket __ = socket;  // workaround for auto-closing without local declaration
             InputStream inputStream = socket.getInputStream();
             ObjectInputStream objectInputStream = new ObjectInputStream(inputStream)
         ) {

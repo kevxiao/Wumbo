@@ -46,15 +46,26 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#111"
-            android:paddingTop="20dp">
+            android:paddingTop="20dp"
+            android:id="@+id/add_channel_row">
 
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_add_white_24dp"
+                android:background="#111"
                 android:layout_marginLeft="10dp"
                 android:layout_gravity="left"
                 android:id="@+id/createChannelIcon"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="1dp"
+                android:layout_gravity="center_vertical"
+                android:textColor="#FFF"
+                android:text="Add a new channel"/>
 
         </LinearLayout>
 
