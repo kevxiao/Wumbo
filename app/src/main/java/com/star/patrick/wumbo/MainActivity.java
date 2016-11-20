@@ -102,41 +102,45 @@ public class MainActivity extends AppCompatActivity implements Observer {
         KeyPair userKeys = null;
         String senderName = (extras != null && extras.getString("name") != null && !extras.getString("name").isEmpty()) ? extras.getString("name") : "Anonymous";
 
-//        try {
-//            KeyPairGenerator kpg;
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                kpg = KeyPairGenerator.getInstance(
-//                        KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
-//                try {
-//                    kpg.initialize(new KeyGenParameterSpec.Builder(
-//                            senderName,
-//                            KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-//                            .setDigests(KeyProperties.DIGEST_SHA256,
-//                                    KeyProperties.DIGEST_SHA512)
-//                            .build());
-//                } catch (InvalidAlgorithmParameterException e) {
-//                    e.printStackTrace();
-//                }
-//            } else {
-//                kpg = KeyPairGenerator.getInstance("RSA", "AndroidKeyStore");
-//                try {
-//                    Calendar endDate = Calendar.getInstance();
-//                    endDate.add(Calendar.YEAR, 1000);
-//                    kpg.initialize(new KeyPairGeneratorSpec.Builder(this)
-//                            .setAlias(senderName)
-//                            .setSubject(new X500Principal("CN=Wumbo, O=Android, C=US"))
-//                            .setSerialNumber(BigInteger.ONE)
-//                            .setStartDate(Calendar.getInstance().getTime())
-//                            .setEndDate(endDate.getTime())
-//                            .build());
-//                } catch (InvalidAlgorithmParameterException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//            userKeys = kpg.generateKeyPair();
-//        } catch (NoSuchProviderException | NoSuchAlgorithmException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            KeyPairGenerator kpg;
+            Log.d("SE464", "Start generating user key pair");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                kpg = KeyPairGenerator.getInstance(
+                        KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
+                try {
+                    kpg.initialize(new KeyGenParameterSpec.Builder(
+                            senderName,
+                            KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                            .setDigests(KeyProperties.DIGEST_SHA256,
+                                    KeyProperties.DIGEST_SHA512)
+                            .build());
+                } catch (InvalidAlgorithmParameterException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                kpg = KeyPairGenerator.getInstance("RSA", "AndroidKeyStore");
+                try {
+                    Calendar endDate = Calendar.getInstance();
+                    endDate.add(Calendar.YEAR, 1000);
+                    kpg.initialize(new KeyPairGeneratorSpec.Builder(this)
+                            .setAlias(senderName)
+                            .setSubject(new X500Principal("CN=Wumbo, O=Android, C=US"))
+                            .setSerialNumber(BigInteger.ONE)
+                            .setStartDate(Calendar.getInstance().getTime())
+                            .setEndDate(endDate.getTime())
+                            .build());
+                } catch (InvalidAlgorithmParameterException e) {
+                    e.printStackTrace();
+                }
+            }
+            userKeys = kpg.generateKeyPair();
+            if(userKeys == null) {
+                Log.d("SE464", "Generated user key pair");
+            }
+        } catch (NoSuchProviderException | NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
 
         messageCourier = new MessageCourierImpl(this);
 

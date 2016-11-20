@@ -129,12 +129,14 @@ public class ChannelImpl extends Observable implements Channel {
     public void send(Message msg) {
         Log.d("SE464", "Channel send message");
         EncryptedMessage emsg = new EncryptedMessage(msg, this.encKey);
+        msgIds.add(emsg.getId());
         messageCourier.send(emsg);
     }
 
     public void receive(EncryptedMessage emsg) {
         Log.d("SE464", "Channel receive");
         if (!msgIds.contains(emsg.getId())) {
+            msgIds.add(emsg.getId());
             Log.d("SE464", "Channel hasn't received this message before: " + emsg.getId());
             Message msg = new Message(emsg, this.encKey);
             Log.d("SE464", "Message ID: " + msg.getId() + " Message Sender: " + msg.getUser().getDisplayName());
@@ -149,8 +151,7 @@ public class ChannelImpl extends Observable implements Channel {
     }
 
     private void add(Message msg) {
-        Log.d("SE464", "Adding message to channel");
-        msgIds.add(msg.getId());
+        Log.d("SE464", "Adding message to channel: " + msg.getId());
         msg.setReceiveTime(new Timestamp(new Date().getTime()));
         msgs.addMessage(msg);
         setChanged();
@@ -183,7 +184,7 @@ public class ChannelImpl extends Observable implements Channel {
     private Message getImageMessageFromReceived(Message msg) {
         String filepath = getFilePathFromId(msg.getId());
         storeImage(msg, filepath);
-        return new Message(new Image(Uri.parse(filepath)), msg.getUser(), msg.getSendTime(), msg.getChannelId());
+        return new Message(msg.getId(), new Image(Uri.parse(filepath)), msg.getUser(), msg.getSendTime(), msg.getChannelId());
     }
 
     private void storeImage(Message msg, String filepath) {
