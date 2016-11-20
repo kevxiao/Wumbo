@@ -27,6 +27,7 @@ import java.net.InetAddress;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -45,13 +46,10 @@ public class WifiDirectService extends Service {
     private Channel channel;
     private Device device;
 
-    private int requestConnectionInfoCount = 0;
-    private Runnable onSendFailure = new Runnable() {
-        @Override
-        public void run() {
-            requestConnectionInfo();
-        }
-    };
+    private Runnable onSendFailure;
+
+    private RestartableEvent reconnectTask;
+    private PausableRecurringEvent tryConnectTask;
 
     @Override
     public void onCreate() {
@@ -61,16 +59,28 @@ public class WifiDirectService extends Service {
         manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         channel = manager.initialize(this, getMainLooper(), null);
 
-        discoverPeers();
-//        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-//        scheduler.scheduleAtFixedRate(new Runnable() {
-//            @Override
-//            public void run() {
-//                discoverPeers();
-//            }
-//        }, 30, 30, TimeUnit.SECONDS);
+        onSendFailure = new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "Send failed, disconnecting and reconnecting");
+                reconnectTask.restart(30);
+            }
+        };
 
-        requestConnectionInfo();
+        reconnectTask = new RestartableEvent(new Runnable() {
+            @Override
+            public void run() {
+                reconnect();
+            }
+        });
+        reconnectTask.restart(0);
+
+        tryConnectTask = new PausableRecurringEvent(new Runnable() {
+            @Override
+            public void run() {
+                tryConnect();
+            }
+        }, 0, 5, TimeUnit.SECONDS, false);
     }
 
     @Nullable
@@ -79,8 +89,18 @@ public class WifiDirectService extends Service {
         return null;
     }
 
-    private void deletePersistentGroups(){
-        manager.cancelConnect(channel, null);
+    private void disconnect(){
+        manager.cancelConnect(channel, new ActionListener() {
+            @Override
+            public void onSuccess() {
+                Log.d(TAG, "Cancelled connection");
+            }
+
+            @Override
+            public void onFailure(int reason) {
+                Log.d(TAG, "Failed to cancel "+reason);
+            }
+        });
         manager.clearLocalServices(channel, null);
         manager.clearServiceRequests(channel, null);
         manager.removeGroup(channel, null);
@@ -103,8 +123,10 @@ public class WifiDirectService extends Service {
 //        }
     }
 
-    private void discoverPeers() {
-        deletePersistentGroups();
+    private void reconnect() {
+        disconnect();
+
+        tryConnectTask.resume();
 
         manager.discoverPeers(channel, new ActionListener() {
             @Override
@@ -119,37 +141,18 @@ public class WifiDirectService extends Service {
         });
     }
 
-    private void requestConnectionInfo() {
-        requestConnectionInfoCount++;
+    private void tryConnect() {
         manager.requestConnectionInfo(channel, new WifiP2pManager.ConnectionInfoListener() {
             @Override
             public void onConnectionInfoAvailable(WifiP2pInfo info) {
-                requestConnectionInfoCount--;
-                if (requestConnectionInfoCount > 0) {
-                    return;
-                }
-
                 if (info.groupFormed) {
                     onGroupFormed(info.isGroupOwner, info.groupOwnerAddress);
-                }
-                else {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                Thread.sleep(5000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            requestConnectionInfo();
-                        }
-                    }).start();
                 }
             }
         });
     }
 
-    private void onPeerListChanged(WifiP2pDeviceList peers) {
+    private void connectToPeers(WifiP2pDeviceList peers) {
         Log.d(TAG, "Peers found: "+ peers.toString());
 
         //obtain a peer from the WifiP2pDeviceList
@@ -168,17 +171,7 @@ public class WifiDirectService extends Service {
                     @Override
                     public void onFailure(int reason) {
                         Log.d(TAG, "Failed to connect to peer. " + reason);
-                        manager.cancelConnect(channel, new ActionListener() {
-                            @Override
-                            public void onSuccess() {
-                                Log.d(TAG, "Cancelled connection");
-                            }
-
-                            @Override
-                            public void onFailure(int reason) {
-                                Log.d(TAG, "Failed to cancel "+reason);
-                            }
-                        });
+                        tryConnectTask.resume();
                     }
                 });
             }
@@ -186,6 +179,10 @@ public class WifiDirectService extends Service {
     }
 
     private void onGroupFormed(boolean isHost, InetAddress hostAddress) {
+        tryConnectTask.pause();
+
+        reconnectTask.restart(30);
+
         Log.d("SE464", "group formed " + hostAddress + ", Am I host? " + isHost);
 
         Message message = new Message(
@@ -228,7 +225,7 @@ public class WifiDirectService extends Service {
         switch (intent.getAction()) {
             case WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION: {
                 WifiP2pDeviceList deviceList = intent.getParcelableExtra(WifiP2pManager.EXTRA_P2P_DEVICE_LIST);
-                onPeerListChanged(deviceList);
+                connectToPeers(deviceList);
             } break;
 
             case WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION: {
@@ -267,7 +264,7 @@ public class WifiDirectService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        deletePersistentGroups();
+        disconnect();
         manager.stopPeerDiscovery(channel, null);
     }
 }
