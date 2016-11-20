@@ -42,6 +42,22 @@
 
         <include layout="@layout/nav_header_view" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#111"
+            android:paddingTop="20dp">
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_add_white_24dp"
+                android:layout_marginLeft="10dp"
+                android:layout_gravity="left"/>
+
+        </LinearLayout>
+
+
         <ListView android:id="@+id/channel_list"
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
