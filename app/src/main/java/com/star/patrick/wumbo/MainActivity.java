@@ -1,10 +1,13 @@
 package com.star.patrick.wumbo;
 
+import android.app.Activity;
 import android.content.ClipData;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -255,8 +258,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             Intent myIntent = new Intent(MainActivity.this, SettingsActivity.class);
-            //myIntent.putExtra("activity", ); //Optional parameters
-            MainActivity.this.startActivity(myIntent);
+            MainActivity.this.startActivityForResult(myIntent, 2);
+
         } else if (drawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
@@ -304,8 +307,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
         this.onStartCallback = runnable;
     }
 
-    protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
-        super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
+    protected void onActivityResult(int requestCode, int resultCode, Intent returnedIntent) {
+        super.onActivityResult(requestCode, resultCode, returnedIntent);
         switch(requestCode) {
 //            case 0:
 //                if(resultCode == RESULT_OK){
@@ -315,13 +318,17 @@ public class MainActivity extends AppCompatActivity implements Observer {
 //
 //                break;
             case 1:
-                if(imageReturnedIntent != null){
-                    Uri selectedImage = imageReturnedIntent.getData();
+                if(returnedIntent != null){
+                    Uri selectedImage = returnedIntent.getData();
                     Log.d("SE464", "Selected image: "+selectedImage.getPath());
                     msgChannel.send(me, selectedImage, this);
                     //imageview.setImageURI(selectedImage);
                 }
                 break;
+            case 2:
+                if (returnedIntent != null){
+                    me.setDisplayName(returnedIntent.getStringExtra("new_name"));
+                }
         }
     }
 
