@@ -21,6 +21,7 @@ import com.star.patrick.wumbo.R;
 import com.star.patrick.wumbo.User;
 import com.star.patrick.wumbo.message.EncryptedMessage;
 import com.star.patrick.wumbo.message.Message;
+import com.star.patrick.wumbo.message.Text;
 
 import java.lang.reflect.Method;
 import java.net.InetAddress;
@@ -179,7 +180,7 @@ public class WifiDirectService extends Service {
         Log.d("SE464", "group formed " + hostAddress + ", Am I host? " + isHost);
 
         Message message = new Message(
-            "Connected",
+            new Text("Connected"),
             new User("System", null),
             new Timestamp(
                 Calendar.getInstance().getTime().getTime()
