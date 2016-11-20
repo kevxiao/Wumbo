@@ -6,11 +6,16 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
+import com.star.patrick.wumbo.message.ChannelInvite;
 import com.star.patrick.wumbo.message.EncryptedMessage;
+import com.star.patrick.wumbo.message.Message;
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
+import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Set;
@@ -72,4 +77,23 @@ public class ChannelManagerImpl extends Observable implements ChannelManager {
         return channels.get(channelId);
     }
 
+    @Override
+    public void createChannel(Channel channel, User inviter, List<User> invitedUsers) {
+        this.addChannel(channel);
+        for (User user : invitedUsers) {
+            Message msg = new Message(
+                    new ChannelInvite(
+                            channel.getId(),
+                            channel.getName(),
+                            channel.getKey(),
+                            user
+                    ),
+                    inviter,
+                    new Timestamp(Calendar.getInstance().getTime().getTime()),
+                    UUID.randomUUID()
+            );
+            //KEVIN FIX THIS SHIT
+            //messageCourier.send(new EncryptedMessage(msg, ???));
+        }
+    }
 }

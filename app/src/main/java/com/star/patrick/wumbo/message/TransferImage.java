@@ -10,7 +10,7 @@ public class TransferImage implements MessageContent, Serializable {
     private MessageType type = MessageType.IMAGE;
     private byte[] content;
 
-    TransferImage(byte[] image) {
+    public TransferImage(byte[] image) {
         this.content = image;
     }
 

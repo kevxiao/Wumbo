@@ -21,6 +21,7 @@ import com.star.patrick.wumbo.message.Message;
 import com.star.patrick.wumbo.message.MessageContent;
 import com.star.patrick.wumbo.message.MessageList;
 import com.star.patrick.wumbo.message.MessageListImpl;
+import com.star.patrick.wumbo.message.Text;
 import com.star.patrick.wumbo.message.TransferImage;
 
 import java.io.ByteArrayOutputStream;
@@ -48,7 +49,7 @@ public class ChannelImpl extends Observable implements Channel {
     private String name;
     private UUID id;
     private MessageList msgs;
-    private MainActivity mainContext;
+    private Context mainContext;
     private SecretKey encKey;
     private MessageCourier messageCourier;
     private Set<UUID> msgIds = new HashSet<>();
@@ -66,11 +67,11 @@ public class ChannelImpl extends Observable implements Channel {
         }
     }
 
-    public ChannelImpl(UUID id, String name, MainActivity context, MessageCourier messageCourier, SecretKey key) {
+    public ChannelImpl(UUID id, String name, Context context, MessageCourier messageCourier, SecretKey key) {
         this(id, name, context, messageCourier, key, new DatabaseHandler(context, messageCourier).getAllMessages(id));
     }
 
-    public ChannelImpl(UUID id, String name, MainActivity context, MessageCourier messageCourier, SecretKey key, MessageList msgs) {
+    public ChannelImpl(UUID id, String name, Context context, MessageCourier messageCourier, SecretKey key, MessageList msgs) {
         this.name = name;
         this.msgs = msgs;
         this.id = id;
@@ -85,7 +86,7 @@ public class ChannelImpl extends Observable implements Channel {
 
     public void send(User sender, String msgText) {
         Log.d("SE464", "Channel send string");
-        final Message msg = new Message(msgText, sender, new Timestamp(Calendar.getInstance().getTimeInMillis()), id);
+        final Message msg = new Message(new Text(msgText), sender, new Timestamp(Calendar.getInstance().getTimeInMillis()), id);
         add(msg);
         Thread sendThread = new Thread() {
             @Override
@@ -104,7 +105,7 @@ public class ChannelImpl extends Observable implements Channel {
         } catch (Exception e){
             e.printStackTrace();
         }
-        final Message msg = new Message(Uri.parse(filepath), sender, new Timestamp(Calendar.getInstance().getTimeInMillis()), id);
+        final Message msg = new Message(new Image(Uri.parse(filepath)), sender, new Timestamp(Calendar.getInstance().getTimeInMillis()), id);
         Log.d("SE464","Sending message: " + msg.getId());
         add(msg);
 
@@ -115,7 +116,7 @@ public class ChannelImpl extends Observable implements Channel {
                     Log.d("SE464","Create bitmap from " + filepath);
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                     MediaStore.Images.Media.getBitmap(mainContext.getContentResolver(), Uri.fromFile(new File(filepath))).compress(Bitmap.CompressFormat.PNG, 100, stream);
-                    Message sendMsg = new Message(msg.getId(), stream.toByteArray(), msg.getUser(), msg.getSendTime(), msg.getChannelId());
+                    Message sendMsg = new Message(msg.getId(), new TransferImage(stream.toByteArray()), msg.getUser(), msg.getSendTime(), msg.getChannelId());
                     send(sendMsg);
                 } catch (Exception e){
                     e.printStackTrace();
@@ -128,12 +129,14 @@ public class ChannelImpl extends Observable implements Channel {
     public void send(Message msg) {
         Log.d("SE464", "Channel send message");
         EncryptedMessage emsg = new EncryptedMessage(msg, this.encKey);
+        msgIds.add(emsg.getId());
         messageCourier.send(emsg);
     }
 
     public void receive(EncryptedMessage emsg) {
         Log.d("SE464", "Channel receive");
         if (!msgIds.contains(emsg.getId())) {
+            msgIds.add(emsg.getId());
             Log.d("SE464", "Channel hasn't received this message before: " + emsg.getId());
             Message msg = new Message(emsg, this.encKey);
             Log.d("SE464", "Message ID: " + msg.getId() + " Message Sender: " + msg.getUser().getDisplayName());
@@ -148,8 +151,7 @@ public class ChannelImpl extends Observable implements Channel {
     }
 
     private void add(Message msg) {
-        Log.d("SE464", "Adding message to channel");
-        msgIds.add(msg.getId());
+        Log.d("SE464", "Adding message to channel: " + msg.getId());
         msg.setReceiveTime(new Timestamp(new Date().getTime()));
         msgs.addMessage(msg);
         setChanged();
@@ -182,7 +184,7 @@ public class ChannelImpl extends Observable implements Channel {
     private Message getImageMessageFromReceived(Message msg) {
         String filepath = getFilePathFromId(msg.getId());
         storeImage(msg, filepath);
-        return new Message(Uri.parse(filepath), msg.getUser(), msg.getSendTime(), msg.getChannelId());
+        return new Message(msg.getId(), new Image(Uri.parse(filepath)), msg.getUser(), msg.getSendTime(), msg.getChannelId());
     }
 
     private void storeImage(Message msg, String filepath) {

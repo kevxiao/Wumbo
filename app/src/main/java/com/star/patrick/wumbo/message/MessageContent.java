@@ -11,6 +11,7 @@ public interface MessageContent{
     MessageType getType();
     enum MessageType{
         TEXT,
-        IMAGE
+        IMAGE,
+        CHANNEL_INVITE
     }
 }

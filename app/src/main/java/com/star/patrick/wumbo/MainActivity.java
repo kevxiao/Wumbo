@@ -1,10 +1,14 @@
 package com.star.patrick.wumbo;
 
+import android.app.Activity;
+import android.content.ClipData;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.security.KeyPairGeneratorSpec;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
@@ -98,41 +102,45 @@ public class MainActivity extends AppCompatActivity implements Observer {
         KeyPair userKeys = null;
         String senderName = (extras != null && extras.getString("name") != null && !extras.getString("name").isEmpty()) ? extras.getString("name") : "Anonymous";
 
-//        try {
-//            KeyPairGenerator kpg;
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                kpg = KeyPairGenerator.getInstance(
-//                        KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
-//                try {
-//                    kpg.initialize(new KeyGenParameterSpec.Builder(
-//                            senderName,
-//                            KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-//                            .setDigests(KeyProperties.DIGEST_SHA256,
-//                                    KeyProperties.DIGEST_SHA512)
-//                            .build());
-//                } catch (InvalidAlgorithmParameterException e) {
-//                    e.printStackTrace();
-//                }
-//            } else {
-//                kpg = KeyPairGenerator.getInstance("RSA", "AndroidKeyStore");
-//                try {
-//                    Calendar endDate = Calendar.getInstance();
-//                    endDate.add(Calendar.YEAR, 1000);
-//                    kpg.initialize(new KeyPairGeneratorSpec.Builder(this)
-//                            .setAlias(senderName)
-//                            .setSubject(new X500Principal("CN=Wumbo, O=Android, C=US"))
-//                            .setSerialNumber(BigInteger.ONE)
-//                            .setStartDate(Calendar.getInstance().getTime())
-//                            .setEndDate(endDate.getTime())
-//                            .build());
-//                } catch (InvalidAlgorithmParameterException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//            userKeys = kpg.generateKeyPair();
-//        } catch (NoSuchProviderException | NoSuchAlgorithmException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            KeyPairGenerator kpg;
+            Log.d("SE464", "Start generating user key pair");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                kpg = KeyPairGenerator.getInstance(
+                        KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
+                try {
+                    kpg.initialize(new KeyGenParameterSpec.Builder(
+                            senderName,
+                            KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                            .setDigests(KeyProperties.DIGEST_SHA256,
+                                    KeyProperties.DIGEST_SHA512)
+                            .build());
+                } catch (InvalidAlgorithmParameterException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                kpg = KeyPairGenerator.getInstance("RSA", "AndroidKeyStore");
+                try {
+                    Calendar endDate = Calendar.getInstance();
+                    endDate.add(Calendar.YEAR, 1000);
+                    kpg.initialize(new KeyPairGeneratorSpec.Builder(this)
+                            .setAlias(senderName)
+                            .setSubject(new X500Principal("CN=Wumbo, O=Android, C=US"))
+                            .setSerialNumber(BigInteger.ONE)
+                            .setStartDate(Calendar.getInstance().getTime())
+                            .setEndDate(endDate.getTime())
+                            .build());
+                } catch (InvalidAlgorithmParameterException e) {
+                    e.printStackTrace();
+                }
+            }
+            userKeys = kpg.generateKeyPair();
+            if(userKeys == null) {
+                Log.d("SE464", "Generated user key pair");
+            }
+        } catch (NoSuchProviderException | NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
 
         messageCourier = new MessageCourierImpl(this);
 
@@ -265,7 +273,9 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            Intent myIntent = new Intent(MainActivity.this, SettingsActivity.class);
+            MainActivity.this.startActivityForResult(myIntent, 2);
+
         } else if (drawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
@@ -313,8 +323,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
         this.onStartCallback = runnable;
     }
 
-    protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
-        super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
+    protected void onActivityResult(int requestCode, int resultCode, Intent returnedIntent) {
+        super.onActivityResult(requestCode, resultCode, returnedIntent);
         switch(requestCode) {
 //            case 0:
 //                if(resultCode == RESULT_OK){
@@ -324,13 +334,17 @@ public class MainActivity extends AppCompatActivity implements Observer {
 //
 //                break;
             case 1:
-                if(imageReturnedIntent != null){
-                    Uri selectedImage = imageReturnedIntent.getData();
+                if(returnedIntent != null){
+                    Uri selectedImage = returnedIntent.getData();
                     Log.d("SE464", "Selected image: "+selectedImage.getPath());
                     msgChannel.send(me, selectedImage);
                     //imageview.setImageURI(selectedImage);
                 }
                 break;
+            case 2:
+                if (returnedIntent != null){
+                    me.setDisplayName(returnedIntent.getStringExtra("new_name"));
+                }
         }
     }
 

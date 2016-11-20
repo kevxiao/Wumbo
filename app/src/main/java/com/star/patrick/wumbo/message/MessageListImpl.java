@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 public class MessageListImpl implements MessageList {
     private List<Message> messages = new ArrayList<>();
@@ -24,8 +25,7 @@ public class MessageListImpl implements MessageList {
                 return msg1.getReceiveTime().compareTo(msg2.getReceiveTime());
             }
         };
-        Message key = new Message("", null, null, null);
-        key.setReceiveTime(ts);
+        Message key = new Message(null, null, null, null, null, ts);
         int index = Collections.binarySearch(messages, key, receiveTimeComparator);
 
         if (index >= messages.size()) {
