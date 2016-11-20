@@ -15,18 +15,20 @@ public class MessageSender extends AsyncTask<Void, Void, Throwable> {
     private int port;
     private Object object;
     private int numRetries;
+    private Runnable onFailure;
 
     public static final int TIMEOUT_MS = 1000;
 
-    public MessageSender(InetAddress hostAddress, int port, Object object) {
-        this(hostAddress, port, object, 1);
+    public MessageSender(InetAddress hostAddress, int port, Object object, Runnable onFailure) {
+        this(hostAddress, port, object, onFailure, 1);
     }
 
-    public MessageSender(InetAddress hostAddress, int port, Object object, int numRetries) {
+    public MessageSender(InetAddress hostAddress, int port, Object object, Runnable onFailure, int numRetries) {
         this.hostAddress = hostAddress;
         this.port = port;
         this.object = object;
         this.numRetries = numRetries;
+        this.onFailure = onFailure;
 
         Log.d("SE464", "address: "+hostAddress.toString()+" port: "+port);
 
@@ -55,5 +57,15 @@ public class MessageSender extends AsyncTask<Void, Void, Throwable> {
             }
         }
         return exception;
+    }
+
+    @Override
+    protected void onPostExecute(Throwable throwable) {
+        super.onPostExecute(throwable);
+
+        if (throwable != null && onFailure != null) {
+            throwable.printStackTrace();
+            onFailure.run();
+        }
     }
 }
