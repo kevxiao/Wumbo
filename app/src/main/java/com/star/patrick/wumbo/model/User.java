@@ -2,6 +2,9 @@ package com.star.patrick.wumbo.model;
 
 import android.util.Base64;
 
+import com.star.patrick.wumbo.Encryption;
+import com.star.patrick.wumbo.view.MainActivity;
+
 import java.io.Serializable;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -22,15 +25,7 @@ public class User implements Serializable {
     public User(UUID id, String displayName, String publicKey) {
         this.id = id;
         this.displayName = displayName;
-
-        try {
-            byte[] publkey = Base64.decode(publicKey, Base64.DEFAULT);
-            X509EncodedKeySpec spec = new X509EncodedKeySpec(publkey);
-            KeyFactory fact = KeyFactory.getInstance("RSA");
-            this.publicKey = fact.generatePublic(spec);
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            e.printStackTrace();
-        }
+        this.publicKey = Encryption.getPublicKeyFromEncoding(publicKey);
     }
 
     public User(UUID id, String displayName, PublicKey p) {
