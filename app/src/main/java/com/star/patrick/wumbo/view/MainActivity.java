@@ -92,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private MessageCourier messageCourier;
     private MessageBroadcastReceiver messageBroadcastReceiver;
     private ArrayAdapter<ChannelListItem> channelListAdapter;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         setContentView(R.layout.activity_main);
 
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_menu_white_24dp);
 
         setSupportActionBar(toolbar);
@@ -296,6 +297,9 @@ public class MainActivity extends AppCompatActivity implements Observer {
         //update the channel list, lazily, it just reloads the whole thing.
         channelListAdapter.clear();
         channelListAdapter.addAll(createChannelItemList(channelManager.getChannels()));
+
+        //update the channel title
+        toolbar.setTitle(msgChannel.getName());
     }
 
     private Runnable onStopCallback;
@@ -384,7 +388,16 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private class ChannelListItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            //supportActionBar.setTitle(?);
+            ChannelListItem channelListItem = (ChannelListItem)parent.getItemAtPosition(position);
+            Log.d("SE464", "MainActivity: Switching to channel " + channelListItem.toString());
+            msgChannel.deleteObserver(MainActivity.this);
+            msgChannel = channelManager.getChannel(channelListItem.getId());
+            msgChannel.addObserver(MainActivity.this);
+            chatAdapter = new ChatAdapter(MainActivity.this, new ArrayList<Message>(), me.getId());
+            lastMessage = null;
+            listView.setAdapter(chatAdapter);
+            MainActivity.this.update(null, null);
+            drawerLayout.closeDrawers();
         }
     }
 
