@@ -132,6 +132,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                         "DELETE FROM messages WHERE messages.uuid IN (SELECT messages.uuid FROM messages ORDER BY messages.rtime limit (select count(*) -500 from messages ));"+
                         "VACUUM;"+
                 "END;";
+        db.execSQL(MESSAGE_LIMIT_TRIGGER);
 
     }
 
