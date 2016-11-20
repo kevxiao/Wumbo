@@ -285,6 +285,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(USER_PUBLIC_KEY, MainActivity.getEncodedPublicKey(user.getPublicKey()));
 
         db.insert(USER_TABLE, null, values);
+        db.close();
     }
 
     public void updateSenderDisplayName(UUID id, String displayName) {
@@ -447,6 +448,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     public void addUser(User user) {
+        if (getUser(user.getId()) != null)
+            return;
+        
         SQLiteDatabase db = this.getWritableDatabase();
 
         Log.d("SE464", "DatabaseHandler: (uuid,display_name) = " + user.getId().toString() + "," + user.getDisplayName());
