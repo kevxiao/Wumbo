@@ -36,7 +36,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     // All Static variables
     // Database Version
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
 
     // Database Name
     private static final String DATABASE_NAME = "Wumbo";
@@ -84,6 +84,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         Log.d("SE464", "Creating THE BIG DB");
         db.execSQL("PRAGMA foreign_keys = ON;");
+        db.execSQL("PRAGMA auto_vacuum = FULL;");
 
         String CREATE_MESSAGES_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_MESSAGE + "("
                 + MESSAGE_UUID + " TEXT PRIMARY KEY,"
@@ -130,7 +131,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 "CREATE TRIGGER delete_till_500 INSERT ON messages WHEN (select count(*) from messages)>700\n"+
                 "BEGIN\n"+
                         "DELETE FROM messages WHERE messages.uuid IN (SELECT messages.uuid FROM messages ORDER BY messages.rtime limit (select count(*) -500 from messages ));"+
-                        "VACUUM;"+
                 "END;";
         db.execSQL(MESSAGE_LIMIT_TRIGGER);
 
@@ -207,6 +207,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 break;
         }
 
+        cursor.close();
         db.close();
 
         // return contact
@@ -247,6 +248,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             msgs.add(msg);
         }
 
+        cursor.close();
         db.close();
 
         Log.d("SE464", "Retrieving " + msgs.size() + " messages from the database");
