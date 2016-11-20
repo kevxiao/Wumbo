@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.star.patrick.wumbo.message.EncryptedMessage;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,7 +19,7 @@ public class MessageBroadcastReceiver {
     public static final String WUMBO_MESSAGE_INTENT_ACTION = "com.star.patrick.wumbo.MESSAGE";
     public static final String WUMBO_MESSAGE_EXTRA = "message";
 
-    private List<MessageReceiver> messageReceivers;
+    private List<MessageReceiver> messageReceivers = new ArrayList<>();
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
