@@ -1,8 +1,7 @@
 package com.star.patrick.wumbo.wifidirect;
 
 
-import com.star.patrick.wumbo.message.EncryptedMessage;
-import com.star.patrick.wumbo.message.Message;
+import com.star.patrick.wumbo.model.message.EncryptedMessage;
 
 import java.net.InetAddress;
 

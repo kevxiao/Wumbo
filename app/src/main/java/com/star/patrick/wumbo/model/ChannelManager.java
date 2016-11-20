@@ -1,11 +1,12 @@
-package com.star.patrick.wumbo;
+package com.star.patrick.wumbo.model;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Observer;
 import java.util.UUID;
 
-import com.star.patrick.wumbo.message.EncryptedMessage;
-import com.star.patrick.wumbo.message.Message;
+import com.star.patrick.wumbo.MessageReceiver;
+import com.star.patrick.wumbo.model.message.EncryptedMessage;
 
 public interface ChannelManager extends MessageReceiver {
     void receive(EncryptedMessage msg);
@@ -14,4 +15,6 @@ public interface ChannelManager extends MessageReceiver {
     void createChannel(Channel channel, User inviter, List<User> invitedUsers);
     Map<UUID,String> getChannels();
     Channel getChannel(UUID channelId);
+    void addObserver(Observer obs);
+    void deleteObserver(Observer obs);
 }

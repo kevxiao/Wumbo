@@ -1,4 +1,4 @@
-package com.star.patrick.wumbo.message;
+package com.star.patrick.wumbo.model.message;
 
 import java.io.Serializable;
 

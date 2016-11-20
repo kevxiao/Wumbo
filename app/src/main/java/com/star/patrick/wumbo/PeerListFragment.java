@@ -5,6 +5,8 @@ import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.util.Log;
 
+import com.star.patrick.wumbo.view.MainActivity;
+
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,34 +1,32 @@
-package com.star.patrick.wumbo;
+package com.star.patrick.wumbo.model;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.util.Log;
 
-import com.star.patrick.wumbo.message.ChannelInvite;
-import com.star.patrick.wumbo.message.EncryptedMessage;
-import com.star.patrick.wumbo.message.Message;
-import com.star.patrick.wumbo.wifidirect.WifiDirectService;
+import com.star.patrick.wumbo.DatabaseHandler;
+import com.star.patrick.wumbo.MessageCourier;
+import com.star.patrick.wumbo.model.message.ChannelInvite;
+import com.star.patrick.wumbo.model.message.EncryptedMessage;
+import com.star.patrick.wumbo.model.message.Message;
+import com.star.patrick.wumbo.model.message.MessageContent;
 
 import java.sql.Timestamp;
 import java.util.Calendar;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
-import java.util.Set;
 import java.util.UUID;
 
 public class ChannelManagerImpl extends Observable implements ChannelManager {
     private final MessageCourier messageCourier;
-    private MainActivity mainContext;
+    private Context context;
     private Map<UUID,Channel> channels = new LinkedHashMap<>();
     private Map<UUID,String> channelNames = new LinkedHashMap<>();
 
-    public ChannelManagerImpl(MainActivity context, MessageCourier messageCourier) {
-        this.mainContext = context;
+
+    public ChannelManagerImpl(Context context, MessageCourier messageCourier) {
+        this.context = context;
         this.messageCourier = messageCourier;
 
         DatabaseHandler db = new DatabaseHandler(context, messageCourier);
@@ -41,9 +39,34 @@ public class ChannelManagerImpl extends Observable implements ChannelManager {
     @Override
     public void receive(EncryptedMessage msg) {
         Log.d("SE 464", "Channel manager is receiving");
-        if (channels.containsKey(msg.getChannelId())) {
+
+        if (msg.getContentType().equals(MessageContent.MessageType.CHANNEL_INVITE)) {
+            createChannel(msg);
+        } else if (channels.containsKey(msg.getChannelId())) {
             channels.get(msg.getChannelId()).receive(msg);
         }
+    }
+
+    private Channel createChannel(EncryptedMessage emsg) {
+        Message msg = null;
+        //KEVIN YOU FIGURE THIS SHIT OUT
+        try {
+            msg = new Message(emsg, null);
+        } catch(Exception e) {
+            return null;
+        }
+
+        ChannelInvite.Info channelInfo = (ChannelInvite.Info) msg.getContent();
+
+//        Channel channel = new ChannelImpl(
+//                channelInfo.getId(),
+//                channelInfo.getName(),
+//                context,
+//                messageCourier,
+//                channelInfo.getKey()
+//        );
+//        addChannel(channel);
+        return null;
     }
 
     @Override
@@ -54,7 +77,7 @@ public class ChannelManagerImpl extends Observable implements ChannelManager {
         notifyObservers();
 
         //Add to db
-        DatabaseHandler db = new DatabaseHandler(mainContext, messageCourier);
+        DatabaseHandler db = new DatabaseHandler(context, messageCourier);
         db.addChannel(channel);
     }
 
@@ -63,7 +86,7 @@ public class ChannelManagerImpl extends Observable implements ChannelManager {
         channels.remove(channel.getId());
 
         //Remove from  db
-        DatabaseHandler db = new DatabaseHandler(mainContext, messageCourier);
+        DatabaseHandler db = new DatabaseHandler(context, messageCourier);
         db.removeChannel(channel.getId());
     }
 

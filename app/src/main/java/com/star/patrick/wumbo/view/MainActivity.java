@@ -1,17 +1,9 @@
-package com.star.patrick.wumbo;
+package com.star.patrick.wumbo.view;
 
-import android.app.Activity;
-import android.content.ClipData;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.security.KeyPairGeneratorSpec;
-import android.security.keystore.KeyGenParameterSpec;
-import android.security.keystore.KeyProperties;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -29,18 +21,34 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
-import com.star.patrick.wumbo.message.Message;
+import com.star.patrick.wumbo.model.Channel;
+import com.star.patrick.wumbo.model.ChannelImpl;
+import com.star.patrick.wumbo.model.ChannelList;
+import com.star.patrick.wumbo.model.ChannelManager;
+import com.star.patrick.wumbo.model.ChannelManagerImpl;
+import com.star.patrick.wumbo.model.ContactsTracker;
+import com.star.patrick.wumbo.model.ContactsTrackerImpl;
+import com.star.patrick.wumbo.DatabaseHandler;
+import com.star.patrick.wumbo.MessageBroadcastReceiver;
+import com.star.patrick.wumbo.MessageCourier;
+import com.star.patrick.wumbo.MessageCourierImpl;
+import com.star.patrick.wumbo.R;
+import com.star.patrick.wumbo.model.User;
+import com.star.patrick.wumbo.model.message.Message;
 import com.star.patrick.wumbo.wifidirect.HandshakeDispatcherService;
 import com.star.patrick.wumbo.wifidirect.MessageDispatcherService;
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
-import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -50,14 +58,13 @@ import java.util.Observer;
 import java.util.UUID;
 
 import javax.crypto.spec.SecretKeySpec;
-import javax.security.auth.x500.X500Principal;
 
 public class MainActivity extends AppCompatActivity implements Observer {
 
     private ChannelManager channelManager;
+    private ContactsTracker contacts;
     private Channel msgChannel;
     private ChannelList msgChannelList;
-    private NetworkManager networkManager;
     public static final String TAG = "SE464";
     private ChatAdapter chatAdapter;
     private ListView listView;
@@ -68,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
     private ImageButton sendBtn;
     private ImageButton cameraBtn;
+    private ImageButton createChannelBtn;
     private EditText editMsg;
     private DrawerLayout drawerLayout;
     private ListView channelListView;
@@ -99,48 +107,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         );
         Bundle extras = getIntent().getExtras();
 
-        KeyPair userKeys = null;
         String senderName = (extras != null && extras.getString("name") != null && !extras.getString("name").isEmpty()) ? extras.getString("name") : "Anonymous";
-
-        try {
-            KeyPairGenerator kpg;
-            Log.d("SE464", "Start generating user key pair");
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                kpg = KeyPairGenerator.getInstance(
-                        KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
-                try {
-                    kpg.initialize(new KeyGenParameterSpec.Builder(
-                            senderName,
-                            KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                            .setDigests(KeyProperties.DIGEST_SHA256,
-                                    KeyProperties.DIGEST_SHA512)
-                            .build());
-                } catch (InvalidAlgorithmParameterException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                kpg = KeyPairGenerator.getInstance("RSA", "AndroidKeyStore");
-                try {
-                    Calendar endDate = Calendar.getInstance();
-                    endDate.add(Calendar.YEAR, 1000);
-                    kpg.initialize(new KeyPairGeneratorSpec.Builder(this)
-                            .setAlias(senderName)
-                            .setSubject(new X500Principal("CN=Wumbo, O=Android, C=US"))
-                            .setSerialNumber(BigInteger.ONE)
-                            .setStartDate(Calendar.getInstance().getTime())
-                            .setEndDate(endDate.getTime())
-                            .build());
-                } catch (InvalidAlgorithmParameterException e) {
-                    e.printStackTrace();
-                }
-            }
-            userKeys = kpg.generateKeyPair();
-            if(userKeys == null) {
-                Log.d("SE464", "Generated user key pair");
-            }
-        } catch (NoSuchProviderException | NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
 
         messageCourier = new MessageCourierImpl(this);
 
@@ -148,21 +115,32 @@ public class MainActivity extends AppCompatActivity implements Observer {
         me = db.getMe();
         if (null == me) {
             Log.d("SE464", "MainActivity: did not find me");
+            KeyPair userKeys = generateKeyPair();
+            String encodedPrivateKey = getEncodedPrivateKey(userKeys.getPrivate());
             me = new User(senderName, userKeys != null ? userKeys.getPublic() : null);
             db.addUser(me);
-            db.setMe(me.getId());
+            db.setMe(me.getId(), encodedPrivateKey);
         } else {
             Log.d("SE464", "MainActivity: me existed");
-            me = new User(me.getId(), senderName, userKeys != null ? userKeys.getPublic() : null);
+            me = new User(me.getId(), senderName, me.getPublicKey());
             db.updateSenderDisplayName(me.getId(), senderName);
+            try {
+                byte[] privkey = Base64.decode(db.getMePrivateKey(), Base64.DEFAULT);
+                PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privkey);
+                KeyFactory fact = KeyFactory.getInstance("RSA");
+                mePrivateKey = fact.generatePrivate(keySpec);
+            } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+                e.printStackTrace();
+            }
         }
-        mePrivateKey = userKeys != null ? userKeys.getPrivate() : null;
 
         channelManager = new ChannelManagerImpl(this, messageCourier);
+        contacts = new ContactsTrackerImpl(this);
 
         messageBroadcastReceiver = new MessageBroadcastReceiver(this);
         messageBroadcastReceiver.add(channelManager);
         messageBroadcastReceiver.add(messageCourier);
+        messageBroadcastReceiver.add(contacts);
 
         byte[] encodedKey = Base64.decode(getResources().getString(R.string.public_secret_key), Base64.DEFAULT);
         msgChannel = new ChannelImpl(
@@ -181,6 +159,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         sendBtn = (ImageButton) findViewById(R.id.sendBtn);
         cameraBtn = (ImageButton) findViewById(R.id.cameraIcon);
         editMsg = (EditText) findViewById(R.id.editMsg);
+        createChannelBtn = (ImageButton) findViewById(R.id.createChannelIcon);
 
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -201,6 +180,13 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 Intent pickPhoto = new Intent(Intent.ACTION_PICK,
                         android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(pickPhoto , 1);//one can be replaced with any action code
+            }
+        });
+
+        createChannelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
             }
         });
 
@@ -238,22 +224,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
         channelListView.setAdapter(new ArrayAdapter<>(this, R.layout.channel_list_item, channels));
         channelListView.setOnItemClickListener(new ChannelListItemClickListener());
 
-        //DatabaseHandler db = new DatabaseHandler(this.getApplicationContext(), me, this, channelManager);
-
-//        Message dbTestMsg = new Message("FUCK ME", me, new Timestamp(10), UUID.fromString(getResources().getString(R.string.public_uuid)));
-//        dbTestMsg.setReceiveTime(new Timestamp(10));
-//        db.addMessage(dbTestMsg);
-//        Message dbRetreivedMsg = db.getMessage(dbTestMsg.getId());
-//        if (null == dbRetreivedMsg) {
-//            Log.d("SE464", "retrieved is null");
-//        } else {
-//            Log.d("SE464", "id: "+dbRetreivedMsg.getId() + " text: "+dbRetreivedMsg.getContent().getMessageContent()+" receiveTime: "+dbRetreivedMsg.getReceiveTime());
-//        }
-//        if (dbRetreivedMsg.getReceiveTime().equals(dbTestMsg.getReceiveTime())) {
-//            Log.d("SE464", "This message seemed to be retreived right");
-//        } else {
-//            Log.d("SE464", "Uh oh, retreived times are different");
-//        }
         update(null, null);
     }
 
@@ -393,6 +363,51 @@ public class MainActivity extends AppCompatActivity implements Observer {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             //supportActionBar.setTitle(?);
         }
+    }
+
+    private static KeyPair generateKeyPair() {
+        KeyPair userKeys = null;
+        try {
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+            Log.d("SE464", "Start generating user key pair");
+            SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
+            sr.setSeed(Calendar.getInstance().getTimeInMillis());
+            kpg.initialize(2048, sr);
+            userKeys = kpg.generateKeyPair();
+            if(userKeys != null) {
+                Log.d("SE464", "Generated user key pair");
+            }
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return userKeys;
+    }
+
+    private static String getEncodedPrivateKey(PrivateKey key) {
+        String privkey = "";
+        try {
+            KeyFactory fact = KeyFactory.getInstance("RSA");
+            PKCS8EncodedKeySpec spec = fact.getKeySpec(key, PKCS8EncodedKeySpec.class);
+            byte[] packed = spec.getEncoded();
+            privkey = Base64.encodeToString(packed, Base64.DEFAULT);
+            Log.d("SE464", "Private key: " + privkey);
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return privkey;
+    }
+
+    public static String getEncodedPublicKey(PublicKey key) {
+        String publkey = "";
+        try {
+            KeyFactory fact = KeyFactory.getInstance("RSA");
+            X509EncodedKeySpec spec = fact.getKeySpec(key, X509EncodedKeySpec.class);
+            publkey = Base64.encodeToString(spec.getEncoded(), Base64.DEFAULT);
+            Log.d("SE464", "Public key: " + publkey);
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return publkey;
     }
 
     @Override

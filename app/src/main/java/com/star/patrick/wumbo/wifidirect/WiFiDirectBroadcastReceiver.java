@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.util.Log;
 
-import static com.star.patrick.wumbo.MainActivity.TAG;
+import static com.star.patrick.wumbo.view.MainActivity.TAG;
 
 public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
     @Override

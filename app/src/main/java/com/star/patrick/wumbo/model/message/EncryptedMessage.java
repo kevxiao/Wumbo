@@ -1,6 +1,6 @@
-package com.star.patrick.wumbo.message;
+package com.star.patrick.wumbo.model.message;
 
-import com.star.patrick.wumbo.User;
+import com.star.patrick.wumbo.model.User;
 
 import java.io.IOException;
 import java.io.Serializable;

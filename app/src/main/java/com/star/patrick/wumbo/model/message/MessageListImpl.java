@@ -1,4 +1,4 @@
-package com.star.patrick.wumbo.message;
+package com.star.patrick.wumbo.model.message;
 
 import android.util.Log;
 
@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 
 public class MessageListImpl implements MessageList {
     private List<Message> messages = new ArrayList<>();

@@ -1,10 +1,9 @@
-package com.star.patrick.wumbo;
+package com.star.patrick.wumbo.model;
 
-import android.content.Context;
 import android.net.Uri;
 
-import com.star.patrick.wumbo.message.EncryptedMessage;
-import com.star.patrick.wumbo.message.Message;
+import com.star.patrick.wumbo.model.message.EncryptedMessage;
+import com.star.patrick.wumbo.model.message.Message;
 
 import java.sql.Timestamp;
 import java.util.List;
