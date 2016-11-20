@@ -63,6 +63,7 @@ import javax.security.auth.x500.X500Principal;
 public class MainActivity extends AppCompatActivity implements Observer {
 
     private ChannelManager channelManager;
+    private ContactsTracker contacts;
     private Channel msgChannel;
     private ChannelList msgChannelList;
     private NetworkManager networkManager;
@@ -76,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
     private ImageButton sendBtn;
     private ImageButton cameraBtn;
+    private ImageButton createChannelBtn;
     private EditText editMsg;
     private DrawerLayout drawerLayout;
     private ListView channelListView;
@@ -135,10 +137,12 @@ public class MainActivity extends AppCompatActivity implements Observer {
         }
 
         channelManager = new ChannelManagerImpl(this, messageCourier);
+        contacts = new ContactsTrackerImpl(this);
 
         messageBroadcastReceiver = new MessageBroadcastReceiver(this);
         messageBroadcastReceiver.add(channelManager);
         messageBroadcastReceiver.add(messageCourier);
+        messageBroadcastReceiver.add(contacts);
 
         byte[] encodedKey = Base64.decode(getResources().getString(R.string.public_secret_key), Base64.DEFAULT);
         msgChannel = new ChannelImpl(
@@ -157,6 +161,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         sendBtn = (ImageButton) findViewById(R.id.sendBtn);
         cameraBtn = (ImageButton) findViewById(R.id.cameraIcon);
         editMsg = (EditText) findViewById(R.id.editMsg);
+        createChannelBtn = (ImageButton) findViewById(R.id.createChannelIcon);
 
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -177,6 +182,13 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 Intent pickPhoto = new Intent(Intent.ACTION_PICK,
                         android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(pickPhoto , 1);//one can be replaced with any action code
+            }
+        });
+
+        createChannelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
             }
         });
 

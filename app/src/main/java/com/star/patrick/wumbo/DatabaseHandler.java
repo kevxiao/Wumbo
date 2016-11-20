@@ -476,4 +476,33 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close();
         return mePk;
     }
+
+    public List<User> getUsers() {
+        List<User> users = new ArrayList<>();
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT * FROM " + USER_TABLE + " ORDER BY " + USER_DISPLAY_NAME,
+                new String[]{}
+        );
+
+        if (cursor == null || !cursor.isBeforeFirst() || !cursor.moveToFirst()) {
+            return users;
+        }
+
+        do {
+            User user = new User(
+                    UUID.fromString(cursor.getString(cursor.getColumnIndex(USER_UUID))),
+                    cursor.getString(cursor.getColumnIndex(USER_DISPLAY_NAME)),
+                    cursor.getString(cursor.getColumnIndex(USER_PUBLIC_KEY))
+            );
+            users.add(user);
+        } while ( cursor.moveToNext() );
+
+        cursor.close();
+        db.close();
+
+        return users;
+    }
 }
