@@ -32,7 +32,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     // All Static variables
     // Database Version
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     // Database Name
     private static final String DATABASE_NAME = "Wumbo";
@@ -60,9 +60,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // User Table Column names
     private static final String USER_UUID = "uuid";
     private static final String USER_DISPLAY_NAME = "display_name";
+    private static final String USER_PUBLIC_KEY = "publkey";
 
     // Me Table Column names
     private static final String ME_UUID = "uuid";
+    private static final String ME_PRIVATE_KEY = "privkey";
 
     private Context context;
     private MessageCourier messageCourier;
@@ -106,6 +108,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                     USER_UUID + " TEXT PRIMARY KEY " +
                     ", " +
                     USER_DISPLAY_NAME + " TEXT " +
+                    ", " +
+                    USER_PUBLIC_KEY + " TEXT " +
                 ") ";
         Log.d("SE464", CREATE_USER_TABLE);
         db.execSQL(CREATE_USER_TABLE);
@@ -113,6 +117,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String CREATE_ME_TABLE =
                 "CREATE TABLE IF NOT EXISTS " + ME_TABLE + " ( " +
                     ME_UUID + " TEXT PRIMARY KEY, " +
+                    ME_PRIVATE_KEY + " TEXT, " +
                     "FOREIGN KEY(" + ME_UUID + ") REFERENCES " + USER_TABLE + "(" + USER_UUID + ") " +
                 ") ";
         db.execSQL(CREATE_ME_TABLE);
@@ -252,7 +257,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             return null;
         }
 
-        User user = new User(id, cursor.getString(cursor.getColumnIndex(USER_DISPLAY_NAME)));
+        User user = new User(
+                id,
+                cursor.getString(cursor.getColumnIndex(USER_DISPLAY_NAME)),
+                cursor.getString(cursor.getColumnIndex(USER_PUBLIC_KEY))
+        );
 
         cursor.close();
         db.close();
@@ -269,6 +278,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(USER_UUID, user.getId().toString());
         values.put(USER_DISPLAY_NAME, user.getDisplayName());
+        values.put(USER_PUBLIC_KEY, MainActivity.getEncodedPublicKey(user.getPublicKey()));
 
         db.insert(USER_TABLE, null, values);
     }
@@ -391,11 +401,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return msgs;
     }
 
-    public void setMe(UUID id) {
+    public void setMe(UUID id, String publicKey) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(ME_UUID, id.toString());
+        values.put(ME_PRIVATE_KEY, publicKey);
 
         db.insert(ME_TABLE, null, values);
 
@@ -408,7 +419,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(
                 "SELECT " +
                     "m." + ME_UUID + " mid, " +
-                    "u." + USER_DISPLAY_NAME + " udn " +
+                    "u." + USER_DISPLAY_NAME + " udn, " +
+                    "u." + USER_PUBLIC_KEY + " upk " +
                 "FROM " + ME_TABLE + " m " +
                 "INNER JOIN " + USER_TABLE + " u " +
                 "ON m." + ME_UUID + " = u." + USER_UUID,
@@ -421,7 +433,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         User user = new User(
                 UUID.fromString(cursor.getString(cursor.getColumnIndex("mid"))),
-                cursor.getString(cursor.getColumnIndex("udn"))
+                cursor.getString(cursor.getColumnIndex("udn")),
+                cursor.getString(cursor.getColumnIndex("upk"))
         );
 
         cursor.close();
@@ -436,9 +449,31 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(USER_UUID, user.getId().toString());
         values.put(USER_DISPLAY_NAME, user.getDisplayName());
+        values.put(USER_PUBLIC_KEY, MainActivity.getEncodedPublicKey(user.getPublicKey()));
         Log.d("SE464", "DatabaseHandler: (uuid,display_name) = " + values.getAsString(USER_UUID) + "," + values.getAsString(USER_DISPLAY_NAME));
 
         db.insert(USER_TABLE, null, values);
         db.close();
+    }
+
+    public String getMePrivateKey() {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT " +
+                        "m." + ME_PRIVATE_KEY + " mpk " +
+                        "FROM " + ME_TABLE + " m",
+                new String[]{}
+        );
+
+        if (cursor == null || !cursor.isBeforeFirst() || !cursor.moveToFirst()) {
+            return null;
+        }
+
+        String mePk = cursor.getString(cursor.getColumnIndex("mpk"));
+
+        cursor.close();
+        db.close();
+        return mePk;
     }
 }

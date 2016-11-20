@@ -35,12 +35,20 @@ import com.star.patrick.wumbo.wifidirect.MessageDispatcherService;
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
 import java.math.BigInteger;
+import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -99,48 +107,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         );
         Bundle extras = getIntent().getExtras();
 
-        KeyPair userKeys = null;
         String senderName = (extras != null && extras.getString("name") != null && !extras.getString("name").isEmpty()) ? extras.getString("name") : "Anonymous";
-
-        try {
-            KeyPairGenerator kpg;
-            Log.d("SE464", "Start generating user key pair");
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                kpg = KeyPairGenerator.getInstance(
-                        KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
-                try {
-                    kpg.initialize(new KeyGenParameterSpec.Builder(
-                            senderName,
-                            KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                            .setDigests(KeyProperties.DIGEST_SHA256,
-                                    KeyProperties.DIGEST_SHA512)
-                            .build());
-                } catch (InvalidAlgorithmParameterException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                kpg = KeyPairGenerator.getInstance("RSA", "AndroidKeyStore");
-                try {
-                    Calendar endDate = Calendar.getInstance();
-                    endDate.add(Calendar.YEAR, 1000);
-                    kpg.initialize(new KeyPairGeneratorSpec.Builder(this)
-                            .setAlias(senderName)
-                            .setSubject(new X500Principal("CN=Wumbo, O=Android, C=US"))
-                            .setSerialNumber(BigInteger.ONE)
-                            .setStartDate(Calendar.getInstance().getTime())
-                            .setEndDate(endDate.getTime())
-                            .build());
-                } catch (InvalidAlgorithmParameterException e) {
-                    e.printStackTrace();
-                }
-            }
-            userKeys = kpg.generateKeyPair();
-            if(userKeys == null) {
-                Log.d("SE464", "Generated user key pair");
-            }
-        } catch (NoSuchProviderException | NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
 
         messageCourier = new MessageCourierImpl(this);
 
@@ -148,15 +115,24 @@ public class MainActivity extends AppCompatActivity implements Observer {
         me = db.getMe();
         if (null == me) {
             Log.d("SE464", "MainActivity: did not find me");
+            KeyPair userKeys = generateKeyPair();
+            String encodedPrivateKey = getEncodedPrivateKey(userKeys.getPrivate());
             me = new User(senderName, userKeys != null ? userKeys.getPublic() : null);
             db.addUser(me);
-            db.setMe(me.getId());
+            db.setMe(me.getId(), encodedPrivateKey);
         } else {
             Log.d("SE464", "MainActivity: me existed");
-            me = new User(me.getId(), senderName, userKeys != null ? userKeys.getPublic() : null);
+            me = new User(me.getId(), senderName, me.getPublicKey());
             db.updateSenderDisplayName(me.getId(), senderName);
+            try {
+                byte[] privkey = Base64.decode(db.getMePrivateKey(), Base64.DEFAULT);
+                PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privkey);
+                KeyFactory fact = KeyFactory.getInstance("RSA");
+                mePrivateKey = fact.generatePrivate(keySpec);
+            } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+                e.printStackTrace();
+            }
         }
-        mePrivateKey = userKeys != null ? userKeys.getPrivate() : null;
 
         channelManager = new ChannelManagerImpl(this, messageCourier);
 
@@ -377,6 +353,51 @@ public class MainActivity extends AppCompatActivity implements Observer {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             //supportActionBar.setTitle(?);
         }
+    }
+
+    private static KeyPair generateKeyPair() {
+        KeyPair userKeys = null;
+        try {
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+            Log.d("SE464", "Start generating user key pair");
+            SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
+            sr.setSeed(Calendar.getInstance().getTimeInMillis());
+            kpg.initialize(2048, sr);
+            userKeys = kpg.generateKeyPair();
+            if(userKeys != null) {
+                Log.d("SE464", "Generated user key pair");
+            }
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return userKeys;
+    }
+
+    private static String getEncodedPrivateKey(PrivateKey key) {
+        String privkey = "";
+        try {
+            KeyFactory fact = KeyFactory.getInstance("RSA");
+            PKCS8EncodedKeySpec spec = fact.getKeySpec(key, PKCS8EncodedKeySpec.class);
+            byte[] packed = spec.getEncoded();
+            privkey = Base64.encodeToString(packed, Base64.DEFAULT);
+            Log.d("SE464", "Private key: " + privkey);
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return privkey;
+    }
+
+    public static String getEncodedPublicKey(PublicKey key) {
+        String publkey = "";
+        try {
+            KeyFactory fact = KeyFactory.getInstance("RSA");
+            X509EncodedKeySpec spec = fact.getKeySpec(key, X509EncodedKeySpec.class);
+            publkey = Base64.encodeToString(spec.getEncoded(), Base64.DEFAULT);
+            Log.d("SE464", "Public key: " + publkey);
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return publkey;
     }
 
     @Override
