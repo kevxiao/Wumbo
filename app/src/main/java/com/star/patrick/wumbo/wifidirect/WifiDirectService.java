@@ -73,7 +73,7 @@ public class WifiDirectService extends Service {
 //            public void run() {
 //                discoverPeers();
 //            }
-//        }, 0, 30, TimeUnit.SECONDS);
+//        }, 30, 30, TimeUnit.SECONDS);
 
         requestConnectionInfo();
     }
