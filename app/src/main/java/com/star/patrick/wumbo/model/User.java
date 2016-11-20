@@ -1,5 +1,6 @@
 package com.star.patrick.wumbo.model;
 
+import android.os.Parcelable;
 import android.util.Base64;
 
 import java.io.Serializable;
@@ -53,5 +54,10 @@ public class User implements Serializable {
 
     public PublicKey getPublicKey() {
         return publicKey;
+    }
+
+    @Override
+    public String toString() {
+        return displayName;
     }
 }

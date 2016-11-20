@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -39,6 +40,7 @@ import com.star.patrick.wumbo.wifidirect.HandshakeDispatcherService;
 import com.star.patrick.wumbo.wifidirect.MessageDispatcherService;
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
+import java.io.Serializable;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -58,6 +60,9 @@ import java.util.Observer;
 import java.util.UUID;
 
 import javax.crypto.spec.SecretKeySpec;
+
+import static com.star.patrick.wumbo.view.CreateChannelActivity.CONTACT_LIST;
+import static com.star.patrick.wumbo.view.CreateChannelActivity.INVITED_USERS;
 
 public class MainActivity extends AppCompatActivity implements Observer {
 
@@ -186,7 +191,11 @@ public class MainActivity extends AppCompatActivity implements Observer {
         createChannelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Intent intent = new Intent(MainActivity.this, CreateChannelActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable(CONTACT_LIST, (Serializable) new ArrayList<>(contacts.getContacts().values()));
+                intent.putExtras(bundle);
+                startActivityForResult(intent, 3);
             }
         });
 
@@ -315,6 +324,15 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 if (returnedIntent != null){
                     me.setDisplayName(returnedIntent.getStringExtra("new_name"));
                 }
+                break;
+            case 3:
+                if (null != returnedIntent) {
+                    String channelName = returnedIntent.getStringExtra(CreateChannelActivity.CHANNEL_NAME);
+                    List<User> invited = (ArrayList<User>)returnedIntent.getExtras().getSerializable(INVITED_USERS);
+                    Channel channel = new ChannelImpl(channelName, this, messageCourier);
+                    channelManager.createChannel(channel, me, invited);
+                }
+                break;
         }
     }
 
