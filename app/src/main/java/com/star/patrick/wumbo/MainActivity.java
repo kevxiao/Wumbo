@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private ActionBar supportActionBar;
     private ActionBarDrawerToggle drawerToggle;
     private MessageCourier messageCourier;
-    private MessageReceiver messageReceiver;
+    private MessageBroadcastReceiver messageBroadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,7 +142,10 @@ public class MainActivity extends AppCompatActivity implements Observer {
         mePrivateKey = userKeys != null ? userKeys.getPrivate() : null;
 
         channelManager = new ChannelManagerImpl(this, messageCourier);
-        messageReceiver = new MessageReceiver(this, messageCourier, channelManager);
+
+        messageBroadcastReceiver = new MessageBroadcastReceiver(this);
+        messageBroadcastReceiver.add(channelManager);
+        messageBroadcastReceiver.add(messageCourier);
 
         byte[] encodedKey = Base64.decode(getResources().getString(R.string.public_secret_key), Base64.DEFAULT);
         msgChannel = new ChannelImpl(

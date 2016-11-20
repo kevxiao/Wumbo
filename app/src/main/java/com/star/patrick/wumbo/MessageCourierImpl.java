@@ -27,4 +27,9 @@ public class MessageCourierImpl implements MessageCourier {
             mainContext.startService(sendMsgIntent);
         }
     }
+
+    @Override
+    public void receive(EncryptedMessage msg) {
+        send(msg);
+    }
 }
