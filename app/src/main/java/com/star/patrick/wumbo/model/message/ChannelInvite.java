@@ -13,8 +13,8 @@ public class ChannelInvite implements MessageContent, Serializable {
     private MessageType type = MessageType.CHANNEL_INVITE;
     private Info content;
 
-    public ChannelInvite(UUID id, String name, String key, User invitee) {
-        content = new Info(id, name, key, invitee);
+    public ChannelInvite(UUID id, String name, String key, User inviter) {
+        content = new Info(id, name, key, inviter);
     }
 
     @Override

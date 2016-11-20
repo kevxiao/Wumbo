@@ -305,13 +305,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             return null;
         }
 
-        byte[] encodedKey = Base64.decode(cursor.getString(cursor.getColumnIndex(CHANNEL_KEY)), Base64.DEFAULT);
         Channel channel = new ChannelImpl(
                 id,
                 cursor.getString(cursor.getColumnIndex(CHANNEL_NAME)),
                 context,
                 messageCourier,
-                new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES"),
+                Encryption.getSecretKeyFromEncoding(cursor.getString(cursor.getColumnIndex(CHANNEL_KEY))),
                 this.getAllMessages(UUID.fromString(cursor.getString(cursor.getColumnIndex(CHANNEL_UUID))))
         );
         cursor.close();
@@ -357,13 +356,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
 
         do {
-            byte[] encodedKey = Base64.decode(cursor.getString(cursor.getColumnIndex(CHANNEL_KEY)), Base64.DEFAULT);
             Channel channel = new ChannelImpl(
                     UUID.fromString(cursor.getString(cursor.getColumnIndex(CHANNEL_UUID))),
                     cursor.getString(cursor.getColumnIndex(CHANNEL_NAME)),
                     context,
                     messageCourier,
-                    new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES"),
+                    Encryption.getSecretKeyFromEncoding(cursor.getString(cursor.getColumnIndex(CHANNEL_KEY))),
                     this.getAllMessages(UUID.fromString(cursor.getString(cursor.getColumnIndex(CHANNEL_UUID))))
             );
             channels.put(channel.getId(), channel);
@@ -457,7 +455,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(USER_UUID, user.getId().toString());
         values.put(USER_DISPLAY_NAME, user.getDisplayName());
-        values.put(USER_PUBLIC_KEY, MainActivity.getEncodedPublicKey(user.getPublicKey()));
+        values.put(USER_PUBLIC_KEY, Encryption.getEncodedPublicKey(user.getPublicKey()));
         Log.d("SE464", "DatabaseHandler: (uuid,display_name) = " + values.getAsString(USER_UUID) + "," + values.getAsString(USER_DISPLAY_NAME));
 
         db.insert(USER_TABLE, null, values);

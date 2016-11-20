@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -21,6 +22,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
+import com.star.patrick.wumbo.Encryption;
 import com.star.patrick.wumbo.model.Channel;
 import com.star.patrick.wumbo.model.ChannelImpl;
 import com.star.patrick.wumbo.model.ChannelList;
@@ -39,6 +41,7 @@ import com.star.patrick.wumbo.wifidirect.HandshakeDispatcherService;
 import com.star.patrick.wumbo.wifidirect.MessageDispatcherService;
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
+import java.io.Serializable;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -57,7 +60,11 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.UUID;
 
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+
+import static com.star.patrick.wumbo.view.CreateChannelActivity.CONTACT_LIST;
+import static com.star.patrick.wumbo.view.CreateChannelActivity.INVITED_USERS;
 
 public class MainActivity extends AppCompatActivity implements Observer {
 
@@ -70,7 +77,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private ListView listView;
     private Message lastMessage;
     private User me;
-    private PrivateKey mePrivateKey;
     private List<ChannelListItem> channels;
 
     private ImageButton sendBtn;
@@ -108,15 +114,15 @@ public class MainActivity extends AppCompatActivity implements Observer {
         Bundle extras = getIntent().getExtras();
 
         String senderName = (extras != null && extras.getString("name") != null && !extras.getString("name").isEmpty()) ? extras.getString("name") : "Anonymous";
-
+        PrivateKey mePrivateKey = null;
         messageCourier = new MessageCourierImpl(this);
 
         DatabaseHandler db = new DatabaseHandler(this, messageCourier);
         me = db.getMe();
         if (null == me) {
             Log.d("SE464", "MainActivity: did not find me");
-            KeyPair userKeys = generateKeyPair();
-            String encodedPrivateKey = getEncodedPrivateKey(userKeys.getPrivate());
+            KeyPair userKeys = Encryption.generateKeyPair();
+            String encodedPrivateKey = Encryption.getEncodedPrivateKey(userKeys.getPrivate());
             me = new User(senderName, userKeys != null ? userKeys.getPublic() : null);
             db.addUser(me);
             db.setMe(me.getId(), encodedPrivateKey);
@@ -124,17 +130,10 @@ public class MainActivity extends AppCompatActivity implements Observer {
             Log.d("SE464", "MainActivity: me existed");
             me = new User(me.getId(), senderName, me.getPublicKey());
             db.updateSenderDisplayName(me.getId(), senderName);
-            try {
-                byte[] privkey = Base64.decode(db.getMePrivateKey(), Base64.DEFAULT);
-                PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privkey);
-                KeyFactory fact = KeyFactory.getInstance("RSA");
-                mePrivateKey = fact.generatePrivate(keySpec);
-            } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-                e.printStackTrace();
-            }
+            mePrivateKey = Encryption.getPrivateKeyFromEncoding(db.getMePrivateKey());
         }
 
-        channelManager = new ChannelManagerImpl(this, messageCourier);
+        channelManager = new ChannelManagerImpl(this, messageCourier, me.getId(), mePrivateKey);
         contacts = new ContactsTrackerImpl(this);
 
         messageBroadcastReceiver = new MessageBroadcastReceiver(this);
@@ -142,13 +141,12 @@ public class MainActivity extends AppCompatActivity implements Observer {
         messageBroadcastReceiver.add(messageCourier);
         messageBroadcastReceiver.add(contacts);
 
-        byte[] encodedKey = Base64.decode(getResources().getString(R.string.public_secret_key), Base64.DEFAULT);
         msgChannel = new ChannelImpl(
                 UUID.fromString(getResources().getString(R.string.public_uuid)),
                 getResources().getString(R.string.public_name),
                 this,
                 messageCourier,
-                new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES")
+                Encryption.getSecretKeyFromEncoding(getResources().getString(R.string.public_secret_key))
         );
         msgChannel.addObserver(this);
         channelManager.addChannel(msgChannel);
@@ -186,7 +184,11 @@ public class MainActivity extends AppCompatActivity implements Observer {
         createChannelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Intent intent = new Intent(MainActivity.this, CreateChannelActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable(CONTACT_LIST, (Serializable) new ArrayList<>(contacts.getContacts().values()));
+                intent.putExtras(bundle);
+                startActivityForResult(intent, 3);
             }
         });
 
@@ -315,6 +317,15 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 if (returnedIntent != null){
                     me.setDisplayName(returnedIntent.getStringExtra("new_name"));
                 }
+                break;
+            case 3:
+                if (null != returnedIntent) {
+                    String channelName = returnedIntent.getStringExtra(CreateChannelActivity.CHANNEL_NAME);
+                    List<User> invited = (ArrayList<User>)returnedIntent.getExtras().getSerializable(INVITED_USERS);
+                    Channel channel = new ChannelImpl(channelName, this, messageCourier);
+                    channelManager.createChannel(channel, me, invited);
+                }
+                break;
         }
     }
 
@@ -363,51 +374,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             //supportActionBar.setTitle(?);
         }
-    }
-
-    private static KeyPair generateKeyPair() {
-        KeyPair userKeys = null;
-        try {
-            KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-            Log.d("SE464", "Start generating user key pair");
-            SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
-            sr.setSeed(Calendar.getInstance().getTimeInMillis());
-            kpg.initialize(2048, sr);
-            userKeys = kpg.generateKeyPair();
-            if(userKeys != null) {
-                Log.d("SE464", "Generated user key pair");
-            }
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return userKeys;
-    }
-
-    private static String getEncodedPrivateKey(PrivateKey key) {
-        String privkey = "";
-        try {
-            KeyFactory fact = KeyFactory.getInstance("RSA");
-            PKCS8EncodedKeySpec spec = fact.getKeySpec(key, PKCS8EncodedKeySpec.class);
-            byte[] packed = spec.getEncoded();
-            privkey = Base64.encodeToString(packed, Base64.DEFAULT);
-            Log.d("SE464", "Private key: " + privkey);
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return privkey;
-    }
-
-    public static String getEncodedPublicKey(PublicKey key) {
-        String publkey = "";
-        try {
-            KeyFactory fact = KeyFactory.getInstance("RSA");
-            X509EncodedKeySpec spec = fact.getKeySpec(key, X509EncodedKeySpec.class);
-            publkey = Base64.encodeToString(spec.getEncoded(), Base64.DEFAULT);
-            Log.d("SE464", "Public key: " + publkey);
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return publkey;
     }
 
     @Override
