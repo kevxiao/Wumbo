@@ -28,7 +28,7 @@ public class EncryptedMessage implements Serializable {
         try {
             Cipher encrypt = Cipher.getInstance("AES");
             encrypt.init(Cipher.ENCRYPT_MODE, secretKey);
-            this.content = new SealedObject(message.getContent().getType() == MessageContent.MessageType.TEXT ? (Text) message.getContent() : (Image) message.getContent(), encrypt);
+            this.content = new SealedObject(message.getContent().getType() == MessageContent.MessageType.TEXT ? (Text) message.getContent() : (TransferImage) message.getContent(), encrypt);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | IOException | IllegalBlockSizeException | InvalidKeyException e) {
             e.printStackTrace();
         }
