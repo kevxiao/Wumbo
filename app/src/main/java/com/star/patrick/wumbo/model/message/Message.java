@@ -3,6 +3,7 @@ package com.star.patrick.wumbo.model.message;
 import com.star.patrick.wumbo.model.User;
 
 import java.io.Serializable;
+import java.security.PrivateKey;
 import java.sql.Timestamp;
 import java.util.UUID;
 
@@ -22,6 +23,11 @@ public class Message implements Serializable {
 
     public Message(EncryptedMessage message, SecretKey secretKey) {
         this(message.getContent(secretKey), message.getUser(), message.getSendTime(), message.getChannelId());
+        this.id = message.getId();
+    }
+
+    public Message(EncryptedMessage message, PrivateKey privateKey) {
+        this(message.getContent(privateKey), message.getUser(), message.getSendTime(), message.getChannelId());
         this.id = message.getId();
     }
 

@@ -44,6 +44,7 @@ public class ContactsTrackerImpl extends Observable implements ContactsTracker {
         DatabaseHandler db = new DatabaseHandler(context, null);
         User user = msg.getUser();
         db.addUser(user);
+        db.updateSenderDisplayName(user.getId(), user.getDisplayName());
         contacts.put(user.getId(), user);
         setChanged();
         notifyObservers();
