@@ -143,7 +143,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // Adding new contact
     public void addMessage(Message msg) {
         Log.d("SE464", "Saving a message to the database");
-        setUser(msg.getUser());
+        addUser(msg.getUser());
 
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -273,20 +273,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return user;
     }
 
-    public void setUser(User user) {
-        if (getUser(user.getId()) != null)
-            return;
-
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(USER_UUID, user.getId().toString());
-        values.put(USER_DISPLAY_NAME, user.getDisplayName());
-        values.put(USER_PUBLIC_KEY, MainActivity.getEncodedPublicKey(user.getPublicKey()));
-
-        db.insert(USER_TABLE, null, values);
-        db.close();
-    }
 
     public void updateSenderDisplayName(UUID id, String displayName) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -448,9 +434,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     public void addUser(User user) {
-        if (getUser(user.getId()) != null)
+        if (getUser(user.getId()) != null) {
+            updateSenderDisplayName(user.getId(), user.getDisplayName());
             return;
-        
+        }
+
         SQLiteDatabase db = this.getWritableDatabase();
 
         Log.d("SE464", "DatabaseHandler: (uuid,display_name) = " + user.getId().toString() + "," + user.getDisplayName());
