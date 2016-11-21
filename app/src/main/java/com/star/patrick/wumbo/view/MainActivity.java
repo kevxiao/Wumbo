@@ -1,10 +1,16 @@
 package com.star.patrick.wumbo.view;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Parcelable;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -41,6 +47,7 @@ import com.star.patrick.wumbo.wifidirect.HandshakeDispatcherService;
 import com.star.patrick.wumbo.wifidirect.MessageDispatcherService;
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
+import java.io.File;
 import java.io.Serializable;
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -164,12 +171,30 @@ public class MainActivity extends AppCompatActivity implements Observer {
         cameraBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//                startActivityForResult(takePicture, 0);//zero can be replaced with any action code
+                File file = new File(Environment.getExternalStorageDirectory().getPath(), "Wumbo-temp.jpg");
+                Uri outputFileUri = Uri.fromFile(file);
 
+                // Camera.
+                final List<Intent> cameraIntents = new ArrayList<Intent>();
+                final Intent captureIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                final PackageManager packageManager = getPackageManager();
+                final List<ResolveInfo> listCam = packageManager.queryIntentActivities(captureIntent, 0);
+                for(ResolveInfo res : listCam) {
+                    final String packageName = res.activityInfo.packageName;
+                    final Intent intent = new Intent(captureIntent);
+                    intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
+                    intent.setPackage(packageName);
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
+                    cameraIntents.add(intent);
+                }
+
+                //Gallery
                 Intent pickPhoto = new Intent(Intent.ACTION_PICK,
                         android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(pickPhoto , 1);//one can be replaced with any action code
+
+                final Intent chooserIntent = Intent.createChooser(pickPhoto, "Select Source");
+                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, cameraIntents.toArray(new Parcelable[]{}));
+                startActivityForResult(chooserIntent , 1);//one can be replaced with any action code
             }
         });
 
@@ -306,8 +331,9 @@ public class MainActivity extends AppCompatActivity implements Observer {
         super.onActivityResult(requestCode, resultCode, returnedIntent);
         switch(requestCode) {
 //            case 0:
-//                if(resultCode == RESULT_OK){
-//                    Uri selectedImage = imageReturnedIntent.getData();
+//                if(returnedIntent != null){
+//                    Log.d("SE464", returnedIntent.toString());
+//                    Uri selectedImage = returnedIntent.getData();
 //                    //imageview.setImageURI(selectedImage);
 //                }
 //
@@ -317,7 +343,11 @@ public class MainActivity extends AppCompatActivity implements Observer {
                     Uri selectedImage = returnedIntent.getData();
                     Log.d("SE464", "Selected image: " + selectedImage.getPath());
                     msgChannel.send(me, selectedImage);
-                    //imageview.setImageURI(selectedImage);
+                } else {
+                    File file = new File(Environment.getExternalStorageDirectory().getPath(), "Wumbo-temp.jpg");
+                    Uri outputFileUri = Uri.fromFile(file);
+                    Log.d("SE464", "Camera image taken and sent to " + outputFileUri.getPath());
+                    msgChannel.send(me, outputFileUri);
                 }
                 break;
             case 2:
