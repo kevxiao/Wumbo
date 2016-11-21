@@ -95,13 +95,14 @@ public class ChannelImpl extends Observable implements Channel {
 
     public void send(User sender, Uri imagePath) {
         Log.d("SE464", "Channel send image");
-        final String filepath = getFilePathFromId(id);
+        UUID msgId = UUID.randomUUID();
+        final String filepath = getFilePathFromId(msgId);
         try {
             copyFile(new File(getAbsolutePath(imagePath)), new File(filepath));
         } catch (Exception e){
             e.printStackTrace();
         }
-        final Message msg = new Message(new Image(Uri.parse(filepath)), sender, new Timestamp(Calendar.getInstance().getTimeInMillis()), id);
+        final Message msg = new Message(msgId, new Image(Uri.parse(filepath)), sender, new Timestamp(Calendar.getInstance().getTimeInMillis()), id);
         Log.d("SE464","Sending message: " + msg.getId());
         add(msg);
 
