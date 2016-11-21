@@ -36,12 +36,12 @@
             android:name=".view.SettingsActivity"
             android:launchMode="singleTop"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".view.CreateChannelActivity"
             android:launchMode="singleTop"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".view.IntroActivity"
             android:label="@string/app_name"
