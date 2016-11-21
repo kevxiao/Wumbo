@@ -25,6 +25,8 @@ import com.star.patrick.wumbo.model.message.Message;
 import com.star.patrick.wumbo.model.message.Text;
 import com.star.patrick.wumbo.view.MainActivity;
 
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import java.net.InetAddress;
 import java.sql.Timestamp;
 import java.util.Calendar;
@@ -255,8 +257,17 @@ public class WifiDirectService extends Service {
                     Log.d(TAG, "Device is null!");
                 }
                 else {
-                    EncryptedMessage message = (EncryptedMessage) intent.getSerializableExtra(EXTRA_MESSAGE);
-                    device.sendMessage(message);
+                    String fileName = (String) intent.getStringExtra(EXTRA_MESSAGE);
+                    try{
+                        FileInputStream fis = this.openFileInput(fileName);
+                        ObjectInputStream is = new ObjectInputStream(fis);
+                        EncryptedMessage message = (EncryptedMessage) is.readObject();
+                        is.close();
+                        fis.close();
+                        device.sendMessage(message);
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
                 }
             } break;
         }
