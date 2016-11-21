@@ -48,7 +48,6 @@ public class CreateChannelActivity extends AppCompatActivity {
         continueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d("SE464", "Adding the users lol");
                 Intent returnName = new Intent();
 //                List<Parcelable> parcelableUsers = new ArrayList<>();
 //                for (User user : invitedUsers) {

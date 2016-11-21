@@ -107,7 +107,6 @@ public class ChatAdapter extends BaseAdapter {
                 holder.imgMessage.setImageResource(0);
                 break;
             case IMAGE:
-                Log.d(TAG, (String) msg.getContent().getMessageContent());
                 Bitmap image = BitmapFactory.decodeFile((String) msg.getContent().getMessageContent());
                 if (image != null) {
                     if(image.getHeight() > image.getWidth() && image.getHeight() > 512) {
