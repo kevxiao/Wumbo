@@ -4,14 +4,12 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -43,26 +41,14 @@ import com.star.patrick.wumbo.wifidirect.MessageDispatcherService;
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
 import java.io.Serializable;
-import java.security.KeyFactory;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.UUID;
-
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 
 import static com.star.patrick.wumbo.view.CreateChannelActivity.CONTACT_LIST;
 import static com.star.patrick.wumbo.view.CreateChannelActivity.INVITED_USERS;
@@ -133,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         } else {
             Log.d("SE464", "MainActivity: me existed");
             me = new User(me.getId(), senderName, me.getPublicKey());
-            db.updateSenderDisplayName(me.getId(), senderName);
+            db.updateUserDisplayName(me.getId(), senderName);
             mePrivateKey = Encryption.getPrivateKeyFromEncoding(db.getMePrivateKey());
         }
 

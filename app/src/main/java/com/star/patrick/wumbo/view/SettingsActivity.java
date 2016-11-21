@@ -43,7 +43,7 @@ public class SettingsActivity extends PreferenceActivity{
                 DatabaseHandler db = new DatabaseHandler(this.getActivity(), null);
                 User me = db.getMe();
                 String newName = sharedPreferences.getString("pref_user_name", "Anonymous");
-                db.updateSenderDisplayName(me.getId(), newName);
+                db.updateUserDisplayName(me.getId(), newName);
                 Log.d("SE464", "New Name is: "+ newName);
                 Intent returnName = new Intent();
                 returnName.putExtra("new_name", newName);

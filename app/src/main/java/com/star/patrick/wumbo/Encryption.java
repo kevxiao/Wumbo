@@ -106,7 +106,7 @@ public class Encryption {
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             e.printStackTrace();
         }
-        return null;
+        return key;
     }
 
     public static String getEncodedSecretKey(SecretKey key) {

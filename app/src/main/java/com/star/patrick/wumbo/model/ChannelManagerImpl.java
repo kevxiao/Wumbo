@@ -58,12 +58,13 @@ public class ChannelManagerImpl extends Observable implements ChannelManager {
     }
 
     private Channel createChannel(EncryptedMessage emsg) {
+        Log.d("SE464", "ChannelManager: createChannel: privateKey: " + Encryption.getEncodedPrivateKey(mePrivateKey));
         Message msg = new Message(emsg, mePrivateKey);
         Log.d("SE464", "ChannelManager: createChannel: id " + msg.getId());
         Log.d("SE464", "ChannelManager: createChannel: user " + msg.getUser());
         Log.d("SE464", "ChannelManager: createChannel: content null?" + (null == msg.getContent() ? " yes" : " no"));
 
-        ChannelInvite.Info channelInfo = (ChannelInvite.Info) msg.getContent();
+        ChannelInvite.Info channelInfo = (ChannelInvite.Info) msg.getContent().getMessageContent();
 
         Channel channel = new ChannelImpl(
                 channelInfo.getId(),

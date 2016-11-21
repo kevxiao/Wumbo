@@ -46,7 +46,7 @@ public class ContactsTrackerImpl extends Observable implements ContactsTracker {
             if (!contacts.get(user.getId()).getDisplayName().equals(user.getDisplayName())) {
                 //update name
                 DatabaseHandler db = new DatabaseHandler(context, null);
-                db.updateSenderDisplayName(user.getId(), user.getDisplayName());
+                db.updateUserDisplayName(user.getId(), user.getDisplayName());
                 setChanged();
             }
         } else {

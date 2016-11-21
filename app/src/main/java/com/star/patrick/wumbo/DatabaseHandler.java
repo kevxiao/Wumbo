@@ -7,7 +7,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.util.Log;
-import android.util.Base64;
 
 import com.star.patrick.wumbo.model.message.Image;
 import com.star.patrick.wumbo.model.message.Message;
@@ -17,7 +16,6 @@ import com.star.patrick.wumbo.model.message.Text;
 import com.star.patrick.wumbo.model.Channel;
 import com.star.patrick.wumbo.model.ChannelImpl;
 import com.star.patrick.wumbo.model.User;
-import com.star.patrick.wumbo.view.MainActivity;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -25,8 +23,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Created by jesse on 18/11/16.
@@ -286,7 +282,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
 
-    public void updateSenderDisplayName(UUID id, String displayName) {
+    public void updateUserDisplayName(UUID id, String displayName) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -415,12 +411,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return msgs;
     }
 
-    public void setMe(UUID id, String publicKey) {
+    public void setMe(UUID id, String privateKey) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(ME_UUID, id.toString());
-        values.put(ME_PRIVATE_KEY, publicKey);
+        values.put(ME_PRIVATE_KEY, privateKey);
 
         db.insert(ME_TABLE, null, values);
 
@@ -450,6 +446,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 cursor.getString(cursor.getColumnIndex("udn")),
                 cursor.getString(cursor.getColumnIndex("upk"))
         );
+        Log.d("SE464", "DatabaseHandler: user,publicKeyString= " + user + "," + cursor.getString(cursor.getColumnIndex("upk")));
+        Log.d("SE464", "Retrieving user (me)s: " + user + " from database with public key: " + Encryption.getEncodedPublicKey(user.getPublicKey()));
 
         cursor.close();
         db.close();
@@ -458,10 +456,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public void addUser(User user) {
         if (getUser(user.getId()) != null) {
-            updateSenderDisplayName(user.getId(), user.getDisplayName());
+            updateUserDisplayName(user.getId(), user.getDisplayName());
             return;
         }
 
+        Log.d("SE464", "DatabaseHandler: Adding user");
         SQLiteDatabase db = this.getWritableDatabase();
 
         Log.d("SE464", "DatabaseHandler: (uuid,display_name) = " + user.getId().toString() + "," + user.getDisplayName());
@@ -518,6 +517,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                     cursor.getString(cursor.getColumnIndex(USER_PUBLIC_KEY))
             );
             users.add(user);
+            Log.d("SE464", "DatabaseHandler: publicKeyString= " + cursor.getString(cursor.getColumnIndex(USER_PUBLIC_KEY)));
             Log.d("SE464", "Retrieving user: " + user + " from database with public key: " + Encryption.getEncodedPublicKey(user.getPublicKey()));
         } while ( cursor.moveToNext() );
 
