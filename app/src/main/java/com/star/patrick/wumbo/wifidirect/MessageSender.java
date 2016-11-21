@@ -53,7 +53,7 @@ public class MessageSender extends AsyncTask<Void, Void, Throwable> {
                 }
             } catch (IOException e) {
                 exception = e;
-                e.printStackTrace();
+//                e.printStackTrace();
             }
         }
         return exception;
