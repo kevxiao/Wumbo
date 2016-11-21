@@ -41,12 +41,20 @@ public class ContactsTrackerImpl extends Observable implements ContactsTracker {
 
     @Override
     public void receive(EncryptedMessage msg) {
-        DatabaseHandler db = new DatabaseHandler(context, null);
         User user = msg.getUser();
-        db.addUser(user);
-        db.updateSenderDisplayName(user.getId(), user.getDisplayName());
+        if (contacts.containsKey(user.getId())) {
+            if (!contacts.get(user.getId()).getDisplayName().equals(user.getDisplayName())) {
+                //update name
+                DatabaseHandler db = new DatabaseHandler(context, null);
+                db.updateSenderDisplayName(user.getId(), user.getDisplayName());
+                setChanged();
+            }
+        } else {
+            DatabaseHandler db = new DatabaseHandler(context, null);
+            db.addUser(user);
+            setChanged();
+        }
         contacts.put(user.getId(), user);
-        setChanged();
         notifyObservers();
     }
 

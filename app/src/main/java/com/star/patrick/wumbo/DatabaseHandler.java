@@ -169,6 +169,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 break;
             case IMAGE:
                 values.put(MESSAGE_CONTENT, (String)msg.getContent().getMessageContent());
+                break;
         }
 
         db.insert(TABLE_MESSAGE, null, values);
@@ -392,10 +393,20 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                             snd,
                             new Timestamp(cursor.getLong(cursor.getColumnIndex("stime"))),
                             UUID.fromString(cursor.getString(cursor.getColumnIndex("cuuid"))),
-                            new Timestamp(cursor.getLong(cursor.getColumnIndex("rtime"))));
-                    msgs.addMessage(msg);
+                            new Timestamp(cursor.getLong(cursor.getColumnIndex("rtime")))
+                    );
+                    break;
+                case 1:
+                    msg = new Message(UUID.fromString(cursor.getString(cursor.getColumnIndex("uuid"))),
+                            new Image(Uri.parse(cursor.getString(cursor.getColumnIndex("content")))),
+                            snd,
+                            new Timestamp(cursor.getLong(cursor.getColumnIndex("stime"))),
+                            UUID.fromString(cursor.getString(cursor.getColumnIndex("cuuid"))),
+                            new Timestamp(cursor.getLong(cursor.getColumnIndex("rtime")))
+                    );
                     break;
             }
+            msgs.addMessage(msg);
         }
 
         cursor.close();
@@ -454,6 +465,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         Log.d("SE464", "DatabaseHandler: (uuid,display_name) = " + user.getId().toString() + "," + user.getDisplayName());
+        Log.d("SE464", "DatabaseHandler: publicKey = " + Encryption.getEncodedPublicKey(user.getPublicKey()));
         ContentValues values = new ContentValues();
         values.put(USER_UUID, user.getId().toString());
         values.put(USER_DISPLAY_NAME, user.getDisplayName());
@@ -506,6 +518,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                     cursor.getString(cursor.getColumnIndex(USER_PUBLIC_KEY))
             );
             users.add(user);
+            Log.d("SE464", "Retrieving user: " + user + " from database with public key: " + Encryption.getEncodedPublicKey(user.getPublicKey()));
         } while ( cursor.moveToNext() );
 
         cursor.close();

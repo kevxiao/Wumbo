@@ -49,8 +49,7 @@ public class ChannelManagerImpl extends Observable implements ChannelManager {
     public void receive(EncryptedMessage msg) {
         Log.d("SE 464", "Channel manager is receiving");
 
-        if (
-                msg.getContentType().equals(MessageContent.MessageType.CHANNEL_INVITE)
+        if (msg.getContentType().equals(MessageContent.MessageType.CHANNEL_INVITE)
                 && msg.getUser().getId().equals(meId)) {
             createChannel(msg);
         } else if (channels.containsKey(msg.getChannelId())) {
@@ -60,6 +59,9 @@ public class ChannelManagerImpl extends Observable implements ChannelManager {
 
     private Channel createChannel(EncryptedMessage emsg) {
         Message msg = new Message(emsg, mePrivateKey);
+        Log.d("SE464", "ChannelManager: createChannel: id " + msg.getId());
+        Log.d("SE464", "ChannelManager: createChannel: user " + msg.getUser());
+        Log.d("SE464", "ChannelManager: createChannel: content null?" + (null == msg.getContent() ? " yes" : " no"));
 
         ChannelInvite.Info channelInfo = (ChannelInvite.Info) msg.getContent();
 
@@ -120,6 +122,8 @@ public class ChannelManagerImpl extends Observable implements ChannelManager {
                     new Timestamp(Calendar.getInstance().getTime().getTime()),
                     UUID.randomUUID()
             );
+            Log.d("SE464", "ChannelManager: createInvite: userId,name = " + user.getId() + "," + user );
+            Log.d("SE464", "ChannelManager: createInvite: publicKey = " + Encryption.getEncodedPublicKey(user.getPublicKey()) );
             messageCourier.send(new EncryptedMessage(msg, user.getPublicKey()));
         }
     }
