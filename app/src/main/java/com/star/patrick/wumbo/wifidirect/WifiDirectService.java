@@ -2,6 +2,7 @@ package com.star.patrick.wumbo.wifidirect;
 
 import android.app.Service;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.net.NetworkInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
@@ -258,11 +259,14 @@ public class WifiDirectService extends Service {
                     Log.d(TAG, "Device is null!");
                 }
                 else {
-                    String fileName = (String) intent.getStringExtra(EXTRA_MESSAGE);
+                    String fileName = intent.getStringExtra(EXTRA_MESSAGE);
                     try{
-                        FileInputStream fis = this.openFileInput(fileName);
+                        File file = new File("app_tmp", fileName);
+                        FileInputStream fis = new FileInputStream(file.getAbsolutePath());
                         ObjectInputStream is = new ObjectInputStream(fis);
                         EncryptedMessage message = (EncryptedMessage) is.readObject();
+                        Log.d("SE464", "WifiDirectService receives: "+file.getAbsolutePath());
+
                         is.close();
                         fis.close();
                         device.sendMessage(message);

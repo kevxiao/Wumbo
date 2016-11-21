@@ -1,13 +1,16 @@
 package com.star.patrick.wumbo;
 
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
+import android.os.Environment;
 import android.util.Log;
 
 import com.star.patrick.wumbo.model.message.EncryptedMessage;
 import com.star.patrick.wumbo.view.MainActivity;
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashSet;
@@ -27,11 +30,17 @@ public class MessageCourierImpl implements MessageCourier {
         if (!sentMessages.contains(msg.getId())) {
             Log.d("SE464", "Haven't sent this message before: " + msg.getId());
             sentMessages.add(msg.getId());
-            String fileName = "tmp/"+msg.getId().toString() + "-emsg.tmp";
+            String fileName = msg.getId().toString() + "-emsg.tmp";
 
             //Save to another file
             try {
-                FileOutputStream fos = mainContext.openFileOutput(fileName, Context.MODE_PRIVATE);
+                ContextWrapper cw = new ContextWrapper(mainContext);
+                File directory = cw.getDir("tmp", Context.MODE_PRIVATE);
+                File file = new File(directory, fileName);
+                Log.d("SE464", "message temp file: "+file.getAbsolutePath());
+                file.createNewFile();
+
+                FileOutputStream fos = new FileOutputStream (file.getAbsolutePath(), false);
                 ObjectOutputStream os = new ObjectOutputStream(fos);
                 os.writeObject(msg);
                 os.close();
