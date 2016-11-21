@@ -16,6 +16,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Base64;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.star.patrick.wumbo.Encryption;
 import com.star.patrick.wumbo.R;
@@ -204,6 +205,7 @@ public class WifiDirectService extends Service {
 //        EncryptedMessage encryptedMessage = new EncryptedMessage(message, key);
 //        FrontEndCommunicator.receivedMessage(this, encryptedMessage);
 
+        Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
         if (isHost) {
             if (!(device instanceof Host)) {
                 device = new Host(onSendFailure);
