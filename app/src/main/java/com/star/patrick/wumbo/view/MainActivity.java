@@ -339,15 +339,42 @@ public class MainActivity extends AppCompatActivity implements Observer {
 //
 //                break;
             case 1:
-                if(returnedIntent != null){
-                    Uri selectedImage = returnedIntent.getData();
-                    Log.d("SE464", "Selected image: " + selectedImage.getPath());
-                    msgChannel.send(me, selectedImage);
-                } else {
-                    File file = new File(Environment.getExternalStorageDirectory().getPath(), "Wumbo-temp.jpg");
-                    Uri outputFileUri = Uri.fromFile(file);
-                    Log.d("SE464", "Camera image taken and sent to " + outputFileUri.getPath());
-                    msgChannel.send(me, outputFileUri);
+                if(resultCode == RESULT_OK)
+                {
+                    final boolean isCamera;
+                    if(returnedIntent == null)
+                    {
+                        isCamera = true;
+                    }
+                    else
+                    {
+                        final String action = returnedIntent.getAction();
+                        if(action == null)
+                        {
+                            isCamera = false;
+                        }
+                        else
+                        {
+                            isCamera = action.equals(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                        }
+                    }
+
+                    Uri selectedImageUri;
+                    if(isCamera)
+                    {
+                        File file = new File(Environment.getExternalStorageDirectory().getPath(), "Wumbo-temp.jpg");
+                        Uri outputFileUri = Uri.fromFile(file);
+                        selectedImageUri = outputFileUri;
+                    }
+                    else
+                    {
+                        selectedImageUri = returnedIntent == null ? null : returnedIntent.getData();
+                    }
+                    if (selectedImageUri != null){
+                        Log.d("SE464", "Image returned and stored at "+selectedImageUri.getPath());
+                        msgChannel.send(me, selectedImageUri);
+                    }
+
                 }
                 break;
             case 2:
