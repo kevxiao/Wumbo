@@ -41,7 +41,11 @@ public class IntroActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent startMainIntent = new Intent(view.getContext(), MainActivity.class);
-                startMainIntent.putExtra("name", mNameTxt.getText().toString());
+                String name = mNameTxt.getText().toString();
+                if (name.equals("")) {
+                    name = getResources().getString(R.string.default_name);
+                }
+                startMainIntent.putExtra("name", name);
                 startActivity(startMainIntent);
                 finish();
             }
