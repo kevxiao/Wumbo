@@ -25,6 +25,7 @@ import com.star.patrick.wumbo.model.message.Message;
 import com.star.patrick.wumbo.model.message.Text;
 import com.star.patrick.wumbo.view.MainActivity;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.net.InetAddress;
@@ -265,6 +266,7 @@ public class WifiDirectService extends Service {
                         is.close();
                         fis.close();
                         device.sendMessage(message);
+                        new File(fileName).delete();
                     } catch (Exception e){
                         e.printStackTrace();
                     }

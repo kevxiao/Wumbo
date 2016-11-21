@@ -27,7 +27,7 @@ public class MessageCourierImpl implements MessageCourier {
         if (!sentMessages.contains(msg.getId())) {
             Log.d("SE464", "Haven't sent this message before: " + msg.getId());
             sentMessages.add(msg.getId());
-            String fileName = msg.getId().toString() + "-emsg.tmp";
+            String fileName = "tmp/"+msg.getId().toString() + "-emsg.tmp";
 
             //Save to another file
             try {
