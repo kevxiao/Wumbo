@@ -1,11 +1,18 @@
 package com.star.patrick.wumbo.view;
 
+import android.Manifest;
+import android.app.AlarmManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -21,6 +28,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.star.patrick.wumbo.Encryption;
 import com.star.patrick.wumbo.model.Channel;
@@ -55,6 +63,8 @@ import static com.star.patrick.wumbo.view.CreateChannelActivity.CONTACT_LIST;
 import static com.star.patrick.wumbo.view.CreateChannelActivity.INVITED_USERS;
 
 public class MainActivity extends AppCompatActivity implements Observer {
+
+    private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
     private ChannelManager channelManager;
     private ContactsTracker contacts;
@@ -166,10 +176,13 @@ public class MainActivity extends AppCompatActivity implements Observer {
             public void onClick(View v) {
 //                Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 //                startActivityForResult(takePicture, 0);//zero can be replaced with any action code
-
-                Intent pickPhoto = new Intent(Intent.ACTION_PICK,
-                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(pickPhoto , 1);//one can be replaced with any action code
+                if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                    Intent pickPhoto = new Intent(Intent.ACTION_PICK,
+                            android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(pickPhoto , 1);//one can be replaced with any action code
+                } else {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+                }
             }
         });
 
@@ -405,6 +418,21 @@ public class MainActivity extends AppCompatActivity implements Observer {
     @Override
     protected void onStop() {
         super.onStop();
+    }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Intent pickPhoto = new Intent(Intent.ACTION_PICK,
+                            android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(pickPhoto , 1);//one can be replaced with any action code
+                } else {
+                    Toast.makeText(this, R.string.read_ext_perm_denied, Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
     }
 }
