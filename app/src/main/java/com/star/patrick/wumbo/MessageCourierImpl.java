@@ -31,13 +31,13 @@ public class MessageCourierImpl implements MessageCourier {
             Log.d("SE464", "Haven't sent this message before: " + msg.getId());
             sentMessages.add(msg.getId());
             String fileName = msg.getId().toString() + "-emsg.tmp";
+            ContextWrapper cw = new ContextWrapper(mainContext);
+            File directory = cw.getDir("tmp", Context.MODE_PRIVATE);
+            File file = new File(directory, fileName);
+            Log.d("SE464", "message temp file: "+file.getAbsolutePath());
 
             //Save to another file
             try {
-                ContextWrapper cw = new ContextWrapper(mainContext);
-                File directory = cw.getDir("tmp", Context.MODE_PRIVATE);
-                File file = new File(directory, fileName);
-                Log.d("SE464", "message temp file: "+file.getAbsolutePath());
                 file.createNewFile();
 
                 FileOutputStream fos = new FileOutputStream (file.getAbsolutePath(), false);
@@ -51,7 +51,7 @@ public class MessageCourierImpl implements MessageCourier {
 
             Intent sendMsgIntent = new Intent(mainContext, WifiDirectService.class);
             sendMsgIntent.setAction(WifiDirectService.SEND_MESSAGE_ACTION);
-            sendMsgIntent.putExtra(WifiDirectService.EXTRA_MESSAGE, fileName);
+            sendMsgIntent.putExtra(WifiDirectService.EXTRA_MESSAGE, file.getAbsolutePath());
             mainContext.startService(sendMsgIntent);
         }
     }

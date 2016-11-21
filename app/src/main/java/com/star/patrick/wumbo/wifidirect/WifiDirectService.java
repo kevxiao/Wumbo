@@ -259,9 +259,9 @@ public class WifiDirectService extends Service {
                     Log.d(TAG, "Device is null!");
                 }
                 else {
-                    String fileName = intent.getStringExtra(EXTRA_MESSAGE);
+                    String filePath = intent.getStringExtra(EXTRA_MESSAGE);
                     try{
-                        File file = new File("app_tmp", fileName);
+                        File file = new File(filePath);
                         FileInputStream fis = new FileInputStream(file.getAbsolutePath());
                         ObjectInputStream is = new ObjectInputStream(fis);
                         EncryptedMessage message = (EncryptedMessage) is.readObject();
@@ -270,7 +270,7 @@ public class WifiDirectService extends Service {
                         is.close();
                         fis.close();
                         device.sendMessage(message);
-                        new File(fileName).delete();
+                        new File(filePath).delete();
                     } catch (Exception e){
                         e.printStackTrace();
                     }
