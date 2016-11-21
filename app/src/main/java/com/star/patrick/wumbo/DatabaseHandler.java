@@ -367,7 +367,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public MessageList getAllMessages(UUID channelId) {
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT * FROM messages WHERE cuuid = ? ORDER BY rtime ASC;", new String[]{String.valueOf(channelId.toString())});
+        Cursor cursor = db.rawQuery("SELECT * FROM (SELECT * FROM messages WHERE cuuid = ? ORDER BY rtime DESC LIMIT 10) ORDER BY rtime ASC;", new String[]{String.valueOf(channelId.toString())});
 
         MessageList msgs= new MessageListImpl();
 
