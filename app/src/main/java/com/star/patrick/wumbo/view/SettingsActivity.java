@@ -38,7 +38,6 @@ public class SettingsActivity extends PreferenceActivity{
 
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key   ) {
-            Log.d("SE464", key);
             if (key.equals("pref_user_name")) {
                 DatabaseHandler db = new DatabaseHandler(this.getActivity(), null);
                 User me = db.getMe();

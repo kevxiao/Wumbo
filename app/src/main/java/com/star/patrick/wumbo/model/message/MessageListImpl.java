@@ -42,9 +42,6 @@ public class MessageListImpl implements MessageList {
 
     @Override
     public void addMessage(Message msg) {
-        Log.d("SE464", "MessageList adding message");
         messages.add(msg);
-        Log.d("SE464", "MessageList has size: " + messages.size());
-
     }
 }
