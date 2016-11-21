@@ -108,11 +108,16 @@ public class ChatAdapter extends BaseAdapter {
                 break;
             case IMAGE:
                 Log.d(TAG, (String) msg.getContent().getMessageContent());
-                Bitmap original = BitmapFactory.decodeFile((String) msg.getContent().getMessageContent());
-                if (original != null) {
-                    int size = (int) (original.getHeight() * (512.0 / original.getWidth()));
-                    Bitmap scaled = Bitmap.createScaledBitmap(original, 512, size, true);
-                    holder.imgMessage.setImageBitmap(scaled);
+                Bitmap image = BitmapFactory.decodeFile((String) msg.getContent().getMessageContent());
+                if (image != null) {
+                    if(image.getHeight() > image.getWidth() && image.getHeight() > 512) {
+                        int width = (int) (image.getWidth() * (512.0 / image.getHeight()));
+                        image = Bitmap.createScaledBitmap(image, width, 512, true);
+                    } else if (image.getWidth() > 512) {
+                        int height = (int) (image.getHeight() * (512.0 / image.getWidth()));
+                        image = Bitmap.createScaledBitmap(image, 512, height, true);
+                    }
+                    holder.imgMessage.setImageBitmap(image);
                 }
                 holder.txtMessage.setVisibility(View.GONE);
                 holder.imgMessage.setOnClickListener(new View.OnClickListener() {

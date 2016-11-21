@@ -112,10 +112,20 @@ public class ChannelImpl extends Observable implements Channel {
                 try{
                     Log.d("SE464","Create bitmap from " + filepath);
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    MediaStore.Images.Media.getBitmap(mainContext.getContentResolver(), Uri.fromFile(new File(filepath))).compress(Bitmap.CompressFormat.PNG, 100, stream);
+                    Bitmap image = MediaStore.Images.Media.getBitmap(mainContext.getContentResolver(), Uri.fromFile(new File(filepath)));
+                    if (image != null) {
+                        if(image.getHeight() > image.getWidth() && image.getHeight() > 512) {
+                            int width = (int) (image.getWidth() * (512.0 / image.getHeight()));
+                            image = Bitmap.createScaledBitmap(image, width, 512, true);
+                        } else if (image.getWidth() > 512) {
+                            int height = (int) (image.getHeight() * (512.0 / image.getWidth()));
+                            image = Bitmap.createScaledBitmap(image, 512, height, true);
+                        }
+                    }
+                    image.compress(Bitmap.CompressFormat.PNG, 100, stream);
                     Message sendMsg = new Message(msg.getId(), new TransferImage(stream.toByteArray()), msg.getUser(), msg.getSendTime(), msg.getChannelId());
                     send(sendMsg);
-                } catch (Exception e){
+                } catch (NullPointerException | IOException e){
                     e.printStackTrace();
                 }
             }
