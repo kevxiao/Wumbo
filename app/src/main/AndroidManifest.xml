@@ -55,11 +55,6 @@
         <service android:name=".wifidirect.HandshakeDispatcherService" />
         <service android:name=".wifidirect.WifiDirectService" />
         <service android:name=".wifidirect.MessageDispatcherService" />
-
-        <activity
-            android:name="res.layout.Main2Activity"
-            android:label="@string/title_activity_main2"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

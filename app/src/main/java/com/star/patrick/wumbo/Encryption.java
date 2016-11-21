@@ -15,6 +15,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Calendar;
 
+import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -39,6 +40,20 @@ public class Encryption {
             e.printStackTrace();
         }
         return userKeys;
+    }
+
+    public static SecretKey generateSecretKey() {
+        SecretKey key = null;
+        try {
+            KeyGenerator kgen = KeyGenerator.getInstance("AES");
+            SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
+            sr.setSeed(Calendar.getInstance().getTimeInMillis());
+            kgen.init(128, sr);
+            key = kgen.generateKey();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return key;
     }
 
     public static String getEncodedPrivateKey(PrivateKey key) {

@@ -1,5 +1,6 @@
 package com.star.patrick.wumbo.model.message;
 
+import com.star.patrick.wumbo.Encryption;
 import com.star.patrick.wumbo.model.User;
 
 import java.io.IOException;
@@ -11,11 +12,13 @@ import java.security.PublicKey;
 import java.sql.Timestamp;
 import java.util.UUID;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SealedObject;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 public class EncryptedMessage implements Serializable {
     private UUID id;
@@ -24,12 +27,29 @@ public class EncryptedMessage implements Serializable {
     private Timestamp sendTime;
     private Timestamp receiveTime;
     private UUID channelId;
+    private byte[] encryptedAES;
     private MessageContent.MessageType type;
 
     public EncryptedMessage(Message message, SecretKey secretKey) {
+        this.initialize(message, secretKey);
+    }
+
+    public EncryptedMessage(Message message, PublicKey publicKey) {
+        SecretKey key = Encryption.generateSecretKey();
+        this.initialize(message, key);
+        try {
+            Cipher encrypt = Cipher.getInstance("RSA");
+            encrypt.init(Cipher.ENCRYPT_MODE, publicKey);
+            this.encryptedAES = encrypt.doFinal(key.getEncoded());
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | InvalidKeyException | BadPaddingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initialize(Message message, SecretKey secretKey) {
         this.content = null;
         try {
-            Cipher encrypt = Cipher.getInstance("AES");
+            Cipher encrypt = Cipher.getInstance("AES/CBC/PKCS5Padding");
             encrypt.init(Cipher.ENCRYPT_MODE, secretKey);
             this.content = new SealedObject(message.getContent(), encrypt);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | IOException | IllegalBlockSizeException | InvalidKeyException e) {
@@ -40,22 +60,7 @@ public class EncryptedMessage implements Serializable {
         this.channelId = message.getChannelId();
         this.id = message.getId();
         this.type = message.getContent().getType();
-    }
-
-    public EncryptedMessage(Message message, PublicKey publicKey) {
-        this.content = null;
-        try {
-            Cipher encrypt = Cipher.getInstance("RSA");
-            encrypt.init(Cipher.ENCRYPT_MODE, publicKey);
-            this.content = new SealedObject(message.getContent(), encrypt);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | IOException | IllegalBlockSizeException | InvalidKeyException e) {
-            e.printStackTrace();
-        }
-        this.user = message.getUser();
-        this.sendTime = message.getSendTime();
-        this.channelId = message.getChannelId();
-        this.id = message.getId();
-        this.type = message.getContent().getType();
+        this.encryptedAES = null;
     }
 
     public UUID getId() {
@@ -73,13 +78,15 @@ public class EncryptedMessage implements Serializable {
     }
 
     public MessageContent getContent(PrivateKey privateKey) {
-        MessageContent msgContent = null;
+        byte[] decodedAES = null;
         try {
-            msgContent = (MessageContent) this.content.getObject(privateKey);
-        } catch (NoSuchAlgorithmException | IOException | ClassNotFoundException | InvalidKeyException e) {
-            e.printStackTrace();
+            final Cipher cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            decodedAES = cipher.doFinal(encryptedAES);
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
-        return msgContent;
+        return decodedAES != null ? getContent(new SecretKeySpec(decodedAES, 0, decodedAES.length, "AES")) : null;
     }
 
     public User getUser() {

@@ -60,15 +60,7 @@ public class ChannelImpl extends Observable implements Channel {
 
     public ChannelImpl(String name, Context context, MessageCourier messageCourier) {
         this(UUID.randomUUID(), name, context, messageCourier, null);
-        try {
-            KeyGenerator kgen = KeyGenerator.getInstance("AES");
-            SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
-            sr.setSeed(Calendar.getInstance().getTimeInMillis());
-            kgen.init(128, sr);
-            encKey = kgen.generateKey();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
+        encKey = Encryption.generateSecretKey();
     }
 
     public ChannelImpl(UUID id, String name, Context context, MessageCourier messageCourier, SecretKey key) {
