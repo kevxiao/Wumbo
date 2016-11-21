@@ -190,19 +190,19 @@ public class WifiDirectService extends Service {
     private void onGroupFormed(boolean isHost, InetAddress hostAddress) {
         Log.d("SE464", "group formed " + hostAddress + ", Am I host? " + isHost);
 
-        Message message = new Message(
-            new Text("Connected"),
-            new User("System", null),
-            new Timestamp(
-                Calendar.getInstance().getTime().getTime()
-            ),
-            UUID.fromString(getResources().getString(R.string.public_uuid))
-        );
-
-        SecretKey key = Encryption.getSecretKeyFromEncoding(getResources().getString(R.string.public_secret_key));
-
-        EncryptedMessage encryptedMessage = new EncryptedMessage(message, key);
-        FrontEndCommunicator.receivedMessage(this, encryptedMessage);
+//        Message message = new Message(
+//            new Text("Connected"),
+//            new User("System", null),
+//            new Timestamp(
+//                Calendar.getInstance().getTime().getTime()
+//            ),
+//            UUID.fromString(getResources().getString(R.string.public_uuid))
+//        );
+//
+//        SecretKey key = Encryption.getSecretKeyFromEncoding(getResources().getString(R.string.public_secret_key));
+//
+//        EncryptedMessage encryptedMessage = new EncryptedMessage(message, key);
+//        FrontEndCommunicator.receivedMessage(this, encryptedMessage);
 
         if (isHost) {
             if (!(device instanceof Host)) {
