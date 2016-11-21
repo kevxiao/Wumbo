@@ -9,7 +9,9 @@ import android.view.Window;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
+import com.star.patrick.wumbo.DatabaseHandler;
 import com.star.patrick.wumbo.R;
+import com.star.patrick.wumbo.model.User;
 
 
 /**
@@ -27,12 +29,23 @@ public class IntroActivity extends AppCompatActivity {
         setContentView(R.layout.activity_intro);
         mNameTxt = (EditText) findViewById(R.id.name_text);
 
+        DatabaseHandler db = new DatabaseHandler(this, null);
+        User user = db.getMe();
+        if (null != user) {
+            mNameTxt.setText(user.getDisplayName());
+            mNameTxt.setSelection(mNameTxt.getText().length());
+        }
+
         ImageButton continueBtn = (ImageButton) findViewById(R.id.continue_button);
         continueBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent startMainIntent = new Intent(view.getContext(), MainActivity.class);
-                startMainIntent.putExtra("name", mNameTxt.getText().toString());
+                String name = mNameTxt.getText().toString();
+                if (name.equals("")) {
+                    name = getResources().getString(R.string.default_name);
+                }
+                startMainIntent.putExtra("name", name);
                 startActivity(startMainIntent);
                 finish();
             }

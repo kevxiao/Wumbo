@@ -3,13 +3,19 @@ package com.star.patrick.wumbo.view;
 import android.Manifest;
 import android.app.AlarmManager;
 import android.content.Context;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.os.Environment;
+import android.os.Parcelable;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -49,6 +55,7 @@ import com.star.patrick.wumbo.wifidirect.HandshakeDispatcherService;
 import com.star.patrick.wumbo.wifidirect.MessageDispatcherService;
 import com.star.patrick.wumbo.wifidirect.WifiDirectService;
 
+import java.io.File;
 import java.io.Serializable;
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -174,12 +181,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
         cameraBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//                startActivityForResult(takePicture, 0);//zero can be replaced with any action code
                 if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                    Intent pickPhoto = new Intent(Intent.ACTION_PICK,
-                            android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                    startActivityForResult(pickPhoto , 1);//one can be replaced with any action code
+                    cameraButtonAction();
                 } else {
                     ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
                 }
@@ -319,18 +322,50 @@ public class MainActivity extends AppCompatActivity implements Observer {
         super.onActivityResult(requestCode, resultCode, returnedIntent);
         switch(requestCode) {
 //            case 0:
-//                if(resultCode == RESULT_OK){
-//                    Uri selectedImage = imageReturnedIntent.getData();
+//                if(returnedIntent != null){
+//                    Log.d("SE464", returnedIntent.toString());
+//                    Uri selectedImage = returnedIntent.getData();
 //                    //imageview.setImageURI(selectedImage);
 //                }
 //
 //                break;
             case 1:
-                if(returnedIntent != null){
-                    Uri selectedImage = returnedIntent.getData();
-                    Log.d("SE464", "Selected image: " + selectedImage.getPath());
-                    msgChannel.send(me, selectedImage);
-                    //imageview.setImageURI(selectedImage);
+                if(resultCode == RESULT_OK)
+                {
+                    final boolean isCamera;
+                    if(returnedIntent == null)
+                    {
+                        isCamera = true;
+                    }
+                    else
+                    {
+                        final String action = returnedIntent.getAction();
+                        if(action == null)
+                        {
+                            isCamera = false;
+                        }
+                        else
+                        {
+                            isCamera = action.equals(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                        }
+                    }
+
+                    Uri selectedImageUri;
+                    if(isCamera)
+                    {
+                        File file = new File(Environment.getExternalStorageDirectory().getPath(), "Wumbo-temp.jpg");
+                        Uri outputFileUri = Uri.fromFile(file);
+                        selectedImageUri = outputFileUri;
+                    }
+                    else
+                    {
+                        selectedImageUri = returnedIntent == null ? null : returnedIntent.getData();
+                    }
+                    if (selectedImageUri != null){
+                        Log.d("SE464", "Image returned and stored at "+selectedImageUri.getPath());
+                        msgChannel.send(me, selectedImageUri);
+                    }
+
                 }
                 break;
             case 2:
@@ -415,6 +450,33 @@ public class MainActivity extends AppCompatActivity implements Observer {
         }
     }
 
+    private void cameraButtonAction() {
+        File file = new File(Environment.getExternalStorageDirectory().getPath(), "Wumbo-temp.jpg");
+        Uri outputFileUri = Uri.fromFile(file);
+
+        // Camera.
+        final List<Intent> cameraIntents = new ArrayList<Intent>();
+        final Intent captureIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        final PackageManager packageManager = getPackageManager();
+        final List<ResolveInfo> listCam = packageManager.queryIntentActivities(captureIntent, 0);
+        for(ResolveInfo res : listCam) {
+            final String packageName = res.activityInfo.packageName;
+            final Intent intent = new Intent(captureIntent);
+            intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
+            intent.setPackage(packageName);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
+            cameraIntents.add(intent);
+        }
+
+        //Gallery
+        Intent pickPhoto = new Intent(Intent.ACTION_PICK,
+                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+
+        final Intent chooserIntent = Intent.createChooser(pickPhoto, "Select Source");
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, cameraIntents.toArray(new Parcelable[]{}));
+        startActivityForResult(chooserIntent , 1);//one can be replaced with any action code
+    }
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -426,9 +488,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
             case PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Intent pickPhoto = new Intent(Intent.ACTION_PICK,
-                            android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                    startActivityForResult(pickPhoto , 1);//one can be replaced with any action code
+                    cameraButtonAction();
                 } else {
                     Toast.makeText(this, R.string.read_ext_perm_denied, Toast.LENGTH_SHORT).show();
                 }

@@ -56,7 +56,11 @@ public class CreateChannelActivity extends AppCompatActivity {
                 Bundle bundle = new Bundle();
                 bundle.putSerializable(INVITED_USERS, (Serializable)invitedUsers);
                 returnName.putExtras(bundle);
-                returnName.putExtra(CHANNEL_NAME, channelNameEditText.getText().toString());
+                String channelName = channelNameEditText.getText().toString();
+                if (channelName.equals("")) {
+                    channelName = getResources().getString(R.string.default_channel_name);
+                }
+                returnName.putExtra(CHANNEL_NAME, channelName);
                 setResult(RESULT_OK, returnName);
                 finish();
             }
