@@ -64,7 +64,7 @@ public class MessageSender extends AsyncTask<Void, Void, Throwable> {
         super.onPostExecute(throwable);
 
         if (throwable != null && onFailure != null) {
-            throwable.printStackTrace();
+//            throwable.printStackTrace();
             onFailure.run();
         }
     }
