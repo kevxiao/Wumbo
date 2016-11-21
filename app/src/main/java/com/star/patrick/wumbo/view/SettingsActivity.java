@@ -42,6 +42,9 @@ public class SettingsActivity extends PreferenceActivity{
                 DatabaseHandler db = new DatabaseHandler(this.getActivity(), null);
                 User me = db.getMe();
                 String newName = sharedPreferences.getString("pref_user_name", "Anonymous");
+                if (newName.equals("")) {
+                    newName = getResources().getString(R.string.default_name);
+                }
                 db.updateUserDisplayName(me.getId(), newName);
                 Log.d("SE464", "New Name is: "+ newName);
                 Intent returnName = new Intent();
