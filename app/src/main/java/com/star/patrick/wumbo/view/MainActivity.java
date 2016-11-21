@@ -343,6 +343,10 @@ public class MainActivity extends AppCompatActivity implements Observer {
                     channelManager.createChannel(channel, me, invited);
                 }
                 break;
+            case 4:
+                Log.d("SE464", "returned from gallery");
+                ChatAdapter.lastMsg.delete();
+                break;
         }
     }
 

@@ -1,9 +1,16 @@
 package com.star.patrick.wumbo.view;
 
 import android.app.Activity;
+import android.content.ContentProvider;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -16,8 +23,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.star.patrick.wumbo.R;
+import com.star.patrick.wumbo.model.ChannelImpl;
 import com.star.patrick.wumbo.model.message.Message;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,6 +38,7 @@ public class ChatAdapter extends BaseAdapter {
     private final List<Message> messages;
     private Activity context;
     private UUID meId;
+    public static File lastMsg = null;
 
     public ChatAdapter(Activity context, List<Message> messages, UUID meId) {
         this.context = context;
@@ -54,7 +65,7 @@ public class ChatAdapter extends BaseAdapter {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
-        Message msg = getItem(position);
+        final Message msg = getItem(position);
         RelativeLayout.LayoutParams lparams;
         LinearLayout.LayoutParams sparams, tparams, cparams;
         LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -104,6 +115,29 @@ public class ChatAdapter extends BaseAdapter {
                     holder.imgMessage.setImageBitmap(scaled);
                 }
                 holder.txtMessage.setVisibility(View.GONE);
+                holder.imgMessage.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String[] parts = ((String) msg.getContent().getMessageContent()).split("/");
+                        String fileName = parts[parts.length-1];
+                        File dest = new File(Environment.getExternalStoragePublicDirectory(
+                                Environment.DIRECTORY_PICTURES), fileName);
+                        File src = new File((String)msg.getContent().getMessageContent());
+                        try {
+                            ChannelImpl.copyFile(src, dest);
+                        } catch (Exception e){
+                            e.printStackTrace();
+                        }
+                        Intent intent = new Intent();
+                        intent.setAction(Intent.ACTION_VIEW);
+
+                        Uri uri = Uri.fromFile(dest);
+                        Log.d("SE464", "Sending "+uri.getPath()+" to Gallery");
+                        intent.setDataAndType(uri, "image/*");
+                        lastMsg = dest;
+                        context.startActivityForResult(intent, 4);
+                    }
+                });
                 break;
         }
 
