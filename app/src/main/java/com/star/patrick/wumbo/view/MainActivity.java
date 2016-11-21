@@ -2,6 +2,7 @@ package com.star.patrick.wumbo.view;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -72,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private EditText editMsg;
     private DrawerLayout drawerLayout;
     private ListView channelListView;
+    private View selectedChannelItem;
 
     private Runnable onStartCallback;
     private ActionBar supportActionBar;
@@ -89,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_menu_white_24dp);
+        selectedChannelItem = null;
 
         setSupportActionBar(toolbar);
         supportActionBar = getSupportActionBar();
@@ -390,6 +393,12 @@ public class MainActivity extends AppCompatActivity implements Observer {
             listView.setAdapter(chatAdapter);
             MainActivity.this.update(null, null);
             drawerLayout.closeDrawers();
+            if(selectedChannelItem != null) {
+                selectedChannelItem.setBackgroundColor(Color.parseColor("#00000000"));
+            }
+            selectedChannelItem = view;
+            selectedChannelItem.setBackgroundColor(Color.parseColor("#20000000"));
+
         }
     }
 

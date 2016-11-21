@@ -16,6 +16,6 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="channel_name_prompt">New Channel Name:</string>
-    <string name="default_channel_name">NewChannel</string>
+    <string name="default_channel_name">New Channel</string>
     <string name="contacts_name_prompt">Select contacts to add:</string>
 </resources>

@@ -26,30 +26,11 @@
             android:layout_height="match_parent"
             android:orientation="vertical" >
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:orientation="vertical" >
-
-                <ImageButton
-                    android:id="@+id/continue_creating_channel_button"
-                    android:layout_gravity="center"
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
-                    android:src="@drawable/ic_arrow_forward_white_24dp"
-                    android:background="@drawable/round_button"
-                    android:elevation="4dp" />
-
-            </LinearLayout>
-
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/white"
-                android:text="@string/channel_name_prompt"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentStart="true" />
+                android:text="@string/channel_name_prompt" />
 
             <EditText
                 android:id="@+id/channel_name_text"
@@ -58,34 +39,35 @@
                 android:text="@string/default_channel_name"
                 android:inputType="textPersonName"
                 android:textColor="@android:color/white"
-                android:maxLines="1" />
+                android:maxLines="1">
+                <requestFocus/>
+            </EditText>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/white"
-                android:text="@string/contacts_name_prompt"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentStart="true" />
+                android:text="@string/contacts_name_prompt" />
 
-            <!--The user list-->
-            <LinearLayout
-                android:layout_width="wrap_content"
+            <ListView android:id="@+id/contact_list"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="start"
-                android:fitsSystemWindows="true"
-                android:orientation="vertical">
+                android:layout_weight="1"
+                android:choiceMode="singleChoice"
+                android:divider="@android:color/transparent"
+                android:dividerHeight="0dp"
+                android:background="@android:color/transparent" />
 
-                <ListView android:id="@+id/contact_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="fill_parent"
-                    android:layout_gravity="start"
-                    android:choiceMode="singleChoice"
-                    android:divider="@android:color/transparent"
-                    android:dividerHeight="10dp"
-                    android:background="#111"
-                    android:paddingTop="20dp"/>
-            </LinearLayout>
+            <ImageButton
+                android:id="@+id/continue_creating_channel_button"
+                android:layout_gravity="center"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:src="@drawable/ic_arrow_forward_white_24dp"
+                android:background="@drawable/round_button"
+                android:elevation="4dp"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"/>
 
         </LinearLayout>
     </LinearLayout>

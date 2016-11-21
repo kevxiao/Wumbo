@@ -2,6 +2,7 @@ package com.star.patrick.wumbo.view;
 
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
@@ -44,8 +45,6 @@ public class CreateChannelActivity extends AppCompatActivity {
         contactListView.setAdapter(contactListAdapter);
         contactListView.setOnItemClickListener(new ContactListItemClickListener());
 
-
-
         continueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -74,7 +73,13 @@ public class CreateChannelActivity extends AppCompatActivity {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Log.d("SE464", "CreateChannel: Selected user at position: " + position);
             User user = (User) parent.getItemAtPosition(position);
-            invitedUsers.add(user);
+            if(!invitedUsers.contains(user)) {
+                view.setBackgroundColor(Color.parseColor("#20000000"));
+                invitedUsers.add(user);
+            } else {
+                view.setBackgroundColor(Color.parseColor("#00000000"));
+                invitedUsers.remove(user);
+            }
         }
     }
 }

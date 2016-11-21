@@ -82,7 +82,6 @@
             android:layout_gravity="start"
             android:choiceMode="singleChoice"
             android:divider="@android:color/transparent"
-            android:dividerHeight="10dp"
             android:background="@android:color/background_light"/>
     </LinearLayout>
     <!--<android.support.design.widget.NavigationView-->

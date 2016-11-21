@@ -24,13 +24,14 @@
             android:id="@+id/intro_form"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical" >
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:orientation="vertical" >
+                android:orientation="vertical"
+                android:paddingBottom="100dp">
 
                 <TextView
                     android:layout_width="match_parent"
@@ -54,7 +55,9 @@
                     android:text="@string/default_name"
                     android:inputType="textPersonName"
                     android:textColor="@android:color/white"
-                    android:maxLines="1" />
+                    android:maxLines="1">
+                    <requestFocus />
+                </EditText>
 
                 <ImageButton
                     android:id="@+id/continue_button"
@@ -63,7 +66,8 @@
                     android:layout_height="56dp"
                     android:src="@drawable/ic_arrow_forward_white_24dp"
                     android:background="@drawable/round_button"
-                    android:elevation="4dp" />
+                    android:elevation="4dp"
+                    android:layout_marginBottom="@dimen/activity_vertical_margin"/>
 
             </LinearLayout>
 
