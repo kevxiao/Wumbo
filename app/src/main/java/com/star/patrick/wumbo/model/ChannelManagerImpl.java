@@ -120,7 +120,7 @@ public class ChannelManagerImpl extends Observable implements ChannelManager {
                     new Timestamp(Calendar.getInstance().getTime().getTime()),
                     UUID.randomUUID()
             );
-            messageCourier.send(new EncryptedMessage(msg, Encryption.getSecretKeyFromEncoding(channel.getKey())));
+            messageCourier.send(new EncryptedMessage(msg, user.getPublicKey()));
         }
     }
 }

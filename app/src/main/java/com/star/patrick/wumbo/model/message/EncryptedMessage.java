@@ -42,11 +42,11 @@ public class EncryptedMessage implements Serializable {
         this.type = message.getContent().getType();
     }
 
-    public EncryptedMessage(Message message, PublicKey secretKey) {
+    public EncryptedMessage(Message message, PublicKey publicKey) {
         this.content = null;
         try {
             Cipher encrypt = Cipher.getInstance("RSA");
-            encrypt.init(Cipher.ENCRYPT_MODE, secretKey);
+            encrypt.init(Cipher.ENCRYPT_MODE, publicKey);
             this.content = new SealedObject(message.getContent(), encrypt);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | IOException | IllegalBlockSizeException | InvalidKeyException e) {
             e.printStackTrace();
