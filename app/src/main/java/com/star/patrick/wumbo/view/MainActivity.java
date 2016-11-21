@@ -52,6 +52,7 @@ import java.io.Serializable;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
@@ -203,7 +204,9 @@ public class MainActivity extends AppCompatActivity implements Observer {
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, CreateChannelActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putSerializable(CONTACT_LIST, (Serializable) new ArrayList<>(contacts.getContacts().values()));
+                Map<UUID, User> myContacts = new HashMap<>(contacts.getContacts());
+                myContacts.remove(me.getId());
+                bundle.putSerializable(CONTACT_LIST, (Serializable) new ArrayList<>(myContacts.values()));
                 intent.putExtras(bundle);
                 startActivityForResult(intent, 3);
             }
