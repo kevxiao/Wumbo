@@ -169,6 +169,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 break;
             case IMAGE:
                 values.put(MESSAGE_CONTENT, (String)msg.getContent().getMessageContent());
+                break;
         }
 
         db.insert(TABLE_MESSAGE, null, values);
@@ -392,10 +393,20 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                             snd,
                             new Timestamp(cursor.getLong(cursor.getColumnIndex("stime"))),
                             UUID.fromString(cursor.getString(cursor.getColumnIndex("cuuid"))),
-                            new Timestamp(cursor.getLong(cursor.getColumnIndex("rtime"))));
-                    msgs.addMessage(msg);
+                            new Timestamp(cursor.getLong(cursor.getColumnIndex("rtime")))
+                    );
+                    break;
+                case 1:
+                    msg = new Message(UUID.fromString(cursor.getString(cursor.getColumnIndex("uuid"))),
+                            new Image(Uri.parse(cursor.getString(cursor.getColumnIndex("content")))),
+                            snd,
+                            new Timestamp(cursor.getLong(cursor.getColumnIndex("stime"))),
+                            UUID.fromString(cursor.getString(cursor.getColumnIndex("cuuid"))),
+                            new Timestamp(cursor.getLong(cursor.getColumnIndex("rtime")))
+                    );
                     break;
             }
+            msgs.addMessage(msg);
         }
 
         cursor.close();
