@@ -284,8 +284,9 @@ public class MainActivity extends AppCompatActivity implements Observer {
             for ( int i = 0; i < newMessages.size(); i++ ) {
                 if (newMessages.get(i).getReceiveTime() != lastMessage.getReceiveTime()) {
                     break;
-                }
-                else if (newMessages.get(i).getId() == lastMessage.getId()) {
+                } else if (newMessages.size() == 1 && newMessages.get(i).getId().equals(lastMessage.getId())) {
+                    newMessages = new ArrayList<>();
+                } else if (newMessages.get(i).getId().equals(lastMessage.getId())) {
                     if (i < newMessages.size() - 1) {
                         newMessages = newMessages.subList(i + 1, newMessages.size());
                         break;
@@ -446,7 +447,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
             }
             selectedChannelItem = view;
             selectedChannelItem.setBackgroundColor(Color.parseColor("#20000000"));
-
+            MainActivity.this.update(null, null);
         }
     }
 
