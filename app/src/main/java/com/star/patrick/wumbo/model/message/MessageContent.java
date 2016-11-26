@@ -3,9 +3,8 @@ package com.star.patrick.wumbo.model.message;
 import java.io.Serializable;
 
 /**
- * Created by jesse on 16/11/16.
+ * Interface for the message content of a message
  */
-
 public interface MessageContent extends Serializable{
     Object getMessageContent();
     MessageType getType();
