@@ -24,10 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Created by jesse on 18/11/16.
- */
-
 public class DatabaseHandler extends SQLiteOpenHelper {
 
     // All Static variables
@@ -79,9 +75,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         Log.d("SE464", "Creating THE BIG DB");
+        //Allow foreign key constraints
         db.execSQL("PRAGMA foreign_keys = ON;");
+        //Allow database memory cleanup
         db.execSQL("PRAGMA auto_vacuum = FULL;");
 
+        //Create the messages table
         String CREATE_MESSAGES_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_MESSAGE + "("
                 + MESSAGE_UUID + " TEXT PRIMARY KEY,"
                 + MESSAGE_TYPE + " INTEGER,"
@@ -94,6 +93,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + "FOREIGN KEY(suuid) REFERENCES users(uuid)" + ")";
         db.execSQL(CREATE_MESSAGES_TABLE);
 
+        //Create the channels table
         String CREATE_CHANNEL_TABLE =
                 "CREATE TABLE IF NOT EXISTS " + CHANNEL_TABLE + " ( " +
                     CHANNEL_UUID + " TEXT PRIMARY KEY " +
@@ -104,6 +104,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 ") ";
         db.execSQL(CREATE_CHANNEL_TABLE);
 
+        //Create users table
         String CREATE_USER_TABLE =
                 "CREATE TABLE IF NOT EXISTS " + USER_TABLE + " ( " +
                     USER_UUID + " TEXT PRIMARY KEY " +
@@ -112,9 +113,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                     ", " +
                     USER_PUBLIC_KEY + " TEXT " +
                 ") ";
-        Log.d("SE464", CREATE_USER_TABLE);
         db.execSQL(CREATE_USER_TABLE);
 
+        //Create me table which keeps track of the user's information
         String CREATE_ME_TABLE =
                 "CREATE TABLE IF NOT EXISTS " + ME_TABLE + " ( " +
                     ME_UUID + " TEXT PRIMARY KEY, " +
@@ -123,6 +124,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 ") ";
         db.execSQL(CREATE_ME_TABLE);
 
+        //Create a trigger to delete messages that are past a certain point
         String MESSAGE_LIMIT_TRIGGER =
                 "CREATE TRIGGER delete_till_500 INSERT ON messages WHEN (select count(*) from messages)>700\n"+
                 "BEGIN\n"+
@@ -132,7 +134,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     }
 
-    // Upgrading database
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Drop older table if existed
@@ -145,13 +146,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    // Adding new contact
     public void addMessage(Message msg) {
         Log.d("SE464", "Saving a message to the database");
         addUser(msg.getUser());
 
         SQLiteDatabase db = this.getWritableDatabase();
 
+        //Set the content of the messages into the db
         ContentValues values = new ContentValues();
         values.put(MESSAGE_UUID, msg.getId().toString());
         values.put(MESSAGE_CUUID, msg.getChannelId().toString());
@@ -159,6 +160,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(MESSAGE_STIME, msg.getSendTime().getTime());
         values.put(MESSAGE_RTIME, msg.getReceiveTime().getTime());
         values.put(MESSAGE_TYPE, msg.getContent().getType().ordinal());
+
+        //Set the content of the message depending on message type
         switch (msg.getContent().getType()) {
             case TEXT:
                 values.put(MESSAGE_CONTENT, (String)msg.getContent().getMessageContent());
@@ -172,17 +175,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close();
     }
 
-    // Getting single contact
     public Message getMessage(UUID id) {
         SQLiteDatabase db = this.getReadableDatabase();
 
+        //Query for the message; return if it doesn't exist
         Cursor cursor = db.rawQuery("SELECT * FROM messages WHERE uuid=?;", new String[]{id.toString()});
         if (cursor == null || !cursor.isBeforeFirst() || !cursor.moveToFirst()) {
             return null;
         }
 
+        //Create message from database row
         Message msg = null;
         User snd = getUser(UUID.fromString(cursor.getString(cursor.getColumnIndex("suuid"))));
+        //Use proper constructor based on message type
         switch (cursor.getInt(cursor.getColumnIndex("type"))){
             case 0:
                 msg = new Message(UUID.fromString(cursor.getString(cursor.getColumnIndex("uuid"))),
@@ -207,21 +212,22 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         cursor.close();
         db.close();
 
-        // return contact
         return msg;
     }
 
-    // Getting All Contacts
     public List<Message> getAllMessagesSince(Timestamp ts) {
         SQLiteDatabase db = this.getReadableDatabase();
 
+        //Query all messages since a time
         Cursor cursor = db.rawQuery("SELECT * FROM messages WHERE rtime > ? ORDER BY rtime ASC;", new String[]{String.valueOf(ts.getTime())});
-
+        //Create a list of messages to return
         List<Message> msgs= new ArrayList<>();
 
         while (cursor!=null && cursor.moveToNext()){
+            //Create message metadata
             Message msg = null;
             User snd = getUser(UUID.fromString(cursor.getString(cursor.getColumnIndex("suuid"))));
+            //Create message based on the message type
             switch (cursor.getInt(cursor.getColumnIndex("type"))){
                 case 0:
                     msg = new Message(UUID.fromString(cursor.getString(cursor.getColumnIndex("uuid"))),
@@ -242,6 +248,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                     );
                     break;
             }
+            //Add to the list of messages
             msgs.add(msg);
         }
 
@@ -249,7 +256,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close();
 
         Log.d("SE464", "Retrieving " + msgs.size() + " messages from the database");
-
         return msgs;
     }
 
@@ -260,15 +266,16 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public User getUser(UUID id) {
         SQLiteDatabase db = this.getReadableDatabase();
 
+        //Query for user; return if it doesn't exist
         Cursor cursor = db.rawQuery(
                 "SELECT * FROM " + USER_TABLE + " WHERE " + USER_UUID + " = ? ",
                 new String[]{id.toString()}
         );
-
         if (cursor == null || !cursor.isBeforeFirst() || !cursor.moveToFirst()) {
             return null;
         }
 
+        //Create user from db row
         User user = new User(
                 id,
                 cursor.getString(cursor.getColumnIndex(USER_DISPLAY_NAME)),
@@ -288,6 +295,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(USER_DISPLAY_NAME, displayName);
 
+        //Update the user's displayname in the db
         db.update(USER_TABLE, values, USER_UUID + " = ? ", new String[]{id.toString()});
         db.close();
     }
@@ -295,22 +303,23 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public Channel getChannel(UUID id) {
         SQLiteDatabase db = this.getReadableDatabase();
 
+        //Query for channel; return null if it doesn't exist
         Cursor cursor = db.rawQuery(
                 "SELECT * FROM " + CHANNEL_TABLE + " WHERE " + CHANNEL_UUID + " = ? ",
                 new String[]{id.toString()}
         );
-
         if (cursor == null || !cursor.isBeforeFirst() || !cursor.moveToFirst()) {
             return null;
         }
 
+        //Create channel out of db row
         Channel channel = new ChannelImpl(
                 id,
                 cursor.getString(cursor.getColumnIndex(CHANNEL_NAME)),
                 context,
                 messageCourier,
                 Encryption.getSecretKeyFromEncoding(cursor.getString(cursor.getColumnIndex(CHANNEL_KEY))),
-                this.getAllMessages(UUID.fromString(cursor.getString(cursor.getColumnIndex(CHANNEL_UUID))))
+                this.getAllMessagesFromChannel(UUID.fromString(cursor.getString(cursor.getColumnIndex(CHANNEL_UUID))))
         );
         cursor.close();
         db.close();
@@ -319,11 +328,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     public void addChannel(Channel channel) {
+        //Check if channel already exists
         if (getChannel(channel.getId()) != null)
             return;
 
         SQLiteDatabase db = this.getWritableDatabase();
 
+        //Insert a channel row into db
         ContentValues values = new ContentValues();
         values.put(CHANNEL_UUID, channel.getId().toString());
         values.put(CHANNEL_NAME, channel.getName());
@@ -336,24 +347,25 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void removeChannel(UUID id) {
         SQLiteDatabase db = this.getWritableDatabase();
 
+        //Delete channel from db
         db.delete(CHANNEL_TABLE, CHANNEL_UUID + " = ? ", new String[]{id.toString()});
         db.close();
     }
 
     public Map<UUID, Channel> getChannels() {
         Map<UUID, Channel> channels = new LinkedHashMap<>();
-
         SQLiteDatabase db = this.getReadableDatabase();
 
+        //Query for all channles; return empty map if no channels exist
         Cursor cursor = db.rawQuery(
                 "SELECT * FROM " + CHANNEL_TABLE + " ORDER BY " + CHANNEL_NAME,
                 new String[]{}
         );
-
         if (cursor == null || !cursor.isBeforeFirst() || !cursor.moveToFirst()) {
             return channels;
         }
 
+        //Create channels out of db rows
         do {
             Channel channel = new ChannelImpl(
                     UUID.fromString(cursor.getString(cursor.getColumnIndex(CHANNEL_UUID))),
@@ -361,8 +373,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                     context,
                     messageCourier,
                     Encryption.getSecretKeyFromEncoding(cursor.getString(cursor.getColumnIndex(CHANNEL_KEY))),
-                    this.getAllMessages(UUID.fromString(cursor.getString(cursor.getColumnIndex(CHANNEL_UUID))))
+                    this.getAllMessagesFromChannel(UUID.fromString(cursor.getString(cursor.getColumnIndex(CHANNEL_UUID))))
             );
+            //Add channel to the map
             channels.put(channel.getId(), channel);
         } while ( cursor.moveToNext() );
 
@@ -372,13 +385,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return channels;
     }
 
-    public MessageList getAllMessages(UUID channelId) {
+    public MessageList getAllMessagesFromChannel(UUID channelId) {
         SQLiteDatabase db = this.getReadableDatabase();
 
+        //Query for all messages from a channel
         Cursor cursor = db.rawQuery("SELECT * FROM messages WHERE cuuid = ? ORDER BY rtime ASC;", new String[]{String.valueOf(channelId.toString())});
 
         MessageList msgs= new MessageListImpl();
 
+        //Create messages and add them to the message list
         while (cursor!=null && cursor.moveToNext()){
             Message msg = null;
             User snd = getUser(UUID.fromString(cursor.getString(cursor.getColumnIndex("suuid"))));
@@ -414,6 +429,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void setMe(UUID id, String privateKey) {
         SQLiteDatabase db = this.getWritableDatabase();
 
+        //Set the user's UUID and privateKey
         ContentValues values = new ContentValues();
         values.put(ME_UUID, id.toString());
         values.put(ME_PRIVATE_KEY, privateKey);
@@ -426,6 +442,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public User getMe() {
         SQLiteDatabase db = this.getReadableDatabase();
 
+        //Get the user's information; return null if he does not exist in db
         Cursor cursor = db.rawQuery(
                 "SELECT " +
                     "m." + ME_UUID + " mid, " +
@@ -436,18 +453,16 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 "ON m." + ME_UUID + " = u." + USER_UUID,
                 new String[]{}
         );
-
         if (cursor == null || !cursor.isBeforeFirst() || !cursor.moveToFirst()) {
             return null;
         }
 
+        //Create new user from db row
         User user = new User(
                 UUID.fromString(cursor.getString(cursor.getColumnIndex("mid"))),
                 cursor.getString(cursor.getColumnIndex("udn")),
                 cursor.getString(cursor.getColumnIndex("upk"))
         );
-        Log.d("SE464", "DatabaseHandler: user,publicKeyString= " + user + "," + cursor.getString(cursor.getColumnIndex("upk")));
-        Log.d("SE464", "Retrieving user (me)s: " + user + " from database with public key: " + Encryption.getEncodedPublicKey(user.getPublicKey()));
 
         cursor.close();
         db.close();
@@ -455,21 +470,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     public void addUser(User user) {
+        //Check if user already exists; update display name if needed
         if (getUser(user.getId()) != null) {
             updateUserDisplayName(user.getId(), user.getDisplayName());
             return;
         }
 
-        Log.d("SE464", "DatabaseHandler: Adding user");
         SQLiteDatabase db = this.getWritableDatabase();
 
-        Log.d("SE464", "DatabaseHandler: (uuid,display_name) = " + user.getId().toString() + "," + user.getDisplayName());
-        Log.d("SE464", "DatabaseHandler: publicKey = " + Encryption.getEncodedPublicKey(user.getPublicKey()));
+        //Set db row to user information
         ContentValues values = new ContentValues();
         values.put(USER_UUID, user.getId().toString());
         values.put(USER_DISPLAY_NAME, user.getDisplayName());
         values.put(USER_PUBLIC_KEY, Encryption.getEncodedPublicKey(user.getPublicKey()));
-        Log.d("SE464", "DatabaseHandler: (uuid,display_name) = " + values.getAsString(USER_UUID) + "," + values.getAsString(USER_DISPLAY_NAME));
 
         db.insert(USER_TABLE, null, values);
         db.close();
@@ -478,13 +491,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public String getMePrivateKey() {
         SQLiteDatabase db = this.getReadableDatabase();
 
+        //Get the user's private key; return null if it does not exist
         Cursor cursor = db.rawQuery(
                 "SELECT " +
                         "m." + ME_PRIVATE_KEY + " mpk " +
                         "FROM " + ME_TABLE + " m",
                 new String[]{}
         );
-
         if (cursor == null || !cursor.isBeforeFirst() || !cursor.moveToFirst()) {
             return null;
         }
@@ -501,15 +514,16 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         SQLiteDatabase db = this.getReadableDatabase();
 
+        //Get all users in db; return empty list if they do not exist
         Cursor cursor = db.rawQuery(
                 "SELECT * FROM " + USER_TABLE + " ORDER BY " + USER_DISPLAY_NAME,
                 new String[]{}
         );
-
         if (cursor == null || !cursor.isBeforeFirst() || !cursor.moveToFirst()) {
             return users;
         }
 
+        //Create users from db rows and add to list
         do {
             User user = new User(
                     UUID.fromString(cursor.getString(cursor.getColumnIndex(USER_UUID))),
@@ -517,8 +531,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                     cursor.getString(cursor.getColumnIndex(USER_PUBLIC_KEY))
             );
             users.add(user);
-            Log.d("SE464", "DatabaseHandler: publicKeyString= " + cursor.getString(cursor.getColumnIndex(USER_PUBLIC_KEY)));
-            Log.d("SE464", "Retrieving user: " + user + " from database with public key: " + Encryption.getEncodedPublicKey(user.getPublicKey()));
         } while ( cursor.moveToNext() );
 
         cursor.close();
