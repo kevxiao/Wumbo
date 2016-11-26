@@ -29,11 +29,8 @@ public class Client implements Device {
     @Override
     public void onConnect() {
         new MessageSender(
-            hostAddress,
-            HandshakeDispatcherService.PORT,
-            "HANDSHAKE",
-            onSendFailure,
-            5
+            hostAddress, HandshakeDispatcherService.PORT, "HANDSHAKE",
+            onSendFailure, 5
         );
     }
 
@@ -44,7 +41,7 @@ public class Client implements Device {
     public void addClient(InetAddress inetAddress) {}
 
     /**
-     * 
+     * All clients send messages to host, host then relays messages to other clients.
      */
     @Override
     public void sendMessage(EncryptedMessage message) {

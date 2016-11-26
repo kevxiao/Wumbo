@@ -319,6 +319,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         this.onStartCallback = runnable;
     }
 
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent returnedIntent) {
         super.onActivityResult(requestCode, resultCode, returnedIntent);
         switch(requestCode) {
