@@ -14,25 +14,12 @@ import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.star.patrick.wumbo.Encryption;
-import com.star.patrick.wumbo.R;
-import com.star.patrick.wumbo.model.User;
 import com.star.patrick.wumbo.model.message.EncryptedMessage;
-import com.star.patrick.wumbo.model.message.Message;
-import com.star.patrick.wumbo.model.message.Text;
-import com.star.patrick.wumbo.view.MainActivity;
 
 import java.net.InetAddress;
-import java.sql.Timestamp;
-import java.util.Calendar;
-import java.util.UUID;
-
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 
 import static com.star.patrick.wumbo.view.MainActivity.TAG;
 

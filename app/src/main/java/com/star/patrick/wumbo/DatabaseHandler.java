@@ -8,14 +8,14 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.util.Log;
 
+import com.star.patrick.wumbo.model.Channel;
+import com.star.patrick.wumbo.model.ChannelImpl;
+import com.star.patrick.wumbo.model.User;
 import com.star.patrick.wumbo.model.message.Image;
 import com.star.patrick.wumbo.model.message.Message;
 import com.star.patrick.wumbo.model.message.MessageList;
 import com.star.patrick.wumbo.model.message.MessageListImpl;
 import com.star.patrick.wumbo.model.message.Text;
-import com.star.patrick.wumbo.model.Channel;
-import com.star.patrick.wumbo.model.ChannelImpl;
-import com.star.patrick.wumbo.model.User;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;

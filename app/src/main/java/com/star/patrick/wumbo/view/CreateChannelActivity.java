@@ -4,7 +4,6 @@ package com.star.patrick.wumbo.view;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -16,7 +15,6 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 
 import com.star.patrick.wumbo.R;
-import com.star.patrick.wumbo.model.ContactsTracker;
 import com.star.patrick.wumbo.model.User;
 
 import java.io.Serializable;

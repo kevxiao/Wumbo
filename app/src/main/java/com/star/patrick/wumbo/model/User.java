@@ -1,17 +1,9 @@
 package com.star.patrick.wumbo.model;
 
-import android.os.Parcelable;
-import android.util.Base64;
-
 import com.star.patrick.wumbo.Encryption;
-import com.star.patrick.wumbo.view.MainActivity;
 
 import java.io.Serializable;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.UUID;
 
 public class User implements Serializable {

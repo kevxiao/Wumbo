@@ -1,7 +1,5 @@
 package com.star.patrick.wumbo.model.message;
 
-import android.util.Log;
-
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;

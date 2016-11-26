@@ -1,16 +1,12 @@
 package com.star.patrick.wumbo.view;
 
 import android.app.Activity;
-import android.content.ContentProvider;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
-import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -27,11 +23,8 @@ import com.star.patrick.wumbo.model.ChannelImpl;
 import com.star.patrick.wumbo.model.message.Message;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.UUID;
-
-import static com.star.patrick.wumbo.view.MainActivity.TAG;
 
 public class ChatAdapter extends BaseAdapter {
 

@@ -12,7 +12,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v4.app.NotificationCompat;
-import android.util.Base64;
 import android.util.Log;
 
 import com.star.patrick.wumbo.DatabaseHandler;
@@ -34,8 +33,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
@@ -45,7 +42,6 @@ import java.util.Observable;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
 public class ChannelImpl extends Observable implements Channel {
