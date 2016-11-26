@@ -7,8 +7,7 @@ import java.net.InetAddress;
 
 
 /**
- * Class representing a P2P client device for
- * Wifi Direct
+ * Class representing a P2P client device for Wifi Direct
  */
 public class Client implements Device {
     private InetAddress hostAddress;

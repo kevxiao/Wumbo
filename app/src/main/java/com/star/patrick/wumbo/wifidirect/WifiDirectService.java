@@ -18,6 +18,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.star.patrick.wumbo.model.message.EncryptedMessage;
+import com.star.patrick.wumbo.model.message.Message;
 
 import java.net.InetAddress;
 
@@ -31,6 +32,8 @@ public class WifiDirectService extends Service {
     public static final String SEND_MESSAGE_ACTION = "com.star.patrick.wumbo.wifidirect.SEND_MESSAGE";
     public static final String EXTRA_MESSAGE = "message";
 
+    public static final int GROUP_FORMED_CHECK_PERIOD = 5000;
+
     private WifiP2pManager manager;
     private Channel channel;
     private Device device;
@@ -39,10 +42,13 @@ public class WifiDirectService extends Service {
     private Runnable onSendFailure = new Runnable() {
         @Override
         public void run() {
-            requestConnectionInfo();
+            checkGroupFormed();
         }
     };
 
+    /**
+     * Starts looking for peers
+     */
     @Override
     public void onCreate() {
         super.onCreate();
@@ -51,16 +57,8 @@ public class WifiDirectService extends Service {
         manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         channel = manager.initialize(this, getMainLooper(), null);
 
-        discoverPeers();
-//        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-//        scheduler.scheduleAtFixedRate(new Runnable() {
-//            @Override
-//            public void run() {
-//                discoverPeers();
-//            }
-//        }, 30, 30, TimeUnit.SECONDS);
-
-        requestConnectionInfo();
+        reconnect();
+        checkGroupFormed();
     }
 
     @Nullable
@@ -69,32 +67,21 @@ public class WifiDirectService extends Service {
         return null;
     }
 
-    private void deletePersistentGroups(){
+    /**
+     * Disconnects from all peers
+     */
+    private void disconnect(){
         manager.cancelConnect(channel, null);
         manager.clearLocalServices(channel, null);
         manager.clearServiceRequests(channel, null);
         manager.removeGroup(channel, null);
-//        manager.stopPeerDiscovery(channel, null);
-
-//        try {
-//            Class WifiDirectManagerClass = Class.forName("android.net.wifi.p2p.WifiP2pManager");
-//            Method deletePersistentGroup = WifiDirectManagerClass.getMethod(
-//                "deletePersistentGroup",
-//                WifiP2pManager.Channel.class,
-//                int.class,
-//                WifiP2pManager.ActionListener.class
-//            );
-//
-//            for (int netId = 0; netId < 32; netId++) {
-//                deletePersistentGroup.invoke(manager, channel, netId, null);
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
     }
 
-    private void discoverPeers() {
-        deletePersistentGroups();
+    /**
+     * Disconnects from all peers, and attempts to reconnect to new peers
+     */
+    private void reconnect() {
+        disconnect();
 
         manager.discoverPeers(channel, new ActionListener() {
             @Override
@@ -109,7 +96,10 @@ public class WifiDirectService extends Service {
         });
     }
 
-    private void requestConnectionInfo() {
+    /**
+     * Periodically checks if a new group has formed
+     */
+    private void checkGroupFormed() {
         requestConnectionInfoCount++;
         manager.requestConnectionInfo(channel, new WifiP2pManager.ConnectionInfoListener() {
             @Override
@@ -123,32 +113,37 @@ public class WifiDirectService extends Service {
                     onGroupFormed(info.isGroupOwner, info.groupOwnerAddress);
                 }
                 else {
-                    new Thread(new Runnable() {
+                    Thread nextCheck = new Thread(new Runnable() {
                         @Override
                         public void run() {
                             try {
-                                Thread.sleep(5000);
+                                Thread.sleep(GROUP_FORMED_CHECK_PERIOD);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
-                            requestConnectionInfo();
+                            checkGroupFormed();
                         }
-                    }).start();
+                    });
+                    nextCheck.start();
                 }
             }
         });
     }
 
-    private void onPeerListChanged(WifiP2pDeviceList peers) {
+    /**
+     * Called when new peers have been discovered. Attempts to connect to them.
+     */
+    private void connectToNewPeers(WifiP2pDeviceList peers) {
         Log.d(TAG, "Peers found: "+ peers.toString());
 
-        //obtain a peer from the WifiP2pDeviceList
         for (WifiP2pDevice device: peers.getDeviceList()) {
             WifiP2pConfig config = new WifiP2pConfig();
             Log.d(TAG, "Peers found: " + device.deviceAddress);
             config.deviceAddress = device.deviceAddress;
 
-            if (device.status != WifiP2pDevice.CONNECTED && device.status != WifiP2pDevice.INVITED) {
+            // connect to devices that have not already been connected to
+            if (device.status != WifiP2pDevice.CONNECTED &&
+                device.status != WifiP2pDevice.INVITED) {
                 manager.connect(channel, config, new ActionListener() {
                     @Override
                     public void onSuccess() {
@@ -158,6 +153,7 @@ public class WifiDirectService extends Service {
                     @Override
                     public void onFailure(int reason) {
                         Log.d(TAG, "Failed to connect to peer. " + reason);
+                        // cancel connection if it failed
                         manager.cancelConnect(channel, new ActionListener() {
                             @Override
                             public void onSuccess() {
@@ -175,22 +171,12 @@ public class WifiDirectService extends Service {
         }
     }
 
+    /**
+     * When a group has formed, determines if this device is a host or a client,
+     * and creates the appropriate class for the device type
+     */
     private void onGroupFormed(boolean isHost, InetAddress hostAddress) {
         Log.d("SE464", "group formed " + hostAddress + ", Am I host? " + isHost);
-
-//        Message message = new Message(
-//            new Text("Connected"),
-//            new User("System", null),
-//            new Timestamp(
-//                Calendar.getInstance().getTime().getTime()
-//            ),
-//            UUID.fromString(getResources().getString(R.string.public_uuid))
-//        );
-//
-//        SecretKey key = Encryption.getSecretKeyFromEncoding(getResources().getString(R.string.public_secret_key));
-//
-//        EncryptedMessage encryptedMessage = new EncryptedMessage(message, key);
-//        FrontEndCommunicator.receivedMessage(this, encryptedMessage);
 
         Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
         if (isHost) {
@@ -205,6 +191,28 @@ public class WifiDirectService extends Service {
         device.onConnect();
     }
 
+    /**
+     * adds new peers
+     */
+    private void addPeer(InetAddress inetAddress) {
+        if (!(device instanceof Host)) {
+            device = new Host(onSendFailure);
+        }
+        device.addClient(inetAddress);
+    }
+
+    /**
+     * sends messages received from the front end to other devices 
+     */
+    private void sendMessage(EncryptedMessage message) {
+        if (device == null) {
+            Log.d(TAG, "Device is null!");
+        }
+        else {
+            device.sendMessage(message);
+        }
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d("SE464", "wifidirect service intent received");
@@ -216,11 +224,13 @@ public class WifiDirectService extends Service {
         Log.d("SE464", intent.getAction());
 
         switch (intent.getAction()) {
+            // list of peers changed => connect to new peers
             case WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION: {
                 WifiP2pDeviceList deviceList = intent.getParcelableExtra(WifiP2pManager.EXTRA_P2P_DEVICE_LIST);
-                onPeerListChanged(deviceList);
+                connectToNewPeers(deviceList);
             } break;
 
+            // group formed => determine if this device is host or client
             case WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION: {
                 WifiP2pInfo p2pInfo = intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_INFO);
                 NetworkInfo networkInfo = intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
@@ -231,33 +241,29 @@ public class WifiDirectService extends Service {
                 }
             } break;
 
+            // adds new peers
             case ADD_PEER_ACTION: {
                 InetAddress inetAddress = (InetAddress) intent.getSerializableExtra(EXTRA_INET_ADDRESS);
-                if (!(device instanceof Host)) {
-                   device = new Host(onSendFailure);
-                }
-                device.addClient(inetAddress);
+                addPeer(inetAddress);
             } break;
 
+            // sends messages received from the front end
             case SEND_MESSAGE_ACTION: {
-                if (device == null) {
-                    Log.d(TAG, "Device is null!");
-                }
-                else {
-                    EncryptedMessage message = (EncryptedMessage) intent.getSerializableExtra(EXTRA_MESSAGE);
-                    device.sendMessage(message);
-                }
+                EncryptedMessage message = (EncryptedMessage) intent.getSerializableExtra(EXTRA_MESSAGE);
+                sendMessage(message);
             } break;
         }
 
         return START_NOT_STICKY;
     }
 
-
+    /**
+     * Stops connecting to peers when service is destroyed
+     */
     @Override
     public void onDestroy() {
         super.onDestroy();
-        deletePersistentGroups();
+        disconnect();
         manager.stopPeerDiscovery(channel, null);
     }
 }

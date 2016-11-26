@@ -11,16 +11,17 @@ public class User implements Serializable {
     private UUID id;
     private PublicKey publicKey;
 
+    //Constructor used in intro activity
     public User(String displayName, PublicKey p) {
         this(UUID.randomUUID(), displayName, p);
     }
 
+    //Constructor for user that already exists
     public User(UUID id, String displayName, String publicKey) {
-        this.id = id;
-        this.displayName = displayName;
-        this.publicKey = Encryption.getPublicKeyFromEncoding(publicKey);
+        this(id, displayName, Encryption.getPublicKeyFromEncoding(publicKey));
     }
 
+    //Constructor for user that already exists
     public User(UUID id, String displayName, PublicKey p) {
         this.id = id;
         this.displayName = displayName;

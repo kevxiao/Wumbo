@@ -197,7 +197,7 @@ public class ChannelImpl extends Observable implements Channel {
 
     /**
      * Add the message to this channel by adding it to the list, and adding the ID to the set
-     * Set the receive time for the channel here. 
+     * Set the receive time for the channel here.
      */
     private void add(Message msg) {
         Log.d("SE464", "Adding message to channel: " + msg.getId());

@@ -12,6 +12,9 @@ import java.io.ObjectInputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
+/**
+ * Thread that handles incoming messages and sends them to the front end
+ */
 public class MessageHandler implements Runnable {
     private Socket socket;
     private Context context;
@@ -26,7 +29,7 @@ public class MessageHandler implements Runnable {
     public void run() {
         Log.d("SE464", "MessageHandler thread run");
         try (
-            Socket __ = socket;  // workaround for auto-closing without local declaration
+            Socket ignored = socket;  // workaround for auto-closing without local declaration
             InputStream inputStream = socket.getInputStream();
             ObjectInputStream objectInputStream = new ObjectInputStream(inputStream)
         ) {
@@ -35,8 +38,10 @@ public class MessageHandler implements Runnable {
 
             EncryptedMessage message = (EncryptedMessage) objectInputStream.readObject();
 
+            // adds original message sender to list of peers
             WifiDirectServiceAdapter.addPeer(context, address);
 
+            // sends newly received message to front end
             Log.d("SE464", "Message Received: " + message.toString());
             FrontEndCommunicator.receivedMessage(context, message);
 
