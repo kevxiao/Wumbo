@@ -45,7 +45,6 @@ import java.util.UUID;
 import javax.crypto.SecretKey;
 
 public class ChannelImpl extends Observable implements Channel {
-
     private String name;
     private UUID id;
     private MessageList msgs;
@@ -54,16 +53,48 @@ public class ChannelImpl extends Observable implements Channel {
     private MessageCourier messageCourier;
     private Set<UUID> msgIds = new HashSet<>();
 
+    /**
+     * Constructor used for creating brand new channel
+     * @param messageCourier Channel will send its created message to this courier
+     */
     public ChannelImpl(String name, Context context, MessageCourier messageCourier) {
         this(UUID.randomUUID(), name, context, messageCourier, null);
         encKey = Encryption.generateSecretKey();
     }
 
-    public ChannelImpl(UUID id, String name, Context context, MessageCourier messageCourier, SecretKey key) {
-        this(id, name, context, messageCourier, key, new DatabaseHandler(context, messageCourier).getAllMessages(id));
+    /**
+     * Constructor for creating a channel that already exists
+     * Pulls messages for the channel from the database
+     * @param messageCourier Channel will send its created message to this courier
+     */
+    public ChannelImpl(
+            UUID id,
+            String name,
+            Context context,
+            MessageCourier messageCourier,
+            SecretKey key
+    ) {
+        this(
+                id,
+                name,
+                context,
+                messageCourier,
+                key,
+                new DatabaseHandler(context, messageCourier).getAllMessages(id));
     }
 
-    public ChannelImpl(UUID id, String name, Context context, MessageCourier messageCourier, SecretKey key, MessageList msgs) {
+    /**
+     * Constructor for creating a channel that already exists, with a set of messages
+     * @param messageCourier Channel will send its created message to this courier
+     */
+    public ChannelImpl(
+            UUID id,
+            String name,
+            Context context,
+            MessageCourier messageCourier,
+            SecretKey key,
+            MessageList msgs
+    ) {
         this.name = name;
         this.msgs = msgs;
         this.id = id;
@@ -76,10 +107,13 @@ public class ChannelImpl extends Observable implements Channel {
         }
     }
 
+    /**
+     * Constructs new message object with text content and sends it
+     * @param sender message will be sent "from" this user
+     */
     public void send(User sender, String msgText) {
         Log.d("SE464", "Channel send string");
         final Message msg = new Message(new Text(msgText), sender, new Timestamp(Calendar.getInstance().getTimeInMillis()), id);
-        add(msg);
         Thread sendThread = new Thread() {
             @Override
             public void run() {
@@ -89,6 +123,10 @@ public class ChannelImpl extends Observable implements Channel {
         sendThread.run();
     }
 
+    /**
+     * Constructs new message object with Image content and sends it
+     * @param sender message will be sent "from" this user
+     */
     public void send(User sender, Uri imagePath) {
         Log.d("SE464", "Channel send image");
         UUID msgId = UUID.randomUUID();
@@ -100,7 +138,6 @@ public class ChannelImpl extends Observable implements Channel {
         }
         final Message msg = new Message(msgId, new Image(Uri.parse(filepath)), sender, new Timestamp(Calendar.getInstance().getTimeInMillis()), id);
         Log.d("SE464","Sending message: " + msg.getId());
-        add(msg);
 
         Thread sendThread = new Thread() {
             @Override
@@ -129,20 +166,25 @@ public class ChannelImpl extends Observable implements Channel {
         sendThread.run();
     }
 
-    public void send(Message msg) {
+    /**
+     * Add it to messages for this channel
+     * Encrypts a message and sends it to the messageCourier
+     */
+    private void send(Message msg) {
         Log.d("SE464", "Channel send message");
+        add(msg);
         EncryptedMessage emsg = new EncryptedMessage(msg, this.encKey);
-        msgIds.add(emsg.getId());
         messageCourier.send(emsg);
     }
 
+    /**
+     * Receive will check if the channel already has this message, and if not receive it
+     */
     public void receive(EncryptedMessage emsg) {
         Log.d("SE464", "Channel receive");
         if (!msgIds.contains(emsg.getId())) {
-            msgIds.add(emsg.getId());
             Log.d("SE464", "Channel hasn't received this message before: " + emsg.getId());
             Message msg = new Message(emsg, this.encKey);
-            Log.d("SE464", "Message ID: " + msg.getId() + " Message Sender: " + msg.getUser().getDisplayName());
             this.createNotification(msg);
 
             if(msg.getContent().getType() == MessageContent.MessageType.IMAGE) {
@@ -153,10 +195,15 @@ public class ChannelImpl extends Observable implements Channel {
         }
     }
 
+    /**
+     * Add the message to this channel by adding it to the list, and adding the ID to the set
+     * Set the receive time for the channel here. 
+     */
     private void add(Message msg) {
         Log.d("SE464", "Adding message to channel: " + msg.getId());
         msg.setReceiveTime(new Timestamp(new Date().getTime()));
         msgs.addMessage(msg);
+        msgIds.add(msg.getId());
         setChanged();
         notifyObservers();
 
@@ -194,7 +241,7 @@ public class ChannelImpl extends Observable implements Channel {
         byte[] msgContent = (byte[]) msg.getContent().getMessageContent();
         if (msgContent != null) {
             Log.d("SE464", "Saving bitmap to " + filepath);
-            FileOutputStream out = null;
+            FileOutputStream out;
             try{
                 Bitmap bitmapImg = BitmapFactory.decodeByteArray(msgContent, 0, msgContent.length);
                 out = new FileOutputStream(filepath);
@@ -222,10 +269,8 @@ public class ChannelImpl extends Observable implements Channel {
 
         Log.d("SE464","Copying image from " + sourceFile.getAbsolutePath() + " to " + destFile.getAbsolutePath());
 
-        FileChannel source = null;
-        FileChannel destination = null;
-        source = new FileInputStream(sourceFile).getChannel();
-        destination = new FileOutputStream(destFile).getChannel();
+        FileChannel source = new FileInputStream(sourceFile).getChannel();
+        FileChannel destination = new FileOutputStream(destFile).getChannel();
         if (destination != null && source != null) {
             destination.transferFrom(source, 0, source.size());
         }

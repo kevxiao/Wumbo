@@ -12,29 +12,40 @@ import com.star.patrick.wumbo.view.MainActivity;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by giliam on 11/19/2016.
- */
 
+/**
+ * Class receives message broadcasts
+ * Has a list of subscribed subscribedMessageReceivers that it calls receive on whenever it gets a broadcast
+ */
 public class MessageBroadcastReceiver {
     public static final String WUMBO_MESSAGE_INTENT_ACTION = "com.star.patrick.wumbo.MESSAGE";
     public static final String WUMBO_MESSAGE_EXTRA = "message";
 
-    private List<MessageReceiver> messageReceivers = new ArrayList<>();
+    private List<MessageReceiver> subscribedMessageReceivers = new ArrayList<>();
 
+    /**
+     * BroadcastReceiver for receiving message broadcasts
+     * Calls private receive method for MessageBroadcastReceiver
+     */
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d("SE464", "Channel received a message");
-            String action = intent.getAction();
-            if (WUMBO_MESSAGE_INTENT_ACTION.equals(action)) {
-                EncryptedMessage msg = (EncryptedMessage) intent.getSerializableExtra(WUMBO_MESSAGE_EXTRA);
-                receive(msg);
-            }
+        Log.d("SE464", "MessageBroadcastReceiver received a message");
+        String action = intent.getAction();
+        if (WUMBO_MESSAGE_INTENT_ACTION.equals(action)) {
+            EncryptedMessage msg =
+                    (EncryptedMessage) intent.getSerializableExtra(WUMBO_MESSAGE_EXTRA);
+            receive(msg);
+        }
         }
     };
 
+    /**
+     * Register the receiver on the main start
+     * Unregister receiver on the main stop
+     */
     public MessageBroadcastReceiver(final MainActivity mainActivity) {
+        // Filter for Wumbo messages
         final IntentFilter filter = new IntentFilter();
         filter.addAction(WUMBO_MESSAGE_INTENT_ACTION);
 
@@ -56,12 +67,18 @@ public class MessageBroadcastReceiver {
         });
     }
 
+    /**
+     * Add a MessageReceiver to the list of subscribed receivers
+     */
     public void add(MessageReceiver msgReceiver) {
-        messageReceivers.add(msgReceiver);
+        subscribedMessageReceivers.add(msgReceiver);
     }
 
+    /**
+     * Pass on the encrypted message to all subscribed receivers
+     */
     private void receive(EncryptedMessage msg) {
-        for (MessageReceiver msgReceiver : messageReceivers) {
+        for (MessageReceiver msgReceiver : subscribedMessageReceivers) {
             msgReceiver.receive(msg);
         }
     }

@@ -41,7 +41,6 @@ import com.star.patrick.wumbo.MessageCourierImpl;
 import com.star.patrick.wumbo.R;
 import com.star.patrick.wumbo.model.Channel;
 import com.star.patrick.wumbo.model.ChannelImpl;
-import com.star.patrick.wumbo.model.ChannelList;
 import com.star.patrick.wumbo.model.ChannelManager;
 import com.star.patrick.wumbo.model.ChannelManagerImpl;
 import com.star.patrick.wumbo.model.ContactsTracker;
@@ -74,7 +73,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private ChannelManager channelManager;
     private ContactsTracker contacts;
     private Channel msgChannel;
-    private ChannelList msgChannelList;
     public static final String TAG = "SE464";
     private ChatAdapter chatAdapter;
     private ListView listView;
@@ -157,9 +155,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 Encryption.getSecretKeyFromEncoding(getResources().getString(R.string.public_secret_key))
         );
         channelManager.addChannel(msgChannel);
-
-//        msgChannelList = new ChannelListImpl();
-//        msgChannelList.put(UUID.fromString(getResources().getString(R.string.public_uuid)), msgChannel);
 
         sendBtn = (ImageButton) findViewById(R.id.sendBtn);
         cameraBtn = (ImageButton) findViewById(R.id.cameraIcon);
