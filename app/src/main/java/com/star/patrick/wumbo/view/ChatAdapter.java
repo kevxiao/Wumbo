@@ -31,7 +31,9 @@ public class ChatAdapter extends BaseAdapter {
     //A list of the current messages
     private final List<Message> messages;
     private Activity context;
+    //A reference to the user's ID
     private UUID meId;
+    //A reference to the msg that is sent to the gallery to delete
     public static File lastMsg = null;
 
     public ChatAdapter(Activity context, List<Message> messages, UUID meId) {
