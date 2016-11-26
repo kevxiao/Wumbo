@@ -8,6 +8,9 @@ import android.util.Log;
 
 import static com.star.patrick.wumbo.view.MainActivity.TAG;
 
+/**
+ * Broadcast receiver that receives Wifi Direct framework broadcasts
+ */
 public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
