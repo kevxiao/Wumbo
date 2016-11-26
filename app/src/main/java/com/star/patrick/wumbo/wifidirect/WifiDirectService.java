@@ -18,6 +18,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.star.patrick.wumbo.model.message.EncryptedMessage;
+import com.star.patrick.wumbo.model.message.Message;
 
 import java.net.InetAddress;
 
@@ -190,6 +191,28 @@ public class WifiDirectService extends Service {
         device.onConnect();
     }
 
+    /**
+     * adds new peers
+     */
+    private void addPeer(InetAddress inetAddress) {
+        if (!(device instanceof Host)) {
+            device = new Host(onSendFailure);
+        }
+        device.addClient(inetAddress);
+    }
+
+    /**
+     * sends messages received from the front end to other devices 
+     */
+    private void sendMessage(EncryptedMessage message) {
+        if (device == null) {
+            Log.d(TAG, "Device is null!");
+        }
+        else {
+            device.sendMessage(message);
+        }
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d("SE464", "wifidirect service intent received");
@@ -221,21 +244,13 @@ public class WifiDirectService extends Service {
             // adds new peers
             case ADD_PEER_ACTION: {
                 InetAddress inetAddress = (InetAddress) intent.getSerializableExtra(EXTRA_INET_ADDRESS);
-                if (!(device instanceof Host)) {
-                   device = new Host(onSendFailure);
-                }
-                device.addClient(inetAddress);
+                addPeer(inetAddress);
             } break;
 
             // sends messages received from the front end
             case SEND_MESSAGE_ACTION: {
-                if (device == null) {
-                    Log.d(TAG, "Device is null!");
-                }
-                else {
-                    EncryptedMessage message = (EncryptedMessage) intent.getSerializableExtra(EXTRA_MESSAGE);
-                    device.sendMessage(message);
-                }
+                EncryptedMessage message = (EncryptedMessage) intent.getSerializableExtra(EXTRA_MESSAGE);
+                sendMessage(message);
             } break;
         }
 
