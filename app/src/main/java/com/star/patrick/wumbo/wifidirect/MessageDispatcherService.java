@@ -8,13 +8,22 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+/**
+ * Handles incoming messages and spawns a new thread to process each message.
+ */
 public class MessageDispatcherService extends IntentService {
+    /**
+     * Port where all incoming messages are accepted
+     */
     public final static int PORT = 56410;
 
     public MessageDispatcherService() {
         super("MessageDispatcherService");
     }
 
+    /**
+     * Continually accept new messages and spawns a new thread to handle each message
+     */
     @Override
     protected void onHandleIntent(Intent intent) {
         Log.d("SE464", "message service starting");
