@@ -28,6 +28,7 @@ import java.util.UUID;
 
 public class ChatAdapter extends BaseAdapter {
 
+    //A list of the current messages
     private final List<Message> messages;
     private Activity context;
     private UUID meId;
@@ -58,11 +59,13 @@ public class ChatAdapter extends BaseAdapter {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
+        //Get the item that is related to the view
         final Message msg = getItem(position);
         RelativeLayout.LayoutParams lparams;
         LinearLayout.LayoutParams sparams, tparams, cparams;
         LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
+        //Check for repeat messages
         if (convertView == null) {
             convertView = vi.inflate(R.layout.message_view, null);
             holder = createViewHolder(convertView);
@@ -71,6 +74,7 @@ public class ChatAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
+        //Set alignment of the message depending on sender
         lparams = (RelativeLayout.LayoutParams) holder.content.getLayoutParams();
         sparams = (LinearLayout.LayoutParams) holder.sender.getLayoutParams();
         tparams = (LinearLayout.LayoutParams) holder.txtInfo.getLayoutParams();
@@ -93,14 +97,17 @@ public class ChatAdapter extends BaseAdapter {
         holder.sender.setText(msg.getUser().getDisplayName());
         holder.txtInfo.setText(msg.getReceiveTime().toString());
 
+        //Set message content depending on the type of message
         switch(msg.getContent().getType()){
             case TEXT:
+                //Set the text to be a message content and make image holder to invisible
                 holder.txtMessage.setVisibility(View.VISIBLE);
                 holder.txtMessage.setText((String)msg.getContent().getMessageContent());
                 holder.imgMessage.setImageResource(0);
                 break;
             case IMAGE:
                 Bitmap image = BitmapFactory.decodeFile((String) msg.getContent().getMessageContent());
+                //Scale the image to an arbitrarily appropriate size
                 if (image != null) {
                     if(image.getHeight() > image.getWidth() && image.getHeight() > 512) {
                         int width = (int) (image.getWidth() * (512.0 / image.getHeight()));
@@ -111,7 +118,9 @@ public class ChatAdapter extends BaseAdapter {
                     }
                     holder.imgMessage.setImageBitmap(image);
                 }
+                //Hide text view
                 holder.txtMessage.setVisibility(View.GONE);
+                //Send image to gallery on image click
                 holder.imgMessage.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -141,6 +150,7 @@ public class ChatAdapter extends BaseAdapter {
         return convertView;
     }
 
+    //Create a holder from the view
     private ViewHolder createViewHolder(View v) {
         ViewHolder holder = new ViewHolder();
         holder.txtMessage = (TextView) v.findViewById(R.id.txtMessage);
@@ -152,16 +162,19 @@ public class ChatAdapter extends BaseAdapter {
         return holder;
     }
 
+    //Add to the list of the current messages
     public void add(Message msg) {
         messages.add(msg);
     }
 
+    //Add multiple messages to the current messages
     public void addAll(List<Message> msgs) {
         Log.d("SE464", "ChatAdaptor: before Messages size is " + msgs.size());
         messages.addAll(msgs);
         Log.d("SE464", "ChatAdaptor: after Messages size is " + msgs.size());
     }
 
+    //A holder for the parts of message_view layout
     private static class ViewHolder {
         private TextView txtMessage;
         private ImageView imgMessage;
