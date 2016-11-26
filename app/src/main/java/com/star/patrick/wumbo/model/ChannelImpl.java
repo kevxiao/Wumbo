@@ -60,7 +60,7 @@ public class ChannelImpl extends Observable implements Channel {
     }
 
     public ChannelImpl(UUID id, String name, Context context, MessageCourier messageCourier, SecretKey key) {
-        this(id, name, context, messageCourier, key, new DatabaseHandler(context, messageCourier).getAllMessages(id));
+        this(id, name, context, messageCourier, key, new DatabaseHandler(context, messageCourier).getAllMessagesFromChannel(id));
     }
 
     public ChannelImpl(UUID id, String name, Context context, MessageCourier messageCourier, SecretKey key, MessageList msgs) {
