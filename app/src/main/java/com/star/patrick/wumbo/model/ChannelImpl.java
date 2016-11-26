@@ -80,7 +80,8 @@ public class ChannelImpl extends Observable implements Channel {
                 context,
                 messageCourier,
                 key,
-                new DatabaseHandler(context, messageCourier).getAllMessages(id));
+                new DatabaseHandler(context, messageCourier).getAllMessagesFromChannel(id)
+        );
     }
 
     /**
