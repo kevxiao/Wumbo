@@ -126,17 +126,21 @@ public class ChannelImpl extends Observable implements Channel {
 
     /**
      * Constructs new message object with Image content and sends it
+     * Copies image from external storage to internal data, then scales it and sends it
      * @param sender message will be sent "from" this user
+     * @param imagePath external path to the selected image
      */
     public void send(User sender, Uri imagePath) {
         Log.d("SE464", "Channel send image");
         UUID msgId = UUID.randomUUID();
         final String filepath = getFilePathFromId(msgId);
+        // copy image from external location to internal app data
         try {
             copyFile(new File(getAbsolutePath(imagePath)), new File(filepath));
         } catch (Exception e){
             e.printStackTrace();
         }
+        // create image message with internal image path to be added to messages list
         final Message msg = new Message(msgId, new Image(Uri.parse(filepath)), sender, new Timestamp(Calendar.getInstance().getTimeInMillis()), id);
         Log.d("SE464","Sending message: " + msg.getId());
 
@@ -146,7 +150,9 @@ public class ChannelImpl extends Observable implements Channel {
                 try{
                     Log.d("SE464","Create bitmap from " + filepath);
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    // get bitmap from the filepath
                     Bitmap image = MediaStore.Images.Media.getBitmap(mainContext.getContentResolver(), Uri.fromFile(new File(filepath)));
+                    // resize bitmap so the longest side is at max 512 pixels
                     if (image != null) {
                         if(image.getHeight() > image.getWidth() && image.getHeight() > 512) {
                             int width = (int) (image.getWidth() * (512.0 / image.getHeight()));
@@ -156,7 +162,9 @@ public class ChannelImpl extends Observable implements Channel {
                             image = Bitmap.createScaledBitmap(image, 512, height, true);
                         }
                     }
+                    // compress bitmap to png format
                     image.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                    // create new message with the image data to be transferred
                     Message sendMsg = new Message(msg.getId(), new TransferImage(stream.toByteArray()), msg.getUser(), msg.getSendTime(), msg.getChannelId());
                     send(sendMsg);
                 } catch (NullPointerException | IOException e){
@@ -213,39 +221,64 @@ public class ChannelImpl extends Observable implements Channel {
         db.addMessage(msg);
     }
 
+    /**
+     * Create a notification for a message
+     * @param msg message that was received
+     */
     private void createNotification(Message msg) {
+        // add the message content to notification
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(mainContext)
                         .setSmallIcon(R.drawable.ic_wumbo)
                         .setContentTitle(this.name)
                         .setContentText(msg.getContent().getType() == MessageContent.MessageType.TEXT ? (String) msg.getContent().getMessageContent() : "Open to see image.");
+
+        // create intent for launching app when clicked
         Intent resultIntent = new Intent(mainContext, MainActivity.class);
         resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        // set the task stack for the back button
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(mainContext);
         stackBuilder.addParentStack(MainActivity.class);
         stackBuilder.addNextIntent(resultIntent);
+
         PendingIntent resultPendingIntent = PendingIntent.getActivity(mainContext.getApplicationContext(), (int) System.currentTimeMillis(), resultIntent, 0);
+        // delete notification if clicked
         mBuilder.setAutoCancel(true);
         mBuilder.setContentIntent(resultPendingIntent);
+
         NotificationManager mNotificationManager =
                 (NotificationManager) mainContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        // add notification to android notification manager
         mNotificationManager.notify(0, mBuilder.build());
     }
 
+    /**
+     * Create a local image message from a received image message
+     * @param msg received image message with the image data
+     * @return local image message with filepath to image file
+     */
     private Message getImageMessageFromReceived(Message msg) {
-        String filepath = getFilePathFromId(msg.getId());
-        storeImage(msg, filepath);
+        String filepath = getFilePathFromId(msg.getId());   // get an image file path for message id
+        storeImage(msg, filepath);      // store the image to internal data
         return new Message(msg.getId(), new Image(Uri.parse(filepath)), msg.getUser(), msg.getSendTime(), msg.getChannelId());
     }
 
+    /**
+     * Store an image from a message to a file to a filepath
+     * @param msg received message with image data
+     * @param filepath filepath to store the image file
+     */
     private void storeImage(Message msg, String filepath) {
         byte[] msgContent = (byte[]) msg.getContent().getMessageContent();
         if (msgContent != null) {
             Log.d("SE464", "Saving bitmap to " + filepath);
             FileOutputStream out;
             try{
+                // decode the immage content to a bimap
                 Bitmap bitmapImg = BitmapFactory.decodeByteArray(msgContent, 0, msgContent.length);
                 out = new FileOutputStream(filepath);
+                // save bitmap as png to filepath
                 bitmapImg.compress(Bitmap.CompressFormat.PNG, 100, out);
             } catch (Exception e){
                 e.printStackTrace();
@@ -253,6 +286,11 @@ public class ChannelImpl extends Observable implements Channel {
         }
     }
 
+    /**
+     * Get an image file path for an specific message ID
+     * @param msgId UUID of a message
+     * @return String representation of the designated filepath
+     */
     private String getFilePathFromId(UUID msgId) {
         String fileName = msgId.toString() + ".jpg";
         ContextWrapper cw = new ContextWrapper(mainContext);
@@ -263,6 +301,10 @@ public class ChannelImpl extends Observable implements Channel {
         return mypath.getAbsolutePath();
     }
 
+    /**
+     * Copy a file from source to destination
+     * @throws IOException
+     */
     public static void copyFile(File sourceFile, File destFile) throws IOException {
         if (!sourceFile.exists()) {
             return;
@@ -272,9 +314,11 @@ public class ChannelImpl extends Observable implements Channel {
 
         FileChannel source = new FileInputStream(sourceFile).getChannel();
         FileChannel destination = new FileOutputStream(destFile).getChannel();
+        // copu the fule from source to destination
         if (destination != null && source != null) {
             destination.transferFrom(source, 0, source.size());
         }
+        // close both files
         if (source != null) {
             source.close();
         }
@@ -283,6 +327,10 @@ public class ChannelImpl extends Observable implements Channel {
         }
     }
 
+    /**
+     * Get an absolute path in string format for a URI
+     * @return String representation for the absolute path of the URI
+     */
     private String getAbsolutePath(Uri uri) {
         String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.ORIENTATION};
         Cursor cursor = mainContext.getContentResolver().query(uri, projection, null, null, null);
