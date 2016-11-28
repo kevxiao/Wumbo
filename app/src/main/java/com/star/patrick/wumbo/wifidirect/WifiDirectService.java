@@ -18,7 +18,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.star.patrick.wumbo.model.message.EncryptedMessage;
-import com.star.patrick.wumbo.model.message.Message;
 
 import java.net.InetAddress;
 
@@ -202,7 +201,7 @@ public class WifiDirectService extends Service {
     }
 
     /**
-     * sends messages received from the front end to other devices 
+     * sends messages received from the front end to other devices
      */
     private void sendMessage(EncryptedMessage message) {
         if (device == null) {

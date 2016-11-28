@@ -43,7 +43,7 @@ public class MessageHandler implements Runnable {
 
             // sends newly received message to front end
             Log.d("SE464", "Message Received: " + message.toString());
-            FrontEndCommunicator.receivedMessage(context, message);
+            FrontEndAdapter.receivedMessage(context, message);
 
             Log.d("SE464", "MessageHandler sent broadcast");
 

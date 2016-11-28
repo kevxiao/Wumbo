@@ -11,9 +11,10 @@ import com.star.patrick.wumbo.model.message.EncryptedMessage;
  * Adapter functions that allows the backend that deals with
  * Wifi Direct to easily communicate with the front end user interface.
  */
-public class FrontEndCommunicator {
+public class FrontEndAdapter {
 
     /**
+     * Adapter that converts a function call (to this function) into an intent broadcast.
      * Sends a newly received message to the front end after receiving it from
      * another device using the Wifi Direct Library.
      */
