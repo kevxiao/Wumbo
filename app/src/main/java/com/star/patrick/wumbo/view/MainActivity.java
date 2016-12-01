@@ -91,6 +91,12 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
     private Runnable onStartCallback;
 
+    public static final int MAIN_ACTIVITY = 0;
+    public static final int PICTURE_ACTIVITY = 1;
+    public static final int SETTINGS_ACTIVITY = 2;
+    public static final int CHANNEL_ACTIVITY = 3;
+    public static final int GALLERY_ACTIVITY = 4;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -191,7 +197,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 myContacts.remove(me.getId());
                 bundle.putSerializable(CONTACT_LIST, (Serializable) new ArrayList<>(myContacts.values()));
                 intent.putExtras(bundle);
-                startActivityForResult(intent, 3);
+                startActivityForResult(intent, CHANNEL_ACTIVITY);
             }
         });
     }
@@ -299,7 +305,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             Intent myIntent = new Intent(MainActivity.this, SettingsActivity.class);
-            MainActivity.this.startActivityForResult(myIntent, 2);
+            MainActivity.this.startActivityForResult(myIntent, SETTINGS_ACTIVITY);
 
         } else if (drawerToggle.onOptionsItemSelected(item)) {
             return true;
@@ -360,15 +366,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     protected void onActivityResult(int requestCode, int resultCode, Intent returnedIntent) {
         super.onActivityResult(requestCode, resultCode, returnedIntent);
         switch(requestCode) {
-//            case 0:
-//                if(returnedIntent != null){
-//                    Log.d("SE464", returnedIntent.toString());
-//                    Uri selectedImage = returnedIntent.getData();
-//                    //imageview.setImageURI(selectedImage);
-//                }
-//
-//                break;
-            case 1:
+            case PICTURE_ACTIVITY:
                 if(resultCode == RESULT_OK)
                 {
                     final boolean isCamera;
@@ -407,12 +405,12 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
                 }
                 break;
-            case 2:
+            case SETTINGS_ACTIVITY:
                 if (returnedIntent != null){
                     me.setDisplayName(returnedIntent.getStringExtra("new_name"));
                 }
                 break;
-            case 3:
+            case CHANNEL_ACTIVITY:
                 if (null != returnedIntent) {
                     String channelName = returnedIntent.getStringExtra(CreateChannelActivity.CHANNEL_NAME);
                     List<User> invited = (ArrayList<User>)returnedIntent.getExtras().getSerializable(INVITED_USERS);
@@ -420,7 +418,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
                     channelManager.createChannel(channel, me, invited);
                 }
                 break;
-            case 4:
+            case GALLERY_ACTIVITY:
                 Log.d("SE464", "returned from gallery");
                 ChatAdapter.lastMsg.delete();
                 break;
@@ -513,7 +511,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         final Intent chooserIntent = Intent.createChooser(pickPhoto, "Select Source");
         chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, cameraIntents.toArray(new Parcelable[]{}));
-        startActivityForResult(chooserIntent , 1);//one can be replaced with any action code
+        startActivityForResult(chooserIntent , PICTURE_ACTIVITY);//one can be replaced with any action code
     }
 
     @Override
