@@ -69,36 +69,37 @@ import static com.star.patrick.wumbo.view.CreateChannelActivity.INVITED_USERS;
 public class MainActivity extends AppCompatActivity implements Observer {
 
     private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
+    public static final String TAG = "SE464";
 
     private ChannelManager channelManager;
     private ContactsTracker contacts;
     private Channel msgChannel;
-    public static final String TAG = "SE464";
-    private ChatAdapter chatAdapter;
-    private ListView listView;
     private Message lastMessage;
     private User me;
     private List<ChannelListItem> channels;
+    private MessageCourier messageCourier;
+    private MessageBroadcastReceiver messageBroadcastReceiver;
 
     private ImageButton sendBtn;
     private ImageButton cameraBtn;
     private LinearLayout createChannelBtn;
     private EditText editMsg;
+
     private DrawerLayout drawerLayout;
-    private ListView channelListView;
+    private ActionBarDrawerToggle drawerToggle;
+    private Toolbar toolbar;
     private View selectedChannelItem;
+    private ChatAdapter chatAdapter;
+    private ArrayAdapter<ChannelListItem> channelListAdapter;
+    private ListView msgListView;
+    private ListView channelListView;
 
     private Runnable onStartCallback;
-    private ActionBar supportActionBar;
-    private ActionBarDrawerToggle drawerToggle;
-    private MessageCourier messageCourier;
-    private MessageBroadcastReceiver messageBroadcastReceiver;
-    private ArrayAdapter<ChannelListItem> channelListAdapter;
-    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -107,7 +108,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
         selectedChannelItem = null;
 
         setSupportActionBar(toolbar);
-        supportActionBar = getSupportActionBar();
 
         drawerToggle = new ActionBarDrawerToggle(
                 this,
@@ -201,8 +201,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         chatAdapter = new ChatAdapter(MainActivity.this, new ArrayList<Message>(), me.getId());
 
-        listView = (ListView) findViewById(R.id.myList);
-        listView.setAdapter(chatAdapter);
+        msgListView = (ListView) findViewById(R.id.myList);
+        msgListView.setAdapter(chatAdapter);
 
         chatAdapter.notifyDataSetChanged();
 
@@ -435,7 +435,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
             msgChannel.addObserver(MainActivity.this);
             chatAdapter = new ChatAdapter(MainActivity.this, new ArrayList<Message>(), me.getId());
             lastMessage = null;
-            listView.setAdapter(chatAdapter);
+            msgListView.setAdapter(chatAdapter);
             MainActivity.this.update(null, null);
             drawerLayout.closeDrawers();
             if(selectedChannelItem != null) {
