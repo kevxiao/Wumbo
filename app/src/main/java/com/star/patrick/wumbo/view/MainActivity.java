@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
     private Toolbar toolbar;
-    private View selectedChannelItem = null;
+    private View selectedChannelItem;
     private ChatAdapter chatAdapter;
     private ArrayAdapter<ChannelListItem> channelListAdapter;
     private ListView msgListView;
