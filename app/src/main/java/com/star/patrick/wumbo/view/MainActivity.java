@@ -117,9 +117,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         buildListAdapters();
 
 
-        //*************************
         //Link the views and models
-        //*************************
         channelManager.addObserver(this);
         msgChannel.addObserver(this);
         for (UUID channelId : channelManager.getChannels().keySet()) {
@@ -137,9 +135,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
     }
 
     private void startBackgroundServices() {
-        //*****************************
-        //Start the background services
-        //*****************************
         Intent intent = new Intent(this, WifiDirectService.class);
         startService(intent);
 
@@ -151,9 +146,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
     }
 
     private void buildListAdapters() {
-        //********************
-        //Set up list adaptors
-        //********************
         chatAdapter = new ChatAdapter(MainActivity.this, new ArrayList<Message>(), me.getId());
         msgListView.setAdapter(chatAdapter);
         chatAdapter.notifyDataSetChanged();
@@ -164,9 +156,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
     }
 
     private void buildControllers() {
-        //******************************
-        //Build the internal controllers
-        //******************************
         final ImageButton sendBtn = (ImageButton) findViewById(R.id.sendBtn);
         ImageButton cameraBtn = (ImageButton) findViewById(R.id.cameraIcon);
         LinearLayout createChannelBtn = (LinearLayout) findViewById(R.id.add_channel_row);
@@ -232,9 +221,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
     }
 
     private void buildModels(String senderName) {
-        //****************
-        //Build the models
-        //****************
         messageCourier = new MessageCourierImpl(this);
 
         //Access to database for saved user data
@@ -284,9 +270,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
     }
 
     private void buildView() {
-        //**************
-        //Build the view
-        //**************
         setContentView(R.layout.activity_main);
 
         //Build the toolbar
@@ -328,12 +311,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             Intent myIntent = new Intent(MainActivity.this, SettingsActivity.class);
             MainActivity.this.startActivityForResult(myIntent, SETTINGS_ACTIVITY);
