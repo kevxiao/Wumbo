@@ -88,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private ListView msgListView;
     private ListView channelListView;
     private EditText editMsg;
+    private NotificationView notificationView;
 
     private Runnable onStartCallback;
 
@@ -278,6 +279,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
         msgListView = (ListView) findViewById(R.id.myList);
         channelListView = (ListView) findViewById(R.id.channel_list);
         editMsg = (EditText) findViewById(R.id.editMsg);
+
+        NotificationView notificationView = new NotificationView(this);
     }
 
     private static List<ChannelListItem> createChannelItemList(Map<UUID,String> channels) {
@@ -416,6 +419,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
                     List<User> invited = (ArrayList<User>)returnedIntent.getExtras().getSerializable(INVITED_USERS);
                     Channel channel = new ChannelImpl(channelName, this, messageCourier);
                     channelManager.createChannel(channel, me, invited);
+
+                    channel.addObserver(notificationView);
                 }
                 break;
             case GALLERY_ACTIVITY:
@@ -470,9 +475,14 @@ public class MainActivity extends AppCompatActivity implements Observer {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             ChannelListItem channelListItem = (ChannelListItem)parent.getItemAtPosition(position);
             Log.d("SE464", "MainActivity: Switching to channel " + channelListItem.toString());
+
             msgChannel.deleteObserver(MainActivity.this);
+            msgChannel.addObserver(notificationView);
+
             msgChannel = channelManager.getChannel(channelListItem.getId());
             msgChannel.addObserver(MainActivity.this);
+            msgChannel.deleteObserver(notificationView);
+
             chatAdapter = new ChatAdapter(MainActivity.this, new ArrayList<Message>(), me.getId());
             lastMessage = null;
             msgListView.setAdapter(chatAdapter);
@@ -531,5 +541,17 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 }
             }
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        msgChannel.addObserver(notificationView);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        msgChannel.deleteObserver(notificationView);;
     }
 }
