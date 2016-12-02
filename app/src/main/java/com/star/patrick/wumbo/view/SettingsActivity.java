@@ -11,10 +11,6 @@ import com.star.patrick.wumbo.DatabaseHandler;
 import com.star.patrick.wumbo.R;
 import com.star.patrick.wumbo.model.User;
 
-/**
- * Created by jesse on 19/11/16.
- */
-
 public class SettingsActivity extends PreferenceActivity{
     private static final String userKey = "pref_user_name";
     private static final String userIntentKey = "new_name";
