@@ -214,7 +214,7 @@ public class ChannelImpl extends Observable implements Channel {
         msgs.addMessage(msg);
         msgIds.add(msg.getId());
         setChanged();
-        notifyObservers();
+        notifyObservers(msg);
 
         //Add to database
         DatabaseHandler db = new DatabaseHandler(mainContext, messageCourier);
@@ -226,31 +226,31 @@ public class ChannelImpl extends Observable implements Channel {
      * @param msg message that was received
      */
     private void createNotification(Message msg) {
-        // add the message content to notification
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(mainContext)
-                        .setSmallIcon(R.drawable.ic_wumbo)
-                        .setContentTitle(this.name)
-                        .setContentText(msg.getContent().getType() == MessageContent.MessageType.TEXT ? (String) msg.getContent().getMessageContent() : "Open to see image.");
-
-        // create intent for launching app when clicked
-        Intent resultIntent = new Intent(mainContext, MainActivity.class);
-        resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
-        // set the task stack for the back button
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(mainContext);
-        stackBuilder.addParentStack(MainActivity.class);
-        stackBuilder.addNextIntent(resultIntent);
-
-        PendingIntent resultPendingIntent = PendingIntent.getActivity(mainContext.getApplicationContext(), (int) System.currentTimeMillis(), resultIntent, 0);
-        // delete notification if clicked
-        mBuilder.setAutoCancel(true);
-        mBuilder.setContentIntent(resultPendingIntent);
-
-        NotificationManager mNotificationManager =
-                (NotificationManager) mainContext.getSystemService(Context.NOTIFICATION_SERVICE);
-        // add notification to android notification manager
-        mNotificationManager.notify(0, mBuilder.build());
+//        // add the message content to notification
+//        NotificationCompat.Builder mBuilder =
+//                new NotificationCompat.Builder(mainContext)
+//                        .setSmallIcon(R.drawable.ic_wumbo)
+//                        .setContentTitle(this.name)
+//                        .setContentText(msg.getContent().getType() == MessageContent.MessageType.TEXT ? (String) msg.getContent().getMessageContent() : "Open to see image.");
+//
+//        // create intent for launching app when clicked
+//        Intent resultIntent = new Intent(mainContext, MainActivity.class);
+//        resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+//
+//        // set the task stack for the back button
+//        TaskStackBuilder stackBuilder = TaskStackBuilder.create(mainContext);
+//        stackBuilder.addParentStack(MainActivity.class);
+//        stackBuilder.addNextIntent(resultIntent);
+//
+//        PendingIntent resultPendingIntent = PendingIntent.getActivity(mainContext.getApplicationContext(), (int) System.currentTimeMillis(), resultIntent, 0);
+//        // delete notification if clicked
+//        mBuilder.setAutoCancel(true);
+//        mBuilder.setContentIntent(resultPendingIntent);
+//
+//        NotificationManager mNotificationManager =
+//                (NotificationManager) mainContext.getSystemService(Context.NOTIFICATION_SERVICE);
+//        // add notification to android notification manager
+//        mNotificationManager.notify(0, mBuilder.build());
     }
 
     /**
