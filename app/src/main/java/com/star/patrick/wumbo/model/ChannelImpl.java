@@ -195,7 +195,6 @@ public class ChannelImpl extends Observable implements Channel {
         if (!msgIds.contains(emsg.getId())) {
             Log.d("SE464", "Channel hasn't received this message before: " + emsg.getId());
             Message msg = new Message(emsg, this.encKey);
-            this.createNotification(msg);
 
             if(msg.getContent().getType() == MessageContent.MessageType.IMAGE) {
                 msg = this.getImageMessageFromReceived(msg);
@@ -220,38 +219,6 @@ public class ChannelImpl extends Observable implements Channel {
         //Add to database
         DatabaseHandler db = new DatabaseHandler(mainContext, messageCourier);
         db.addMessage(msg);
-    }
-
-    /**
-     * Create a notification for a message
-     * @param msg message that was received
-     */
-    private void createNotification(Message msg) {
-//        // add the message content to notification
-//        NotificationCompat.Builder mBuilder =
-//                new NotificationCompat.Builder(mainContext)
-//                        .setSmallIcon(R.drawable.ic_wumbo)
-//                        .setContentTitle(this.name)
-//                        .setContentText(msg.getContent().getType() == MessageContent.MessageType.TEXT ? (String) msg.getContent().getMessageContent() : "Open to see image.");
-//
-//        // create intent for launching app when clicked
-//        Intent resultIntent = new Intent(mainContext, MainActivity.class);
-//        resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-//
-//        // set the task stack for the back button
-//        TaskStackBuilder stackBuilder = TaskStackBuilder.create(mainContext);
-//        stackBuilder.addParentStack(MainActivity.class);
-//        stackBuilder.addNextIntent(resultIntent);
-//
-//        PendingIntent resultPendingIntent = PendingIntent.getActivity(mainContext.getApplicationContext(), (int) System.currentTimeMillis(), resultIntent, 0);
-//        // delete notification if clicked
-//        mBuilder.setAutoCancel(true);
-//        mBuilder.setContentIntent(resultPendingIntent);
-//
-//        NotificationManager mNotificationManager =
-//                (NotificationManager) mainContext.getSystemService(Context.NOTIFICATION_SERVICE);
-//        // add notification to android notification manager
-//        mNotificationManager.notify(0, mBuilder.build());
     }
 
     /**
