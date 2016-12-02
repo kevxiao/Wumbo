@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.Outline;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -24,6 +25,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewOutlineProvider;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -120,6 +122,10 @@ public class MainActivity extends AppCompatActivity implements Observer {
         //*************************
         channelManager.addObserver(this);
         msgChannel.addObserver(this);
+        for (UUID channelId : channelManager.getChannels().keySet()) {
+            channelManager.getChannel(channelId).addObserver(notificationView);
+        }
+        msgChannel.deleteObserver(notificationView);
 
         startBackgroundServices();
 
@@ -161,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         //******************************
         //Build the internal controllers
         //******************************
-        ImageButton sendBtn = (ImageButton) findViewById(R.id.sendBtn);
+        final ImageButton sendBtn = (ImageButton) findViewById(R.id.sendBtn);
         ImageButton cameraBtn = (ImageButton) findViewById(R.id.cameraIcon);
         LinearLayout createChannelBtn = (LinearLayout) findViewById(R.id.add_channel_row);
 
@@ -176,6 +182,17 @@ public class MainActivity extends AppCompatActivity implements Observer {
             }
         });
 
+        ViewOutlineProvider sendBtnOutlineProvider = new ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, Outline outline) {
+                int size = getResources().getDimensionPixelSize(R.dimen.send_button_size);
+                outline.setOval(0, 0, size, size);
+            }
+        };
+
+        sendBtn.setOutlineProvider(sendBtnOutlineProvider);
+        sendBtn.setClipToOutline(true);
+
         cameraBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -187,6 +204,17 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 }
             }
         });
+
+        ViewOutlineProvider cameraBtnOutlineProvider = new ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, Outline outline) {
+                int size = getResources().getDimensionPixelSize(R.dimen.send_button_size);
+                outline.setOval(0, 0, size, size);
+            }
+        };
+
+        cameraBtn.setOutlineProvider(cameraBtnOutlineProvider);
+        cameraBtn.setClipToOutline(true);
 
         createChannelBtn.setOnClickListener(new View.OnClickListener() {
             @Override

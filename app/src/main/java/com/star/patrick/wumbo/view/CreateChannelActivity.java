@@ -3,11 +3,13 @@ package com.star.patrick.wumbo.view;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Outline;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewOutlineProvider;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -63,6 +65,17 @@ public class CreateChannelActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+        ViewOutlineProvider continueButtonOutlineProvider = new ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, Outline outline) {
+                int size = getResources().getDimensionPixelSize(R.dimen.circle_button_size);
+                outline.setOval(0, 0, size, size);
+            }
+        };
+
+        continueButton.setOutlineProvider(continueButtonOutlineProvider);
+        continueButton.setClipToOutline(true);
     }
 
     public static final String CONTACT_LIST = "contact_list";

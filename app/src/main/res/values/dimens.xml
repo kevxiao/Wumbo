@@ -5,6 +5,7 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="chat_margin">2dp</dimen>
     <dimen name="circle_button_size">56dp</dimen>
+    <dimen name="send_button_size">46dp</dimen>
     <dimen name="input_margins">8dp</dimen>
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="nav_header_vertical_spacing">16dp</dimen>

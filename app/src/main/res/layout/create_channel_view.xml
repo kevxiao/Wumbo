@@ -62,12 +62,14 @@
             <ImageButton
                 android:id="@+id/continue_creating_channel_button"
                 android:layout_gravity="center"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
+                android:layout_width="@dimen/circle_button_size"
+                android:layout_height="@dimen/circle_button_size"
                 android:src="@drawable/ic_arrow_forward_white_24dp"
                 android:background="@drawable/round_button"
+                android:foreground="?attr/selectableItemBackground"
                 android:elevation="4dp"
-                android:layout_marginBottom="@dimen/activity_vertical_margin"/>
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:contentDescription="@string/continue_desc" />
 
         </LinearLayout>
     </LinearLayout>
