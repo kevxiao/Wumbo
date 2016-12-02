@@ -6,15 +6,21 @@ import java.io.Serializable;
 import java.util.UUID;
 
 /**
- * Created by giliam on 11/19/2016.
+ * Message content object for a channel invite message
  */
-
 public class ChannelInvite implements MessageContent, Serializable {
     private MessageType type = MessageType.CHANNEL_INVITE;
     private Info content;
 
-    public ChannelInvite(UUID id, String name, String key, User inviter) {
-        content = new Info(id, name, key, inviter);
+    /**
+     * Constructor for channel invite message using channel info
+     * @param channelId Channel ID for the invite
+     * @param channelName Channel name for the invite
+     * @param channelKey Channel secret key for the invite
+     * @param inviter The user that is sending the invite
+     */
+    public ChannelInvite(UUID channelId, String channelName, String channelKey, User inviter) {
+        content = new Info(channelId, channelName, channelKey, inviter);     // create channel info object
     }
 
     @Override
@@ -27,33 +33,43 @@ public class ChannelInvite implements MessageContent, Serializable {
         return type;
     }
 
+    /**
+     * Class for the channel info for the message content
+     */
     public static class Info implements Serializable {
-        private final UUID id;
-        private final String name;
-        private final String key;
-        private final User invitee;
+        private final UUID channelId;
+        private final String channelName;
+        private final String channelKey;
+        private final User inviter;
 
-        public Info(UUID id, String name, String key, User invitee) {
-            this.id = id;
-            this.name = name;
-            this.key = key;
-            this.invitee = invitee;
+        /**
+         * Constructor for channel info object using provided info
+         * @param channelId Channel ID for the invite
+         * @param channelName Channel name for the invite
+         * @param channelKey Channel secret key for the invite
+         * @param inviter The user that is sending the invite
+         */
+        public Info(UUID channelId, String channelName, String channelKey, User inviter) {
+            this.channelId = channelId;
+            this.channelName = channelName;
+            this.channelKey = channelKey;
+            this.inviter = inviter;
         }
 
         public UUID getId() {
-            return id;
+            return channelId;
         }
 
         public String getName() {
-            return name;
+            return channelName;
         }
 
         public String getKey() {
-            return key;
+            return channelKey;
         }
 
-        public User getInvitee() {
-            return invitee;
+        public User getInviter() {
+            return inviter;
         }
     }
 }

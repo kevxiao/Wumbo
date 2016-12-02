@@ -14,13 +14,15 @@ import java.util.Observable;
 import java.util.UUID;
 
 /**
- * Created by giliam on 11/20/2016.
+ * Implementation that adds any user that has a message pass by the user to the list of contacts
  */
-
 public class ContactsTrackerImpl extends Observable implements ContactsTracker {
     private Map<UUID,User> contacts = new LinkedHashMap<>();
     private Context context;
 
+    /**
+     * Create adding a list of contacts from the database
+     */
     public ContactsTrackerImpl(Context context) {
         this.context = context;
 
@@ -39,21 +41,29 @@ public class ContactsTrackerImpl extends Observable implements ContactsTracker {
         }
     }
 
+    /**
+     * Strips the user information from a message received, and adds it to the contacts if it was
+     * not there before
+     * If already there but the display name is different, will update the display name
+     */
     @Override
     public void receive(EncryptedMessage msg) {
         User user = msg.getUser();
         if (contacts.containsKey(user.getId())) {
+            //If the contact exists, check if name is different
             if (!contacts.get(user.getId()).getDisplayName().equals(user.getDisplayName())) {
-                //update name
+                //update display name in database
                 DatabaseHandler db = new DatabaseHandler(context, null);
                 db.updateUserDisplayName(user.getId(), user.getDisplayName());
                 setChanged();
             }
         } else {
+            //Otherwise if it was unknown, add the new known user to the database
             DatabaseHandler db = new DatabaseHandler(context, null);
             db.addUser(user);
             setChanged();
         }
+        //Add to map of known users
         contacts.put(user.getId(), user);
         notifyObservers();
     }

@@ -5,13 +5,16 @@ import android.net.Uri;
 import java.io.Serializable;
 
 /**
- * Created by jesse on 16/11/16.
+ * Local message content for an image message
  */
-
 public class Image implements MessageContent, Serializable {
     private MessageType type = MessageType.IMAGE;
     private String filepath;
 
+    /**
+     * Local image message constructor
+     * @param uri URI for the image
+     */
     public Image(Uri uri) {
         filepath = uri.toString();
     }

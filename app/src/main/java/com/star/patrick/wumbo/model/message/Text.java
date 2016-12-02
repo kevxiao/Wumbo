@@ -3,13 +3,16 @@ package com.star.patrick.wumbo.model.message;
 import java.io.Serializable;
 
 /**
- * Created by jesse on 16/11/16.
+ * Message content for a text message
  */
-
 public class Text implements MessageContent, Serializable{
     private MessageType type = MessageType.TEXT;
     private String content;
 
+    /**
+     * Text message constructor
+     * @param text Text to be sent and shown in the message
+     */
     public Text(String text){
         content = text;
     }

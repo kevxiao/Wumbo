@@ -8,13 +8,22 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+/**
+ * Handles incoming handshake requests and spawns a new thread to handle each new request
+ */
 public class HandshakeDispatcherService extends IntentService {
+    /**
+     * Port that accepts all incoming handshake connections
+     */
     public static final int PORT = 63244;
 
     public HandshakeDispatcherService() {
         super("HandshakeDispatcherService");
     }
 
+    /**
+     * Accept incoming connections and spawns new HandshakeHandlers
+     */
     @Override
     protected void onHandleIntent(Intent intent) {
         Log.d("SE464", "message service starting");

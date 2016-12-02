@@ -21,8 +21,9 @@
         android:stackFromBottom="true" />
 
     <ImageButton
-        android:layout_width="46dp"
-        android:layout_height="46dp"
+        android:background="?attr/selectableItemBackground"
+        android:layout_width="@dimen/send_button_size"
+        android:layout_height="@dimen/send_button_size"
         android:layout_marginRight="@dimen/input_margins"
         android:layout_marginLeft="@dimen/input_margins"
         android:layout_marginStart="@dimen/input_margins"
@@ -49,6 +50,7 @@
 
     <ImageButton
         android:background="@drawable/round_button"
+        android:foreground="?attr/selectableItemBackground"
         android:layout_width="46dp"
         android:layout_height="46dp"
         android:layout_marginRight="@dimen/input_margins"
@@ -59,6 +61,8 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:id="@+id/sendBtn" />
+        android:id="@+id/sendBtn"
+        android:elevation="2dp"
+        android:contentDescription="@string/send_desc"/>
 
 </RelativeLayout>
