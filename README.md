@@ -1,10 +1,15 @@
 # Wumbo
 
 I Wumbo
+
 You Wumbo
+
 He- she- me- Wumbo
+
 Wumbo
+
 Wumboing
+
 Wumbology: the study of Wumbo
 
 Wumbo is an open source wifi-direct chat app for local secure public and private communication. Talk to nearby users anonymously using the public channel, or create a private channel for secured conversation.
