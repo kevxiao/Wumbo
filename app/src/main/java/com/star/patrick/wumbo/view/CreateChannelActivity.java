@@ -49,10 +49,6 @@ public class CreateChannelActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent returnName = new Intent();
-//                List<Parcelable> parcelableUsers = new ArrayList<>();
-//                for (User user : invitedUsers) {
-//                    parcelableUsers.add((Parcelable) user);
-//                }
                 Bundle bundle = new Bundle();
                 bundle.putSerializable(INVITED_USERS, (Serializable)invitedUsers);
                 returnName.putExtras(bundle);
