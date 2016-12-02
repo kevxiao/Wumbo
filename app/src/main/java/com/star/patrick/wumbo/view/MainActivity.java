@@ -357,6 +357,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     }
 
     private Runnable onStopCallback;
+
     public void setOnStopCallback(Runnable runnable) {
         this.onStopCallback = runnable;
     }
