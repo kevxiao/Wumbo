@@ -280,7 +280,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         channelListView = (ListView) findViewById(R.id.channel_list);
         editMsg = (EditText) findViewById(R.id.editMsg);
 
-        NotificationView notificationView = new NotificationView(this);
+        notificationView = new NotificationView(this);
     }
 
     private static List<ChannelListItem> createChannelItemList(Map<UUID,String> channels) {
@@ -552,6 +552,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
     @Override
     protected void onResume() {
         super.onResume();
-        msgChannel.deleteObserver(notificationView);;
+        msgChannel.deleteObserver(notificationView);
     }
 }
