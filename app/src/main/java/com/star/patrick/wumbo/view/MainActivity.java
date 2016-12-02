@@ -17,7 +17,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -80,11 +79,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private MessageCourier messageCourier;
     private MessageBroadcastReceiver messageBroadcastReceiver;
 
-    private ImageButton sendBtn;
-    private ImageButton cameraBtn;
-    private LinearLayout createChannelBtn;
-    private EditText editMsg;
-
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
     private Toolbar toolbar;
@@ -93,77 +87,87 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private ArrayAdapter<ChannelListItem> channelListAdapter;
     private ListView msgListView;
     private ListView channelListView;
+    private EditText editMsg;
 
     private Runnable onStartCallback;
+
+    public static final int MAIN_ACTIVITY = 0;
+    public static final int PICTURE_ACTIVITY = 1;
+    public static final int SETTINGS_ACTIVITY = 2;
+    public static final int CHANNEL_ACTIVITY = 3;
+    public static final int GALLERY_ACTIVITY = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_main);
-
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setNavigationIcon(R.drawable.ic_menu_white_24dp);
-        selectedChannelItem = null;
-
-        setSupportActionBar(toolbar);
-
-        drawerToggle = new ActionBarDrawerToggle(
-                this,
-                drawerLayout,
-                toolbar,
-                R.string.navigation_drawer_open,
-                R.string.navigation_drawer_close
-        );
+        //Get the sender name found
         Bundle extras = getIntent().getExtras();
-
         String senderName = (extras != null && extras.getString("name") != null && !extras.getString("name").isEmpty()) ? extras.getString("name") : "Anonymous";
-        PrivateKey mePrivateKey = null;
-        messageCourier = new MessageCourierImpl(this);
 
-        DatabaseHandler db = new DatabaseHandler(this, messageCourier);
-        me = db.getMe();
-        if (null == me) {
-            Log.d("SE464", "MainActivity: did not find me");
-            KeyPair userKeys = Encryption.generateKeyPair();
-            String encodedPrivateKey = Encryption.getEncodedPrivateKey(userKeys.getPrivate());
-            me = new User(senderName, userKeys != null ? userKeys.getPublic() : null);
-            db.addUser(me);
-            db.setMe(me.getId(), encodedPrivateKey);
-            mePrivateKey = userKeys.getPrivate();
-        } else {
-            Log.d("SE464", "MainActivity: me existed");
-            me = new User(me.getId(), senderName, me.getPublicKey());
-            db.updateUserDisplayName(me.getId(), senderName);
-            mePrivateKey = Encryption.getPrivateKeyFromEncoding(db.getMePrivateKey());
+        buildView();
+
+        buildModels(senderName);
+
+        buildControllers();
+
+        buildListAdapters();
+
+
+        //*************************
+        //Link the views and models
+        //*************************
+        channelManager.addObserver(this);
+        msgChannel.addObserver(this);
+
+        startBackgroundServices();
+
+
+        if (onStartCallback != null) {
+            onStartCallback.run();
         }
+        update(null, null);
+    }
 
-        channelManager = new ChannelManagerImpl(this, messageCourier, me.getId(), mePrivateKey);
-        contacts = new ContactsTrackerImpl(this);
+    private void startBackgroundServices() {
+        //*****************************
+        //Start the background services
+        //*****************************
+        Intent intent = new Intent(this, WifiDirectService.class);
+        startService(intent);
 
-        messageBroadcastReceiver = new MessageBroadcastReceiver(this);
-        messageBroadcastReceiver.add(channelManager);
-        messageBroadcastReceiver.add(messageCourier);
-        messageBroadcastReceiver.add(contacts);
+        intent = new Intent(this, HandshakeDispatcherService.class);
+        startService(intent);
 
-        msgChannel = new ChannelImpl(
-                UUID.fromString(getResources().getString(R.string.public_uuid)),
-                getResources().getString(R.string.public_name),
-                this,
-                messageCourier,
-                Encryption.getSecretKeyFromEncoding(getResources().getString(R.string.public_secret_key))
-        );
-        channelManager.addChannel(msgChannel);
+        intent = new Intent(this, MessageDispatcherService.class);
+        startService(intent);
+    }
 
-        sendBtn = (ImageButton) findViewById(R.id.sendBtn);
-        cameraBtn = (ImageButton) findViewById(R.id.cameraIcon);
-        editMsg = (EditText) findViewById(R.id.editMsg);
-        createChannelBtn = (LinearLayout) findViewById(R.id.add_channel_row);
+    private void buildListAdapters() {
+        //********************
+        //Set up list adaptors
+        //********************
+        chatAdapter = new ChatAdapter(MainActivity.this, new ArrayList<Message>(), me.getId());
+        msgListView.setAdapter(chatAdapter);
+        chatAdapter.notifyDataSetChanged();
+
+        channelListAdapter = new ArrayAdapter<>(this, R.layout.channel_list_item, new ArrayList<ChannelListItem>());
+        channelListView.setOnItemClickListener(new ChannelListItemClickListener());
+        channelListView.setAdapter(channelListAdapter);
+    }
+
+    private void buildControllers() {
+        //******************************
+        //Build the internal controllers
+        //******************************
+        ImageButton sendBtn = (ImageButton) findViewById(R.id.sendBtn);
+        ImageButton cameraBtn = (ImageButton) findViewById(R.id.cameraIcon);
+        LinearLayout createChannelBtn = (LinearLayout) findViewById(R.id.add_channel_row);
 
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //Send a message with the text to the current channel
                 if(!editMsg.getText().toString().isEmpty()) {
                     msgChannel.send(me, editMsg.getText().toString());
                     editMsg.setText("");
@@ -174,6 +178,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         cameraBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //Send the photo to the current channel
                 if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                     cameraButtonAction();
                 } else {
@@ -185,51 +190,94 @@ public class MainActivity extends AppCompatActivity implements Observer {
         createChannelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //Start a new flow to create a channel. Give it the contact list
                 Intent intent = new Intent(MainActivity.this, CreateChannelActivity.class);
                 Bundle bundle = new Bundle();
                 Map<UUID, User> myContacts = new HashMap<>(contacts.getContacts());
                 myContacts.remove(me.getId());
                 bundle.putSerializable(CONTACT_LIST, (Serializable) new ArrayList<>(myContacts.values()));
                 intent.putExtras(bundle);
-                startActivityForResult(intent, 3);
+                startActivityForResult(intent, CHANNEL_ACTIVITY);
             }
         });
+    }
 
-        if (onStartCallback != null) {
-            onStartCallback.run();
+    private void buildModels(String senderName) {
+        //****************
+        //Build the models
+        //****************
+        messageCourier = new MessageCourierImpl(this);
+
+        //Access to database for saved user data
+        DatabaseHandler db = new DatabaseHandler(this, messageCourier);
+
+        me = db.getMe();
+
+        PrivateKey mePrivateKey;
+        if (null == me) {
+            //If it is the users first launch, they need to load keys for them self
+            Log.d("SE464", "MainActivity: did not find me");
+            KeyPair userKeys = Encryption.generateKeyPair();
+            String encodedPrivateKey = Encryption.getEncodedPrivateKey(userKeys.getPrivate());
+            me = new User(senderName, userKeys != null ? userKeys.getPublic() : null);
+
+            //add myself to the database
+            db.addUser(me);
+            db.setMe(me.getId(), encodedPrivateKey);
+            mePrivateKey = userKeys.getPrivate();
+        } else {
+            //Otherwise create 'me' from the info in the database
+            Log.d("SE464", "MainActivity: me existed");
+            me = new User(me.getId(), senderName, me.getPublicKey());
+
+            //update the display name in the database
+            db.updateUserDisplayName(me.getId(), senderName);
+            mePrivateKey = Encryption.getPrivateKeyFromEncoding(db.getMePrivateKey());
         }
 
-        chatAdapter = new ChatAdapter(MainActivity.this, new ArrayList<Message>(), me.getId());
+        //Create the core models
+        channelManager = new ChannelManagerImpl(this, messageCourier, me.getId(), mePrivateKey);
+        contacts = new ContactsTrackerImpl(this);
+        msgChannel = new ChannelImpl(
+                UUID.fromString(getResources().getString(R.string.public_uuid)),
+                getResources().getString(R.string.public_name),
+                this,
+                messageCourier,
+                Encryption.getSecretKeyFromEncoding(getResources().getString(R.string.public_secret_key))
+        );
+        channelManager.addChannel(msgChannel);
+
+        //Create the message broadcast receiver, and add the observers
+        messageBroadcastReceiver = new MessageBroadcastReceiver(this);
+        messageBroadcastReceiver.add(channelManager);
+        messageBroadcastReceiver.add(messageCourier);
+        messageBroadcastReceiver.add(contacts);
+    }
+
+    private void buildView() {
+        //**************
+        //Build the view
+        //**************
+        setContentView(R.layout.activity_main);
+
+        //Build the toolbar
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setNavigationIcon(R.drawable.ic_menu_white_24dp);
+
+        //Build the drawer layout
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerToggle = new ActionBarDrawerToggle(
+                this,
+                drawerLayout,
+                toolbar,
+                R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close
+        );
 
         msgListView = (ListView) findViewById(R.id.myList);
-        msgListView.setAdapter(chatAdapter);
-
-        chatAdapter.notifyDataSetChanged();
-
-        Intent intent = new Intent(this, WifiDirectService.class);
-        startService(intent);
-
-        intent = new Intent(this, HandshakeDispatcherService.class);
-        startService(intent);
-
-        intent = new Intent(this, MessageDispatcherService.class);
-        startService(intent);
-
-//        Message msg = new Message("intent message", me, new Timestamp(Calendar.getInstance().getTimeInMillis()), UUID.randomUUID());
-//        Intent messageIntent = new Intent(ChannelImpl.WUMBO_MESSAGE_INTENT_ACTION);
-//        messageIntent.putExtra(ChannelImpl.WUMBO_MESSAGE_EXTRA, msg);
-//        sendBroadcast(messageIntent);
-
         channelListView = (ListView) findViewById(R.id.channel_list);
-
-        channels = createChannelItemList(channelManager.getChannels());
-        channelListAdapter = new ArrayAdapter<>(this, R.layout.channel_list_item, channels);
-        channelListView.setAdapter(channelListAdapter);
-        channelListView.setOnItemClickListener(new ChannelListItemClickListener());
-
-        update(null, null);
-        channelManager.addObserver(this);
-        msgChannel.addObserver(this);
+        editMsg = (EditText) findViewById(R.id.editMsg);
     }
 
     private static List<ChannelListItem> createChannelItemList(Map<UUID,String> channels) {
@@ -257,7 +305,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             Intent myIntent = new Intent(MainActivity.this, SettingsActivity.class);
-            MainActivity.this.startActivityForResult(myIntent, 2);
+            MainActivity.this.startActivityForResult(myIntent, SETTINGS_ACTIVITY);
 
         } else if (drawerToggle.onOptionsItemSelected(item)) {
             return true;
@@ -318,15 +366,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     protected void onActivityResult(int requestCode, int resultCode, Intent returnedIntent) {
         super.onActivityResult(requestCode, resultCode, returnedIntent);
         switch(requestCode) {
-//            case 0:
-//                if(returnedIntent != null){
-//                    Log.d("SE464", returnedIntent.toString());
-//                    Uri selectedImage = returnedIntent.getData();
-//                    //imageview.setImageURI(selectedImage);
-//                }
-//
-//                break;
-            case 1:
+            case PICTURE_ACTIVITY:
                 if(resultCode == RESULT_OK)
                 {
                     final boolean isCamera;
@@ -365,12 +405,12 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
                 }
                 break;
-            case 2:
+            case SETTINGS_ACTIVITY:
                 if (returnedIntent != null){
                     me.setDisplayName(returnedIntent.getStringExtra("new_name"));
                 }
                 break;
-            case 3:
+            case CHANNEL_ACTIVITY:
                 if (null != returnedIntent) {
                     String channelName = returnedIntent.getStringExtra(CreateChannelActivity.CHANNEL_NAME);
                     List<User> invited = (ArrayList<User>)returnedIntent.getExtras().getSerializable(INVITED_USERS);
@@ -378,7 +418,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
                     channelManager.createChannel(channel, me, invited);
                 }
                 break;
-            case 4:
+            case GALLERY_ACTIVITY:
                 Log.d("SE464", "returned from gallery");
                 ChatAdapter.lastMsg.delete();
                 break;
@@ -471,7 +511,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         final Intent chooserIntent = Intent.createChooser(pickPhoto, "Select Source");
         chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, cameraIntents.toArray(new Parcelable[]{}));
-        startActivityForResult(chooserIntent , 1);//one can be replaced with any action code
+        startActivityForResult(chooserIntent , PICTURE_ACTIVITY);//one can be replaced with any action code
     }
 
     @Override

@@ -143,7 +143,7 @@ public class ChatAdapter extends BaseAdapter {
                         Log.d("SE464", "Sending "+uri.getPath()+" to Gallery");
                         intent.setDataAndType(uri, "image/*");
                         lastMsg = dest;
-                        context.startActivityForResult(intent, 4);
+                        context.startActivityForResult(intent, MainActivity.GALLERY_ACTIVITY);
                     }
                 });
                 break;

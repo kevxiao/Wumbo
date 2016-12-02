@@ -115,6 +115,7 @@ public class ChannelImpl extends Observable implements Channel {
     public void send(User sender, String msgText) {
         Log.d("SE464", "Channel send string");
         final Message msg = new Message(new Text(msgText), sender, new Timestamp(Calendar.getInstance().getTimeInMillis()), id);
+        add(msg);
         Thread sendThread = new Thread() {
             @Override
             public void run() {
@@ -143,6 +144,7 @@ public class ChannelImpl extends Observable implements Channel {
         // create image message with internal image path to be added to messages list
         final Message msg = new Message(msgId, new Image(Uri.parse(filepath)), sender, new Timestamp(Calendar.getInstance().getTimeInMillis()), id);
         Log.d("SE464","Sending message: " + msg.getId());
+        add(msg);
 
         Thread sendThread = new Thread() {
             @Override
@@ -181,7 +183,6 @@ public class ChannelImpl extends Observable implements Channel {
      */
     private void send(Message msg) {
         Log.d("SE464", "Channel send message");
-        add(msg);
         EncryptedMessage emsg = new EncryptedMessage(msg, this.encKey);
         messageCourier.send(emsg);
     }
