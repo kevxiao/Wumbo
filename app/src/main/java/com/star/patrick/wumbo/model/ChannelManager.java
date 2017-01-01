@@ -17,6 +17,7 @@ public interface ChannelManager extends MessageReceiver {
     void addChannel(Channel channel);
     void removeChannel(Channel channel);
     void createChannel(Channel channel, User inviter, List<User> invitedUsers);
+    void inviteToChannel(Channel channel, User inviter, List<User> invitedUsers);
     Map<UUID,String> getChannels();
     Channel getChannel(UUID channelId);
     void addObserver(Observer obs);

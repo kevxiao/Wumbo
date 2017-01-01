@@ -12,6 +12,7 @@
     <string name="prompt_continue">Continue</string>
     <string name="image_message_error">Cannot load image</string>
     <string name="add_channel_label">Add a new channel</string>
+    <string name="invite_label">Invite to channel</string>
     <string name="read_ext_perm_denied">Cannot load images, permission denied</string>
     <string name="continue_desc">Continue</string>
     <string name="send_desc">Send</string>

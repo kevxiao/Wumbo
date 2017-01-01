@@ -81,16 +81,19 @@ public class ChannelManagerImpl extends Observable implements ChannelManager {
 
         //get the channel invite info and create a new channel, add it to the known channels
         ChannelInvite.Info channelInfo = (ChannelInvite.Info) msg.getContent().getMessageContent();
+        Channel channel = null;
 
-        Channel channel = new ChannelImpl(
-                channelInfo.getId(),
-                channelInfo.getName(),
-                context,
-                messageCourier,
-                Encryption.getSecretKeyFromEncoding(channelInfo.getKey())
-        );
-        addChannel(channel);
-        return channel;
+        if (!channels.containsKey(channelInfo.getId())) {
+            channel = new ChannelImpl(
+                    channelInfo.getId(),
+                    channelInfo.getName(),
+                    context,
+                    messageCourier,
+                    Encryption.getSecretKeyFromEncoding(channelInfo.getKey())
+            );
+            addChannel(channel);
+        }
+        return channel != null ? channel : channels.get(channelInfo.getId());
     }
 
     /**
@@ -142,6 +145,17 @@ public class ChannelManagerImpl extends Observable implements ChannelManager {
         //Add to own list of channels
         this.addChannel(channel);
 
+        inviteToChannel(channel, inviter, invitedUsers);
+    }
+
+    /**
+     * Invite users to a channel
+     * @param channel The specified channel
+     * @param inviter Whoever created the channel and invited others
+     * @param invitedUsers The list of users to invite to the newly created channel
+     */
+    @Override
+    public void inviteToChannel(Channel channel, User inviter, List<User> invitedUsers) {
         //Send out invites to the list of invitedUsers via messageCourier
         for (User user : invitedUsers) {
             Message msg = new Message(

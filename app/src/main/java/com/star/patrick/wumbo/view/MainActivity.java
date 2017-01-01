@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -65,6 +66,7 @@ import java.util.Observer;
 import java.util.UUID;
 
 import static com.star.patrick.wumbo.view.CreateChannelActivity.CONTACT_LIST;
+import static com.star.patrick.wumbo.view.CreateChannelActivity.CHANNEL_NAME;
 import static com.star.patrick.wumbo.view.CreateChannelActivity.INVITED_USERS;
 
 public class MainActivity extends AppCompatActivity implements Observer {
@@ -99,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     public static final int SETTINGS_ACTIVITY = 2;
     public static final int CHANNEL_ACTIVITY = 3;
     public static final int GALLERY_ACTIVITY = 4;
+    public static final int INVITE_ACTIVITY = 5;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,7 +119,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         buildListAdapters();
 
-
         //Link the views and models
         channelManager.addObserver(this);
         msgChannel.addObserver(this);
@@ -127,11 +129,28 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         startBackgroundServices();
 
-
         if (onStartCallback != null) {
             onStartCallback.run();
         }
         update(null, null);
+
+        final List<ChannelListItem> channelList = createChannelItemList(channelManager.getChannels());
+        for (final ChannelListItem channelItem : channelList) {
+            if (channelItem.getId().equals(msgChannel.getId())){
+                channelListView.clearFocus();
+                channelListView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.d("SE464", "MainActivity: layout change: selecting: " + channelList.indexOf(channelItem) + ", num children: " + channelListView.getChildCount());
+                        channelListView.requestFocusFromTouch();
+                        channelListView.setSelection(channelList.indexOf(channelItem));
+                        channelListView.requestFocus();
+                        selectChannelItem(channelListView.getChildAt(channelListView.getSelectedItemPosition()));
+                        Log.d("SE464", "MainActivity: layout change: selected: " + channelListView.getSelectedItemPosition());
+                    }
+                });
+            }
+        }
     }
 
     private void startBackgroundServices() {
@@ -159,6 +178,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         final ImageButton sendBtn = (ImageButton) findViewById(R.id.sendBtn);
         ImageButton cameraBtn = (ImageButton) findViewById(R.id.cameraIcon);
         LinearLayout createChannelBtn = (LinearLayout) findViewById(R.id.add_channel_row);
+        LinearLayout inviteBtn = (LinearLayout) findViewById(R.id.invite_row);
 
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -216,6 +236,21 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 bundle.putSerializable(CONTACT_LIST, (Serializable) new ArrayList<>(myContacts.values()));
                 intent.putExtras(bundle);
                 startActivityForResult(intent, CHANNEL_ACTIVITY);
+            }
+        });
+
+        inviteBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //Start a new flow to create a channel. Give it the contact list
+                Intent intent = new Intent(MainActivity.this, InviteActivity.class);
+                Bundle bundle = new Bundle();
+                Map<UUID, User> myContacts = new HashMap<>(contacts.getContacts());
+                myContacts.remove(me.getId());
+                bundle.putSerializable(CONTACT_LIST, new ArrayList<>(myContacts.values()));
+                bundle.putSerializable(CHANNEL_NAME, msgChannel.getName());
+                intent.putExtras(bundle);
+                startActivityForResult(intent, INVITE_ACTIVITY);
             }
         });
     }
@@ -357,7 +392,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         //update the channel list, lazily, it just reloads the whole thing.
         channelListAdapter.clear();
-        channelListAdapter.addAll(createChannelItemList(channelManager.getChannels()));
+        List<ChannelListItem> channelList = createChannelItemList(channelManager.getChannels());
+        channelListAdapter.addAll(channelList);
 
         //update the channel title
         toolbar.setTitle(msgChannel.getName());
@@ -435,6 +471,12 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 Log.d("SE464", "returned from gallery");
                 ChatAdapter.lastMsg.delete();
                 break;
+            case INVITE_ACTIVITY:
+                if (null != returnedIntent) {
+                    List<User> invited = (ArrayList<User>)returnedIntent.getExtras().getSerializable(INVITED_USERS);
+                    channelManager.inviteToChannel(msgChannel, me, invited);
+                }
+                break;
         }
     }
 
@@ -482,7 +524,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             ChannelListItem channelListItem = (ChannelListItem)parent.getItemAtPosition(position);
-            Log.d("SE464", "MainActivity: Switching to channel " + channelListItem.toString());
+            Log.d("SE464", "MainActivity: Switching to channel " + channelListItem.toString() + ", position: " + position);
 
             msgChannel.deleteObserver(MainActivity.this);
             msgChannel.addObserver(notificationView);
@@ -496,13 +538,17 @@ public class MainActivity extends AppCompatActivity implements Observer {
             msgListView.setAdapter(chatAdapter);
             MainActivity.this.update(null, null);
             drawerLayout.closeDrawers();
-            if(selectedChannelItem != null) {
-                selectedChannelItem.setBackgroundColor(Color.parseColor("#00000000"));
-            }
-            selectedChannelItem = view;
-            selectedChannelItem.setBackgroundColor(Color.parseColor("#20000000"));
+            selectChannelItem(view);
             MainActivity.this.update(null, null);
         }
+    }
+
+    private void selectChannelItem(View view) {
+        if(selectedChannelItem != null) {
+            selectedChannelItem.setBackgroundColor(Color.parseColor("#00000000"));
+        }
+        selectedChannelItem = view;
+        selectedChannelItem.setBackgroundColor(Color.parseColor("#20000000"));
     }
 
     private void cameraButtonAction() {
